@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Genera las paginas HTML de la rutina a partir de los datos."""
 import os, json, html, re
-import dibujos, fichas
+import dibujos, fichas, secciones
 
 OUT = "/home/user/aws-static-web-popos/ejercicio-fisico/web"
 os.makedirs(OUT, exist_ok=True)
@@ -81,6 +81,10 @@ a{color:var(--accent)}
 }
 .days a:hover{background:var(--surface-2); color:var(--ink)}
 .days a[aria-current="page"]{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+.days .sec-chip{
+  width:auto; min-width:0; padding:0 8px; height:28px; font-size:12px;
+  letter-spacing:.02em; border:1px solid var(--line);
+}
 .days .dado{font-size:19px; line-height:1; margin-left:5px; border-left:1px solid var(--line); border-radius:0 7px 7px 0; padding-left:7px; width:auto; min-width:30px}
 
 /* ---------- estructura ---------- */
@@ -300,9 +304,14 @@ JS = """
     if (nEl) nEl.textContent = done + ' / ' + total;
   }
 
+  function ambito(){
+    return document.querySelector('.rutina:not([hidden])') || document;
+  }
+
   function enlaza(){
-    boxes = Array.prototype.slice.call(document.querySelectorAll('.row input[type=checkbox]'));
-    rds   = Array.prototype.slice.call(document.querySelectorAll('.rd'));
+    var raiz = ambito();
+    boxes = Array.prototype.slice.call(raiz.querySelectorAll('.row input[type=checkbox]'));
+    rds   = Array.prototype.slice.call(raiz.querySelectorAll('.rd'));
 
     boxes.forEach(function(b){
       if (b.dataset.lig) return;
@@ -337,10 +346,9 @@ JS = """
 
   var rs = document.querySelector('.reset');
   if (rs) rs.addEventListener('click', function(){
-    state = {}; save();
-    boxes.forEach(function(b){ b.checked = false; });
-    rds.forEach(function(r){ r.setAttribute('aria-pressed','false'); });
-    refresh();
+    boxes.forEach(function(b){ b.checked = false; delete state[b.id]; });
+    rds.forEach(function(r){ r.setAttribute('aria-pressed','false'); delete state[r.id]; });
+    save(); refresh();
   });
 
   /* ---- cronometro de descanso ---- */
@@ -748,17 +756,27 @@ HEAD = """<title>{title}</title>
 <style>{css}</style>
 """
 
-def topbar(active):
-    chips = []
-    for slug, nombre, letra in DIAS:
-        cur = ' aria-current="page"' if slug == active else ''
-        chips.append('<a href="%s.html"%s title="%s">%s</a>' % (slug, cur, nombre, letra))
-    dado = ('<a href="aleatoria.html"%s class="dado" title="Rutina aleatoria">&#9861;</a>'
-            % (' aria-current="page"' if active == "aleatoria" else ''))
+SECS = [("dias", "Días"), ("aleatoria", "Azar"),
+        ("abdominales", "Abdomen"), ("pecho", "Pecho")]
+
+
+def topbar(active, modo="sec"):
+    if modo in ("dia", "dias"):
+        chips = "".join(
+            '<a href="%s.html"%s title="%s">%s</a>'
+            % (slug, ' aria-current="page"' if slug == active else '', nombre, letra)
+            for slug, nombre, letra in DIAS)
+        home = ("dias.html", "&larr; Días") if modo == "dia" else ("index.html", "&larr; Menú")
+        nav = '<nav class="days" aria-label="Días de la semana">%s</nav>' % chips
+    else:
+        chips = "".join(
+            '<a class="sec-chip" href="%s.html"%s>%s</a>'
+            % (slug, ' aria-current="page"' if slug == active else '', nombre)
+            for slug, nombre in SECS)
+        home = ("index.html", "&larr; Menú")
+        nav = '<nav class="days" aria-label="Secciones">%s</nav>' % chips
     return ('<header class="top"><div class="top-in">'
-            '<a class="home" href="index.html">&larr; Índice</a>'
-            '<nav class="days" aria-label="Días de la semana">%s%s</nav>'
-            '</div></header>') % ("".join(chips), dado)
+            '<a class="home" href="%s">%s</a>%s</div></header>') % (home[0], home[1], nav)
 
 TIMER = """<div class="timer" role="status" aria-live="polite">
   <div class="timer-in">
@@ -820,7 +838,13 @@ def render_block(bi, b):
         rounds = '<div class="rounds"><span class="lb">Rondas</span>%s</div>' % pills
     items = "".join(render_item(bi, i, x) for i, x in enumerate(b["items"]))
     rest = ''
-    if b.get("rest"):
+    if b.get("timers"):
+        botones = "".join(
+            '<button type="button" class="restbtn %s" data-sec="%d" data-label="%s">%s %d s</button>'
+            % ("trabajo" if i == 0 else "", sec, E(lb), E(lb), sec)
+            for i, (sec, lb) in enumerate(b["timers"]))
+        rest = '<div class="timers">%s</div>' % botones
+    elif b.get("rest"):
         rest = ('<button type="button" class="restbtn" data-sec="%d" data-label="Descanso entre rondas">'
                 'Descanso %d s</button>') % (b["rest"], b["rest"])
     return '<section class="block">%s%s%s<ul class="ex">%s</ul>%s</section>' % (head, note, rounds, items, rest)
@@ -838,11 +862,11 @@ def render_day(slug, d):
     if prev:
         pager += '<a href="%s.html"><span class="k">Anterior</span><span class="v">%s</span></a>' % (prev[0], prev[1])
     else:
-        pager += '<a href="index.html"><span class="k">Volver</span><span class="v">Índice</span></a>'
+        pager += '<a href="dias.html"><span class="k">Volver</span><span class="v">Días</span></a>'
     if nxt:
         pager += '<a class="next" href="%s.html"><span class="k">Siguiente</span><span class="v">%s</span></a>' % (nxt[0], nxt[1])
     else:
-        pager += '<a class="next" href="progresion.html"><span class="k">Siguiente</span><span class="v">Progresión</span></a>'
+        pager += '<a class="next" href="dias.html"><span class="k">Volver</span><span class="v">Días</span></a>'
     pager += '</nav>'
 
     body = (
@@ -862,7 +886,7 @@ def render_day(slug, d):
 
     title = "Día %d · %s — Rutina del tapete" % (d["n"], d["nombre"])
     return (HEAD.format(title=E(title), css=CSS)
-            + topbar(slug)
+            + topbar(slug, "dia")
             + body
             + '<script>window.PAGE_KEY="%s";</script>' % slug
             + '<script>%s</script>' % JS)
@@ -922,7 +946,7 @@ DAY_CARDS = [
  ("dia-7","Domingo","Movilidad, respiración y core suave","Sin peso", True),
 ]
 
-def render_index():
+def render_dias():
     cards = ""
     for slug, nombre, desc, load, rest in DAY_CARDS:
         n = [s for s,_,_ in DIAS].index(slug) + 1
@@ -999,51 +1023,25 @@ def render_index():
       'pierna, pecho, espalda, brazo y core, pero cada día le toca una parte distinta de cada área.</p>'
       '</header>'
       '<div class="grid">%s</div>'
-      '<div class="grid" style="margin-top:10px">'
-      '<a class="card alea" href="aleatoria.html"><span class="d">Cuando quieras</span>'
-      '<h3>Aleatoria</h3><p>Treinta minutos armados al azar con los mismos ejercicios, '
-      'para los días en que la rutina fija te aburre. Con HIIT si lo pides.</p>'
-      '<div class="load">Generar &rarr;</div></a></div>'
-      '<section class="sec"><h2>Cómo leer cada ejercicio</h2>'
-      '<p class="bnote">Cada ejercicio trae un dibujo con la posición de inicio y la de '
-      'llegada, y dos datos que valen tanto como las repeticiones.</p>'
-      '<div class="tw"><table><tbody>%s</tbody></table></div>'
-      '<p class="bnote">Y dentro de <strong>Cómo se hace</strong> están la técnica, la '
-      'versión más fácil para arrancar y el error que casi todo el mundo comete.</p></section>'
-      '<section class="sec"><h2>Tu equipo</h2><div class="tw"><table>'
-      '<tbody>%s</tbody></table></div></section>'
-      '<section class="sec"><h2>Configuraciones de carga</h2>'
-      '<p class="bnote">Cambiar discos toma 30 segundos. Cada rutina te dice cuál usar.</p>'
-      '<div class="tw"><table><thead><tr><th>Nombre</th><th>Cómo se arma</th><th>Peso</th></tr></thead>'
-      '<tbody>%s</tbody></table></div></section>'
       '<section class="sec"><h2>La rotación</h2><div class="tw"><table>'
       '<thead><tr><th>Día</th><th>Pierna</th><th>Pecho</th><th>Espalda</th><th>Brazo</th></tr></thead>'
       '<tbody>%s</tbody></table></div>'
       '<p class="bnote">El domingo es suave a propósito. Entrenas los siete días, pero uno deja que '
       'el cuerpo se reconstruya. Sin ese día, a las tres semanas se te cae el rendimiento.</p></section>'
-      '<section class="sec"><h2>Reglas de la casa</h2><ul class="rules">%s</ul></section>'
-      '<section class="sec"><h2>Progresión</h2>'
-      '<p class="bnote">Cuándo subir de peso, qué hacer cuando se acaben los discos y dónde anotar tus números.</p>'
-      '<div class="grid" style="margin-top:12px"><a class="card rest" href="progresion.html">'
-      '<span class="d">Referencia</span><h3>Progresión</h3>'
-      '<p>La regla de las dos rondas, qué esperar mes a mes y la tabla de registro.</p>'
-      '<div class="load">Abrir &rarr;</div></a></div></section>'
-      '<p class="fine">Esto es una rutina general para alguien sano que entrena en casa y no sustituye '
-      'a un profesional. Si tienes una lesión, una condición cardíaca o llevas mucho tiempo sin moverte, '
-      'habla con un médico o un fisioterapeuta antes de arrancar.</p>'
+      '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
+      '<span class="v">Menú</span></a>'
+      '<a class="next" href="guia.html"><span class="k">Ver</span>'
+      '<span class="v">Cómo funciona</span></a></nav>'
       '</div>'
-    ) % (cards, leer, eq, cg, rt, rl)
+    ) % (cards, rt)
 
-    return (HEAD.format(title="Rutina del tapete", css=CSS + INDEX_CSS_EXTRA)
-            + '<header class="top"><div class="top-in">'
-            + '<span class="home">Rutina del tapete</span>'
-            + '<nav class="days" aria-label="Días de la semana">'
-            + "".join('<a href="%s.html" title="%s">%s</a>' % (s, n, l) for s, n, l in DIAS)
-            + '</nav></div></header>'
-            + body)
+    return (HEAD.format(title="Rutinas por día — Rutina del tapete",
+                        css=CSS + INDEX_CSS_EXTRA)
+            + topbar("dias", "dias") + body)
 
-with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
-    f.write(render_index())
+
+with open(os.path.join(OUT, "dias.html"), "w", encoding="utf-8") as f:
+    f.write(render_dias())
 
 
 # ---------------------------------------------------------------- progresión
@@ -1187,8 +1185,8 @@ def render_prog():
       'siguiente más fuerte que cuando paraste.</p></section>'
       '<section class="sec"><h2>Qué esperar, honestamente</h2>'
       '<div class="tw"><table><tbody>%s</tbody></table></div></section>'
-      '<nav class="pager"><a href="index.html"><span class="k">Volver</span><span class="v">Índice</span></a>'
-      '<a class="next" href="dia-1.html"><span class="k">Empezar</span><span class="v">Lunes</span></a></nav>'
+      '<nav class="pager"><a href="index.html"><span class="k">Volver</span><span class="v">Menú</span></a>'
+      '<a class="next" href="dias.html"><span class="k">Ir a</span><span class="v">Rutinas por día</span></a></nav>'
       '</div>'
     ) % (ps, sn, ini, sem_tables, esp)
 
@@ -1355,9 +1353,9 @@ def render_alea():
       '</header>'
       '<div id="salida"></div>'
       '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
-      '<span class="v">Índice</span></a>'
-      '<a class="next" href="progresion.html"><span class="k">Ver</span>'
-      '<span class="v">Progresión</span></a></nav>'
+      '<span class="v">Menú</span></a>'
+      '<a class="next" href="banco.html"><span class="k">Ver</span>'
+      '<span class="v">Banco de ejercicios</span></a></nav>'
       '</div>' + TIMER
     )
     js = ALEA_JS.replace("__CATALOGO__", json.dumps(CATALOGO, ensure_ascii=False).replace("</", "<\\/"))
@@ -1372,3 +1370,473 @@ with open(os.path.join(OUT, "aleatoria.html"), "w", encoding="utf-8") as f:
     f.write(render_alea())
 
 print("aleatoria ok ·", sum(len(v) for v in CATALOGO.values()), "ejercicios en el catálogo")
+
+
+# ---------------------------------------------------------------- menú
+
+MENU_CSS = INDEX_CSS_EXTRA + """
+.tiles{display:flex; flex-direction:column; gap:12px; margin-top:22px}
+.tile{
+  display:grid; grid-template-columns:1fr 118px; align-items:center; gap:10px;
+  text-decoration:none; color:inherit; background:var(--surface);
+  border:1px solid var(--line); border-left:4px solid var(--accent);
+  border-radius:var(--r); padding:16px 14px 16px 18px; box-shadow:var(--shadow);
+  transition:.15s;
+}
+.tile:hover{border-color:var(--accent); border-left-color:var(--accent); transform:translateY(-1px)}
+.tile .tn{
+  font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--ink-3); display:block; margin-bottom:3px;
+}
+.tile h2{font-size:clamp(21px,5.5vw,26px); text-transform:uppercase; line-height:1.05; margin:0}
+.tile p{margin:6px 0 0; font-size:14.5px; color:var(--ink-2); line-height:1.4; max-width:40ch}
+.tile .go{
+  display:inline-block; margin-top:10px; font-family:Oswald,sans-serif; font-size:13px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+}
+.tile .tfig{opacity:.85}
+.tile .tfig .f-t, .tile .tfig .f-c{display:none}
+.tile .tfig svg{width:100%; height:auto; display:block}
+.tile.t2{border-left-color:var(--steel)} .tile.t2 .go{color:var(--steel)}
+.mini{display:flex; flex-wrap:wrap; gap:8px; margin-top:26px}
+.mini a{
+  flex:1; min-width:150px; text-decoration:none; text-align:center;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r);
+  padding:13px 12px; color:var(--ink-2); font-size:14px;
+}
+.mini a:hover{border-color:var(--accent); color:var(--accent)}
+.mini b{display:block; font-family:Oswald,sans-serif; font-size:15px; color:var(--ink);
+        text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px}
+.mini a:hover b{color:var(--accent)}
+@media (max-width:430px){
+  .tile{grid-template-columns:1fr 92px; padding:14px 12px 14px 14px}
+  .tile p{font-size:13.5px}
+}
+"""
+
+TILES = [
+  ("dias.html", "1", "Rutinas por día", "t1", "sentadilla_goblet",
+   "Lunes a domingo, ya armadas. Cada día trabaja una parte distinta del cuerpo. "
+   "Entras y escoges el día de hoy.", "Escoger el día"),
+  ("aleatoria.html", "2", "Rutina aleatoria", "t2", "salto",
+   "Treinta minutos armados al azar con los mismos ejercicios, para los días en "
+   "que la rutina fija aburre. Le das a un botón y te la pone en pantalla.", "Generar una"),
+  ("abdominales.html", "3", "Abdominales", "t1", "plancha",
+   "Abdomen, costados y espalda baja, más bloques de quema. Cuatro rutinas para "
+   "escoger según el día.", "Ver las rutinas"),
+  ("pecho.html", "4", "Pecho", "t2", "press_piso",
+   "Tres rutinas de pectoral: con flexiones, solo con mancuernas, o mezclado con "
+   "intervalos de quema.", "Ver las rutinas"),
+]
+
+
+def render_index():
+    tiles = ""
+    for href, n, titulo, cls, figk, desc, go in TILES:
+        tiles += (
+          '<a class="tile %s" href="%s">'
+          '<div><span class="tn">%s</span><h2>%s</h2><p>%s</p>'
+          '<span class="go">%s &rarr;</span></div>'
+          '<div class="tfig" aria-hidden="true">%s</div></a>'
+        ) % (cls, href, n, E(titulo), E(desc), E(go), dibujos.DIB.get(figk, ""))
+
+    body = (
+      '<div class="wrap">'
+      '<header class="hero">'
+      '<p class="eyebrow">Entrenamiento en casa</p>'
+      '<h1>Rutina del tapete</h1>'
+      '<p class="lede">Todo lo que necesitas son las mancuernas, la vara y el tapete. '
+      'Escoge por dónde quieres empezar.</p>'
+      '</header>'
+      '<nav class="tiles">%s</nav>'
+      '<div class="mini">'
+      '<a href="banco.html"><b>Banco de ejercicios</b>Todos, con su dibujo</a>'
+      '<a href="guia.html"><b>Cómo funciona</b>Equipo, cargas y cómo leer</a>'
+      '<a href="progresion.html"><b>Progresión</b>Cuándo subir peso</a>'
+      '</div>'
+      '<p class="fine">Esto es una rutina general para alguien sano que entrena en casa y no '
+      'sustituye a un profesional. Si tienes una lesión, una condición cardíaca o llevas mucho '
+      'tiempo sin moverte, habla con un médico o un fisioterapeuta antes de arrancar.</p>'
+      '</div>'
+    ) % tiles
+
+    return (HEAD.format(title="Rutina del tapete", css=CSS + MENU_CSS)
+            + '<header class="top"><div class="top-in">'
+            + '<span class="home">Menú</span>'
+            + '<nav class="days" aria-label="Secciones">'
+            + "".join('<a class="sec-chip" href="%s.html">%s</a>' % (sl, nm) for sl, nm in SECS)
+            + '</nav></div></header>' + body)
+
+
+with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
+    f.write(render_index())
+
+
+# ---------------------------------------------------------------- secciones
+
+SEC_CSS = INDEX_CSS_EXTRA + """
+.verdad{margin-top:20px; border:1px solid var(--line); border-radius:var(--r);
+        background:var(--surface-2)}
+.verdad > summary{
+  cursor:pointer; padding:13px 16px; list-style:none; color:var(--ink);
+  font-family:Oswald,sans-serif; font-size:14px; letter-spacing:.06em; text-transform:uppercase;
+}
+.verdad > summary::-webkit-details-marker{display:none}
+.verdad > summary::before{content:"▸ "; color:var(--steel)}
+.verdad[open] > summary::before{content:"▾ "}
+.verdad > summary:hover{color:var(--steel)}
+.verdad .vin{display:flex; flex-direction:column; gap:10px; padding:0 10px 10px}
+.verdad > div{
+  background:var(--surface); border:1px solid var(--line);
+  border-left:3px solid var(--steel); border-radius:var(--r); padding:14px 16px;
+}
+.verdad h3{
+  font-size:15.5px; margin:0 0 5px; color:var(--ink); text-transform:none;
+  letter-spacing:0; line-height:1.3;
+}
+.verdad p{margin:0; font-size:14.5px; color:var(--ink-2); line-height:1.5; max-width:62ch}
+.verdad strong{color:var(--ink)}
+.picker{display:flex; flex-wrap:wrap; gap:7px; margin-top:24px}
+.picker button{
+  flex:1 1 auto; min-width:120px; cursor:pointer; text-align:left;
+  background:var(--surface); border:1.5px solid var(--line); border-radius:var(--r);
+  padding:10px 13px; color:var(--ink-2); font:inherit; transition:.15s;
+}
+.picker button:hover{border-color:var(--accent)}
+.picker button[aria-pressed="true"]{
+  border-color:var(--accent); background:var(--accent-soft); color:var(--ink);
+}
+.picker .pn{
+  display:block; font-family:Oswald,sans-serif; font-size:15px; color:var(--ink);
+  text-transform:uppercase; letter-spacing:.03em;
+}
+.picker button[aria-pressed="true"] .pn{color:var(--accent)}
+.picker .pm{display:block; font-size:12.5px; margin-top:1px}
+.rdesc{margin:16px 0 0; font-size:15px; color:var(--ink-2); max-width:58ch}
+.timers{display:flex; gap:8px; margin-top:12px}
+.timers .restbtn{margin-top:0}
+.timers .trabajo{background:var(--accent); color:var(--on-accent)}
+.timers .trabajo:hover{background:var(--ink); color:var(--bg)}
+"""
+
+PICKER_JS = """
+(function(){
+  var v = document.querySelector('details.verdad');
+  if (v){
+    var KV = 'rutina:verdad:' + (window.PAGE_KEY || 'x');
+    try { if (localStorage.getItem(KV) === '0') v.open = false; } catch(e){}
+    v.addEventListener('toggle', function(){
+      try { localStorage.setItem(KV, v.open ? '1' : '0'); } catch(e){}
+    });
+  }
+})();
+
+(function(){
+  var K = 'rutina:sel:' + (window.PAGE_KEY || 'x');
+  var bs = Array.prototype.slice.call(document.querySelectorAll('.picker button'));
+  if (!bs.length) return;
+
+  function muestra(id, guarda){
+    document.querySelectorAll('.rutina').forEach(function(r){ r.hidden = (r.dataset.rid !== id); });
+    bs.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.rid === id ? 'true' : 'false'); });
+    if (guarda) { try { localStorage.setItem(K, id); } catch(e){} }
+    if (window.RUTINA_ENLAZA) window.RUTINA_ENLAZA();
+  }
+
+  var ini = bs[0].dataset.rid;
+  try {
+    var g = localStorage.getItem(K);
+    if (g && document.querySelector('.rutina[data-rid="' + g + '"]')) ini = g;
+  } catch(e){}
+  muestra(ini, false);
+
+  bs.forEach(function(b){
+    b.addEventListener('click', function(){
+      muestra(b.dataset.rid, true);
+      var r = document.querySelector('.rutina:not([hidden])');
+      if (r) window.scrollTo({ top: r.offsetTop - 70, behavior: 'smooth' });
+    });
+  });
+})();
+"""
+
+
+def render_seccion(slug, eyebrow, titulo, lede, verdad, rutinas, resumen):
+    vs = "".join('<div><h3>%s</h3><p>%s</p></div>' % (E(t), p) for t, p in verdad)
+
+    pick = "".join(
+        '<button type="button" data-rid="%s" aria-pressed="false">'
+        '<span class="pn">%s</span><span class="pm">%d min</span></button>'
+        % (r["id"], E(r["nombre"]), r["mins"]) for r in rutinas)
+
+    cuerpo = ""
+    for ri, r in enumerate(rutinas):
+        bloques = "".join(render_block(ri * 10 + bi, b) for bi, b in enumerate(r["blocks"]))
+        cuerpo += ('<div class="rutina" data-rid="%s" hidden>'
+                   '<p class="rdesc">%s</p>%s</div>') % (r["id"], E(r["desc"]), bloques)
+
+    body = (
+      '<div class="wrap">'
+      '<header class="hero">'
+      '<p class="eyebrow">%s</p><h1>%s</h1>'
+      '<p class="lede">%s</p>'
+      '<div class="prog"><span class="bar"><i></i></span><span class="n num">0 / 0</span>'
+      '<button type="button" class="figtog">Ocultar dibujos</button>'
+      '<button type="button" class="reset">Reiniciar</button></div>'
+      '</header>'
+      '<details class="verdad" open><summary>%s</summary><div class="vin">%s</div></details>'
+      '<div class="picker" role="group" aria-label="Escoge la rutina">%s</div>'
+      '%s'
+      '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
+      '<span class="v">Menú</span></a>'
+      '<a class="next" href="banco.html"><span class="k">Ver</span>'
+      '<span class="v">Banco de ejercicios</span></a></nav>'
+      '</div>'
+    ) % (E(eyebrow), E(titulo), E(lede), E(resumen), vs, pick, cuerpo) + TIMER
+
+    return (HEAD.format(title=E(titulo + " — Rutina del tapete"), css=CSS + SEC_CSS)
+            + topbar(slug) + body
+            + '<script>window.PAGE_KEY="%s";</script>' % slug
+            + '<script>%s</script>' % JS
+            + '<script>%s</script>' % PICKER_JS)
+
+
+with open(os.path.join(OUT, "abdominales.html"), "w", encoding="utf-8") as f:
+    f.write(render_seccion(
+        "abdominales", "Abdomen y quema", "Abdominales",
+        "Cuatro rutinas: tres de abdomen y una de quema. Escoge una y arranca. "
+        "Antes de eso, léete lo de abajo una vez.",
+        secciones.ABD_VERDAD, secciones.ABDOMINALES,
+        "Antes de empezar · qué quema grasa de verdad"))
+
+with open(os.path.join(OUT, "pecho.html"), "w", encoding="utf-8") as f:
+    f.write(render_seccion(
+        "pecho", "Pectoral", "Pecho",
+        "Tres rutinas de pecho para escoger según el día y según cómo tengas el hombro.",
+        secciones.PECHO_VERDAD, secciones.PECHO,
+        "Antes de empezar · qué cambia la forma del pecho"))
+
+print("secciones ok")
+
+
+# ---------------------------------------------------------------- guía
+
+def render_guia():
+    equipo = [
+      ("2 mancuernas ajustables", "Cargadas hoy a <strong>7,5 kg cada una</strong>: 2 discos de 2,5 kg y 2 de 1,25 kg por mancuerna."),
+      ("4 discos sueltos", "1 kg cada uno. Son los que te dan la carga Pesada."),
+      ("Vara larga", "Une las dos mancuernas en una barra de ~19 kg con todos los discos."),
+      ("Silla", "Solo para sentarte. No te subes en ella ni la empujas contra la pared."),
+      ("Sofá", "Borde firme para las flexiones con manos elevadas. Pesado y ancho: no se mueve."),
+      ("Tapete", "Tu zona de trabajo de suelo. La baldosa es resbalosa."),
+      ("Espejo", "Revisa la técnica, sobre todo en sentadilla y peso muerto."),
+    ]
+    eq = "".join('<tr><td class="k">%s</td><td>%s</td></tr>' % (E(a), b) for a, b in equipo)
+
+    cargas = [
+      ("Ligera", "Solo los discos de 1,25 kg", "2,5 kg por mancuerna"),
+      ("Media", "Solo los discos de 2,5 kg", "5 kg por mancuerna"),
+      ("Actual", "Como las tienes ahora", "7,5 kg por mancuerna"),
+      ("Pesada", "Actual + 1 disco de 1 kg por lado", "9,5 kg por mancuerna"),
+      ("Barra", "Todos los discos en la vara", "~19 kg en total"),
+    ]
+    cg = "".join('<tr><td class="k">%s</td><td>%s</td><td><strong>%s</strong></td></tr>'
+                 % (E(a), E(b), E(c)) for a, b, c in cargas)
+
+    leer_filas = [
+      ("Cadencia", "Tres números: segundos para <strong>bajar</strong>, segundos de "
+                   "<strong>pausa</strong> abajo y segundos para <strong>subir</strong>. "
+                   "<strong>3-1-1</strong> es bajar en tres, parar uno, subir en uno. "
+                   "Bajar lento es la mitad del trabajo y casi nadie lo hace."),
+      ("Hasta dónde", "El punto exacto donde termina el recorrido. Más abajo no siempre "
+                      "es mejor: en varios ejercicios pasarse es justo lo que lesiona."),
+      ("El dibujo", "Posición 1 y posición 2. La línea punteada roja marca la altura o la "
+                    "alineación que tienes que buscar."),
+      ("Tri-serie", "Haces A1, A2 y A3 seguidos, sin descanso entre ellos. Al terminar los "
+                    "tres, descansas. Eso es una ronda."),
+      ("Cómo se hace", "Ábrelo y encuentras la técnica, la versión más fácil para arrancar "
+                       "y el error que casi todo el mundo comete."),
+    ]
+    leer = "".join('<tr><td class="k">%s</td><td>%s</td></tr>' % (E(a), b) for a, b in leer_filas)
+
+    reglas = [
+      "<strong>Ritmo:</strong> baja el peso en 2 segundos, súbelo en 1. Sin rebotes.",
+      "<strong>Piso:</strong> el tapete para todo lo de suelo. La baldosa es resbalosa, así que "
+      "entrena descalzo o con tenis, nunca en medias.",
+      "<strong>La silla es solo para sentarse.</strong> Si se desliza en la baldosa cuando te "
+      "sientas, ponla sobre el tapete.",
+      "<strong>Espacio:</strong> todo es en el sitio. No hay zancadas caminando en esta casa.",
+      "<strong>Si algo duele</strong> con dolor puntual en una articulación, no el ardor del "
+      "músculo, para ese ejercicio y sigue con el resto.",
+      "<strong>Descanso real entre rondas.</strong> Mirar el celular 75 segundos no es descanso. "
+      "Usa el cronómetro que trae cada bloque.",
+      "<strong>Los botones de la esquina:</strong> las casillas se marcan al tocarlas y se "
+      "guardan en el celular. <em>Reiniciar</em> las borra y <em>Ocultar dibujos</em> "
+      "compacta la página cuando ya te sepas la rutina.",
+    ]
+    rl = "".join("<li>%s</li>" % r for r in reglas)
+
+    body = (
+      '<div class="wrap">'
+      '<header class="hero">'
+      '<p class="eyebrow">Antes de empezar</p><h1>Cómo funciona</h1>'
+      '<p class="lede">Qué equipo suponen las rutinas, cómo se arman los pesos y cómo se '
+      'lee cada ejercicio. Se lee una vez y ya.</p>'
+      '</header>'
+      '<section class="sec"><h2>Tu equipo</h2>'
+      '<div class="tw"><table><tbody>%s</tbody></table></div></section>'
+      '<section class="sec"><h2>Configuraciones de carga</h2>'
+      '<p class="bnote">Cambiar discos toma 30 segundos. Cada rutina te dice cuál usar.</p>'
+      '<div class="tw"><table><thead><tr><th>Nombre</th><th>Cómo se arma</th><th>Peso</th></tr>'
+      '</thead><tbody>%s</tbody></table></div></section>'
+      '<section class="sec"><h2>Cómo leer cada ejercicio</h2>'
+      '<div class="tw"><table><tbody>%s</tbody></table></div></section>'
+      '<section class="sec"><h2>Reglas de la casa</h2><ul class="rules">%s</ul></section>'
+      '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
+      '<span class="v">Menú</span></a>'
+      '<a class="next" href="progresion.html"><span class="k">Ver</span>'
+      '<span class="v">Progresión</span></a></nav>'
+      '</div>'
+    ) % (eq, cg, leer, rl)
+
+    return (HEAD.format(title="Cómo funciona — Rutina del tapete", css=CSS + INDEX_CSS_EXTRA)
+            + topbar("guia") + body)
+
+
+with open(os.path.join(OUT, "guia.html"), "w", encoding="utf-8") as f:
+    f.write(render_guia())
+
+
+# ---------------------------------------------------------------- banco
+
+GRUPOS = [
+  ("pierna_rodilla", "Pierna · sentadilla y zancada"),
+  ("pierna_cadera",  "Pierna · cadera y glúteo"),
+  ("pierna_acc",     "Pierna · accesorios"),
+  ("empuje",         "Empuje · pecho y hombro"),
+  ("pecho",          "Pecho"),
+  ("jalon",          "Jalón · espalda"),
+  ("brazo",          "Brazo"),
+  ("core",           "Abdomen"),
+  ("core_obl",       "Abdomen · costados"),
+  ("core_bajo",      "Abdomen · bajo"),
+  ("hiit",           "Quema"),
+  ("calent",         "Calentamiento y movilidad"),
+  ("estiram",        "Estiramientos"),
+]
+
+BANCO_CSS = INDEX_CSS_EXTRA + """
+.buscar{
+  width:100%; margin-top:20px; padding:12px 14px; font:inherit; font-size:16px;
+  border:1.5px solid var(--line-strong); border-radius:var(--r);
+  background:var(--surface); color:var(--ink);
+}
+.buscar:focus{outline:none; border-color:var(--accent)}
+.gr{margin-top:28px}
+.gr > h2{
+  font-size:15px; text-transform:uppercase; letter-spacing:.1em; color:var(--accent);
+  padding-bottom:7px; border-bottom:1px solid var(--line);
+}
+.gr .ex{margin-top:10px}
+.gr .ex > li .row{cursor:default}
+.vacio{margin-top:26px; padding:22px; text-align:center; color:var(--ink-3);
+       border:1.5px dashed var(--line-strong); border-radius:var(--r)}
+"""
+
+BANCO_JS = """
+(function(){
+  var inp = document.querySelector('.buscar');
+  if (!inp) return;
+  var sin = function(t){
+    return t.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();
+  };
+  inp.addEventListener('input', function(){
+    var q = sin(inp.value.trim());
+    var total = 0;
+    document.querySelectorAll('.gr').forEach(function(g){
+      var n = 0;
+      g.querySelectorAll('li[data-nombre]').forEach(function(li){
+        var ok = !q || sin(li.dataset.nombre).indexOf(q) >= 0;
+        li.hidden = !ok;
+        if (ok) n++;
+      });
+      g.hidden = n === 0;
+      total += n;
+    });
+    document.querySelector('.vacio').hidden = total > 0;
+  });
+})();
+"""
+
+
+def render_banco():
+    por_cat, vistos = {}, set()
+    for pat, d in fichas.FICHAS:
+        if not d["cat"] or not d["nombre"] or d["fig"] not in dibujos.DIB:
+            continue
+        if (d["cat"], d["nombre"]) in vistos:
+            continue
+        vistos.add((d["cat"], d["nombre"]))
+        por_cat.setdefault(d["cat"], []).append(d)
+
+    total, grupos = 0, ""
+    for cat, titulo in GRUPOS:
+        lista = por_cat.get(cat, [])
+        if not lista:
+            continue
+        total += len(lista)
+        items = ""
+        for i, d in enumerate(lista):
+            cues = ""
+            if d.get("cad"):
+                cues += '<span class="cue cad"><b>Cadencia</b>%s</span>' % E(d["cad"])
+            if d.get("hasta"):
+                cues += '<span class="cue hasta"><b>Hasta dónde</b>%s</span>' % E(d["hasta"])
+            det = ""
+            if d.get("facil"):
+                det += '<p><span class="tag">Más fácil</span>%s</p>' % E(d["facil"])
+            if d.get("error"):
+                det += '<p><span class="tag err">Error común</span>%s</p>' % E(d["error"])
+            items += (
+              '<li data-nombre="%s">'
+              '<div class="row"><span class="txt"><span class="nm">%s</span>'
+              '<span class="sub"><span class="d">%s</span>%s</span></span></div>'
+              '<div class="figbox">%s</div>%s%s</li>'
+            ) % (E(d["nombre"]), E(d["nombre"]), E(d["reps"] or ""),
+                 ('<span>%s</span>' % E(d["carga"])) if d.get("carga") else "",
+                 dibujos.DIB[d["fig"]],
+                 ('<div class="cues">%s</div>' % cues) if cues else "",
+                 ('<details class="how"><summary>Cómo se hace</summary>%s</details>' % det) if det else "")
+        grupos += '<section class="gr"><h2>%s</h2><ul class="ex">%s</ul></section>' % (E(titulo), items)
+
+    body = (
+      '<div class="wrap">'
+      '<header class="hero">'
+      '<p class="eyebrow">La base de todo</p><h1>Banco de ejercicios</h1>'
+      '<p class="lede">Los %d ejercicios que usan todas las rutinas, con su dibujo. '
+      'Busca uno por nombre si quieres revisar cómo se hace.</p>'
+      '<button type="button" class="figtog">Ocultar dibujos</button>'
+      '</header>'
+      '<input class="buscar" type="search" id="q-banco" placeholder="Buscar: sentadilla, plancha, pecho…" '
+      'aria-label="Buscar ejercicio">'
+      '%s'
+      '<p class="vacio" hidden>Ningún ejercicio con ese nombre.</p>'
+      '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
+      '<span class="v">Menú</span></a>'
+      '<a class="next" href="guia.html"><span class="k">Ver</span>'
+      '<span class="v">Cómo funciona</span></a></nav>'
+      '</div>'
+    ) % (total, grupos)
+
+    return (HEAD.format(title="Banco de ejercicios — Rutina del tapete",
+                        css=CSS + BANCO_CSS)
+            + topbar("banco") + body
+            + '<script>window.PAGE_KEY="banco";</script>'
+            + '<script>%s</script>' % JS
+            + '<script>%s</script>' % BANCO_JS)
+
+
+with open(os.path.join(OUT, "banco.html"), "w", encoding="utf-8") as f:
+    f.write(render_banco())
+
+print("guía y banco ok")

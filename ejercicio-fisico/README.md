@@ -13,15 +13,25 @@ marcando ejercicios, contador de rondas y cronómetro de descanso.
 
 ## Qué hay en esta carpeta
 
+El menú tiene cuatro entradas: **rutinas por día**, **rutina aleatoria**,
+**abdominales** y **pecho**. Debajo, el banco de ejercicios, la guía y la
+progresión.
+
 | Ruta | Qué es |
 |---|---|
-| `web/index.html` | Índice: equipo, cargas, rotación, cómo leer una ficha |
+| `web/index.html` | El menú: las cuatro entradas |
+| `web/dias.html` | Escoger día, más la tabla de rotación |
 | `web/dia-1.html` … `web/dia-7.html` | Una rutina por día |
 | `web/aleatoria.html` | Generador: arma una rutina de 30 min al azar |
+| `web/abdominales.html` | Cuatro rutinas: core, costados, abdomen bajo y quema |
+| `web/pecho.html` | Tres rutinas de pectoral |
+| `web/banco.html` | Los 97 ejercicios con su dibujo, con buscador |
+| `web/guia.html` | Equipo, cargas, cómo leer una ficha, reglas |
 | `web/progresion.html` | Cuándo subir peso y tabla de registro |
-| `build.py` | Rutinas de la semana y plantilla de las páginas |
+| `build.py` | Rutinas de la semana y plantilla de todas las páginas |
+| `secciones.py` | Rutinas de abdominales y pecho |
 | `figuras.py` | Motor de dibujo: figuras de palo en SVG |
-| `dibujos.py` | Una pose por ejercicio (69 dibujos) |
+| `dibujos.py` | Una pose por ejercicio (89 dibujos) |
 | `fichas.py` | Cadencia, hasta dónde, versión fácil y error común |
 
 Las páginas de `web/` son generadas. Para regenerarlas:
@@ -33,6 +43,7 @@ python3 build.py
 Dónde tocar según lo que quieras cambiar:
 
 - **Un ejercicio de la semana** → diccionario `DATA` en `build.py`
+- **Una rutina de abdominales o pecho** → `secciones.py`
 - **La cadencia, la versión fácil o el error común** → lista `FICHAS` en `fichas.py`
 - **Un dibujo** → `DIB[...]` en `dibujos.py`. Las poses se definen por coordenadas
   (dónde va el tobillo, dónde la muñeca) y `figuras.py` resuelve los ángulos.
@@ -40,7 +51,7 @@ Dónde tocar según lo que quieras cambiar:
 
 ### Hoja de contacto de los dibujos
 
-Para revisar los 69 dibujos de una sola vez, genera una página con todos:
+Para revisar los 89 dibujos de una sola vez, genera una página con todos:
 
 ```python
 import dibujos
@@ -93,6 +104,19 @@ error que casi todo el mundo comete.
 | 7 · Dom | Movilidad | Movilidad | Movilidad | Movilidad |
 
 El domingo es suave a propósito: movilidad y core ligero, sin mancuernas.
+
+---
+
+## Sobre bajar de peso
+
+Las secciones de abdominales y pecho dicen esto en la propia página, y conviene
+que quede escrito también acá: **no se puede quemar grasa de un sitio en
+particular**. Los abdominales no quitan la barriga y los ejercicios de pecho no
+quitan la grasa del pecho. Lo que trabajan es el músculo que queda debajo.
+
+Lo que mueve la grasa, en orden: comer menos de lo que se gasta, mantener el
+músculo mientras se baja, y gastar más. Los bloques de *quema* de esta carpeta
+hacen lo tercero. Los dos primeros no los hace ninguna rutina.
 
 ---
 

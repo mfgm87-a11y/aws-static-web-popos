@@ -22,6 +22,111 @@ def f(pat, fig, cat=None, cad=None, hasta=None, facil=None, error=None,
 
 FICHAS = [
 
+# ─────────────────────────────── abdomen, pecho y quema (van antes: los
+# patrones de más abajo son genéricos y se los tragarían)
+
+f("plancha con elevación de pierna", "plancha_pierna", "core", None,
+  "Sube la pierna sin que la cadera se ladee",
+  "Sin subir la pierna, plancha normal",
+  "Arquear la espalda para levantar más la pierna", "5 s por pierna", None,
+  "Plancha con elevación de pierna"),
+
+f("plancha lateral con cadera", "plancha_lateral_cadera", "core_obl", "2-0-1",
+  "Bajas sin tocar el piso y subes",
+  "Apoya la rodilla de abajo",
+  "Rotar el pecho hacia el piso", "10 por lado", None,
+  "Plancha lateral con cadera"),
+
+f("escalador cruzado", "escalador_cruzado", "core_obl", None,
+  "La rodilla llega al codo contrario",
+  "Más lento, o llevando la rodilla al pecho sin cruzar",
+  "Subir la cadera para que quepa la rodilla", "20 (10 por lado)", None,
+  "Escalador cruzado"),
+
+f("leñador", "lenador", "core_obl", "2-0-1",
+  "De arriba de un hombro a la cadera contraria",
+  "Sin peso, o con un disco de 1 kg",
+  "Girar solo los brazos en vez del tronco", "12 por lado",
+  "1 mancuerna · 5 kg", "Leñador"),
+
+f("toques de talón", "toques_talon", "core_obl", None,
+  "Alcanzas el talón con los hombros despegados",
+  "Menos recorrido", "Dejar caer los hombros entre repetición y repetición",
+  "20 (10 por lado)", None, "Toques de talón"),
+
+f("marcha con maleta", "marcha_maleta", "core_obl", None,
+  "El tronco queda derecho aunque el peso jale",
+  "Menos peso", "Inclinarse hacia el lado del peso", "40 s por lado",
+  "1 mancuerna · 7,5 kg", "Marcha con maleta"),
+
+f("tijeras", "tijeras", "core_bajo", None,
+  "Recorrido corto, sin tocar el piso",
+  "Dobla un poco las rodillas",
+  "Arquear la espalda baja", "30 s", None, "Tijeras"),
+
+f("crunch inverso", "crunch_inverso", "core_bajo", "2-0-2",
+  "La cadera se despega del piso",
+  "Sin despegar la cadera, solo rodillas al pecho",
+  "Patear con las piernas en vez de enrollar la cadera", "12 reps", None,
+  "Crunch inverso"),
+
+f("rodillas al pecho sentado", "rodillas_pecho_sentado", "core_bajo", "2-0-1",
+  "Los pies no tocan el piso en ningún momento",
+  "Apoya las manos atrás",
+  "Dejar caer la espalda redondeada", "15 reps", None, "Rodillas al pecho sentado"),
+
+f("hollow", "hollow", "core_bajo", None,
+  "Hombros y piernas arriba, espalda baja pegada",
+  "Sube más las piernas o dobla las rodillas",
+  "Dejar que la espalda se arquee", "30 s", None, "Hollow"),
+
+f("sit-up", "sit_up", "core", "2-0-2",
+  "Sube el tronco entero",
+  "Cámbialo por el encogimiento",
+  "Darse tirón con los brazos", "15 reps", None, "Sit-up"),
+
+f("encogimiento abdominal", "crunch", "core", "2-1-2",
+  "Solo despegas los omóplatos",
+  "Menos recorrido", "Jalarse el cuello con las manos", "20 reps", None,
+  "Encogimiento abdominal"),
+
+f("flexión diamante", "flexion_diamante", "pecho", "3-0-1",
+  "El pecho toca las manos",
+  "Con las rodillas en el piso",
+  "Abrir los codos: acá van pegados", "8 reps", None, "Flexión diamante"),
+
+f("flexión ancha", "flexion_ancha", "pecho", "3-0-1",
+  "El pecho casi toca el piso",
+  "Con las rodillas en el piso, o manos en el sofá",
+  "Bajar solo la cabeza", "10 reps", None, "Flexión ancha"),
+
+f("press alterno", "press_alterno", "pecho", "2-0-1",
+  "Uno sube mientras el otro baja",
+  "Los dos brazos a la vez",
+  "Ladear el tronco al empujar", "10 por brazo", "2 mancuernas · 7,5 kg",
+  "Press alterno en el piso"),
+
+f("salto de tijera", "salto_tijera", "hiit", None,
+  "Brazos y piernas abren al mismo tiempo",
+  "Sin salto: abre un pie y luego el otro",
+  "Caer con la rodilla rígida", "40 s", None, "Salto de tijera"),
+
+f("rodillas altas", "rodillas_altas", "hiit", None,
+  "La rodilla sube a la altura de la cadera",
+  "Marcha rápida sin trotar", "Encorvarse al frente", "40 s", None,
+  "Rodillas altas"),
+
+f("talones al glúteo", "talones_gluteo", "hiit", None,
+  "El talón toca el glúteo",
+  "Más lento, en el sitio", "Inclinar el tronco al frente", "40 s", None,
+  "Talones al glúteo"),
+
+f("burpee", "burpee", "hiit", None,
+  "Pecho al piso y salto arriba",
+  "Sin flexión abajo y sin salto arriba",
+  "Dejar caer la cadera al poner los pies atrás", "8 reps", None, "Burpee"),
+
+
 # ─────────────────────────────────────────── pierna · dominante de rodilla
 f("sentadilla goblet", "sentadilla_goblet", "pierna_rodilla", "3-1-1",
   "Hasta que el muslo quede paralelo al piso",

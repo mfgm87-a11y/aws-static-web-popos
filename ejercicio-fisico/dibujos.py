@@ -948,3 +948,151 @@ DIB["peso_muerto_rumano"] = duo(
                         + aviso("Rodillas casi rectas · la cadera va atrás y la espalda queda plana")
                         + arrow((152, 90), (130, 90), 0),
     alt="Peso muerto rumano: de pie y con la cadera echada atrás, espalda plana")
+
+
+# ══════════════════════════════════════════════════ ABDOMEN
+
+DIB["crunch"] = duo(
+    P((0, 124), -90, (24, 128), (-24, 114)),
+    P((0, 124), -70, (24, 128), (-20, 104)),
+    "1 · Hombros en el piso", "2 · Despega",
+    fondo=mat(14, 236), piso=False,
+    guides=lambda a, b: aviso("Solo despegas los omóplatos. La espalda baja no se mueve."),
+    alt="Encogimiento abdominal despegando solo los hombros del piso")
+
+DIB["sit_up"] = duo(
+    P((0, 124), -90, (24, 128), (-24, 114)),
+    P((0, 122), -38, (24, 128), (10, 104)),
+    "1 · Acostado", "2 · Sube entero",
+    fondo=mat(14, 118), piso=False,
+    guides=lambda a, b: aviso("Sube rodando la espalda, vértebra por vértebra, sin tirón"),
+    alt="Abdominal completo subiendo el tronco entero")
+
+DIB["toques_talon"] = duo(
+    P((0, 124), -76, (22, 128), (2, 124)),
+    P((0, 124), -76, (22, 128), (18, 128)),
+    "1 · Hombros arriba", "2 · Toca el talón",
+    fondo=mat(14, 236), piso=False,
+    guides=lambda a, b: aviso("Los hombros se quedan despegados todo el rato. Alternas lado y lado."),
+    alt="Toques de talón: acostado con los hombros despegados se alcanza el talón")
+
+DIB["tijeras"] = solo(
+    P((0, 122), -90, ((28, 94), (44, 124)), (-12, 126), knee=(1, 1)),
+    "Piernas rectas, alternando",
+    fondo=mat(20, 230), piso=False,
+    guides=lambda j: aviso("Manos debajo de la cola · recorrido corto y rápido, sin tocar el piso"),
+    alt="Tijeras: piernas rectas subiendo y bajando alternadas sin tocar el piso")
+
+DIB["crunch_inverso"] = duo(
+    P((0, 122), -90, (26, 104), (-14, 126), knee=1),
+    P((0, 114), -78, (4, 92), (-14, 126), knee=1),
+    "1 · Rodillas arriba", "2 · Rueda la cadera",
+    fondo=mat(14, 236), piso=False,
+    guides=lambda a, b: aviso("La cadera se despega del piso. No es patear: es enrollar."),
+    alt="Crunch inverso llevando las rodillas al pecho y despegando la cadera")
+
+DIB["hollow"] = solo(
+    P((0, 124), -74, (46, 106), (-56, 98), bow=-6),
+    "Hombros y piernas arriba",
+    fondo=mat(30, 220), piso=False,
+    guides=lambda j: aviso("Forma de banano · la espalda baja pegada al piso. Si se arquea, sube más las piernas."),
+    alt="Hollow: hombros y piernas despegados con la espalda baja pegada al piso")
+
+DIB["rodillas_pecho_sentado"] = duo(
+    P((0, 120), -40, (40, 122), (18, 106)),
+    P((0, 120), -46, (20, 104), (14, 108), knee=1),
+    "1 · Piernas largas", "2 · Rodillas al pecho",
+    guides=lambda a, b: aviso("Sentado con el tronco atrás · los pies no tocan el piso en ningún momento"),
+    alt="Sentado se llevan las rodillas al pecho sin apoyar los pies")
+
+DIB["plancha_pierna"] = solo(
+    P((0, 104), 90, ((-42, 126), (-46, 102)), (48, 128), elbow=1, foot=200),
+    "Plancha con una pierna arriba",
+    guides=lambda j: linea(j["ankle_n"], j["head"], "", 0)
+                     + aviso("Sube la pierna sin que la cadera se ladee · 5 s por pierna"),
+    alt="Plancha sobre antebrazos levantando una pierna")
+
+DIB["plancha_lateral_cadera"] = duo(
+    P((0, 122), 62, (-40, 128), (42, 128), elbow=1, foot=170),
+    P((0, 108), 62, (-40, 128), (42, 128), elbow=1, foot=170),
+    "1 · Cadera abajo", "2 · Cadera arriba",
+    guides=lambda a, b: aviso("Bajas la cadera sin tocar el piso y subes · el costado hace todo"),
+    alt="Plancha lateral bajando y subiendo la cadera")
+
+DIB["escalador_cruzado"] = duo(
+    P((0, 96), 90, (-42, 126), (34, 129), foot=200),
+    P((0, 96), 90, ((-42, 126), (6, 112)), (34, 129), knee=(-1, 1), foot=200),
+    "1 · Plancha alta", "2 · Rodilla cruzada",
+    guides=lambda a, b: aviso("La rodilla cruza hacia el codo contrario · ahí es donde trabaja el costado"),
+    alt="Escalador cruzado llevando la rodilla al codo contrario")
+
+DIB["lenador"] = duo(
+    P((0, 88), -8, ((-15, 130), (15, 130)), (31, 45)),
+    P((0, 102), 13, ((-17, 130), (17, 130)), (-26, 119)),
+    "1 · Arriba y afuera", "2 · Abajo y cruzado",
+    eq=lambda a, b: db(a["wrist"]) + db(b["wrist"]),
+    guides=lambda a, b: aviso("Visto de frente · el peso baja en diagonal, de arriba de un hombro a la cadera contraria"),
+    alt="Leñador: la mancuerna baja en diagonal cruzando el cuerpo")
+
+DIB["marcha_maleta"] = solo(
+    P((0, 86), -5, ((22, 102), (0, 130)), ((-11, 101), (13, 111)), knee=(1, 1)),
+    "Un solo peso, un solo lado",
+    eq=lambda j: db(j["wrist_f"]),
+    guides=lambda j: aviso("El peso te jala a un lado y tú no lo dejas · el tronco queda derecho"),
+    alt="Marcha con un solo peso al costado manteniendo el tronco derecho")
+
+
+# ══════════════════════════════════════════════════ PECHO
+
+DIB["flexion_diamante"] = duo(
+    P((0, 96), 90, (-42, 126), (34, 129), elbow=-1, foot=200),
+    P((0, 110), 90, (-42, 126), (34, 129), elbow=-1, foot=200),
+    "1 · Arriba", "2 · Abajo",
+    guides=lambda a, b: aviso("Manos juntas formando un diamante con índices y pulgares · codos rozando las costillas"),
+    alt="Flexión diamante con las manos juntas bajo el pecho")
+
+DIB["flexion_ancha"] = duo(
+    P((0, 96), 90, (-42, 126), (40, 129), elbow=-1, foot=200),
+    P((0, 108), 90, (-42, 126), (40, 129), elbow=-1, foot=200),
+    "1 · Arriba", "2 · Abajo",
+    guides=lambda a, b: aviso("Manos bastante más abiertas que los hombros · carga el pecho por fuera"),
+    alt="Flexión con las manos muy abiertas")
+
+DIB["press_alterno"] = duo(
+    P((0, 122), -90, (22, 128), ((-32, 88), (-22, 112))),
+    P((0, 122), -90, (22, 128), ((-22, 112), (-32, 88))),
+    "1 · Uno arriba", "2 · Cambias",
+    eq=lambda a, b: db(a["wrist_n"]) + db(a["wrist_f"]) + db(b["wrist_n"]) + db(b["wrist_f"]),
+    fondo=mat(14, 236), piso=False,
+    guides=lambda a, b: aviso("Uno sube mientras el otro baja · el core trabaja para que no te ladees"),
+    alt="Press de pecho alternando un brazo y el otro")
+
+
+# ══════════════════════════════════════════════════ QUEMA / HIIT
+
+DIB["salto_tijera"] = duo(
+    P((0, 88), 0, ((-8, 130), (8, 130)), ((-12, 118), (12, 118))),
+    P((0, 84), 0, ((-31, 128), (31, 128)), ((-31, 47), (31, 47))),
+    "1 · Pies juntos", "2 · Abre todo",
+    guides=lambda a, b: aviso("Visto de frente · abres brazos y piernas al mismo tiempo, cae suave"),
+    alt="Salto de tijera abriendo brazos y piernas a la vez")
+
+DIB["rodillas_altas"] = solo(
+    P((0, 84), 4, ((26, 98), (0, 130)), ((20, 74), (-12, 98)), knee=(1, 1)),
+    "Rodilla sobre la cadera",
+    guides=lambda j: hline(j["hip"][1], "a la cadera", 180, 244)
+                     + aviso("Rápido, sobre las puntas de los pies · como trotando en el sitio"),
+    alt="Rodillas altas corriendo en el sitio")
+
+DIB["talones_gluteo"] = solo(
+    P((0, 86), 4, ((0, 130), (-16, 90)), ((16, 96), (-8, 82)), knee=(1, -1)),
+    "Talón al glúteo, rápido",
+    guides=lambda j: aviso("Como trotando pero pateando atrás · el talón toca el glúteo"),
+    alt="Talones al glúteo trotando en el sitio")
+
+DIB["burpee"] = duo(
+    P((0, 110), 90, (-42, 126), (34, 129), elbow=-1, foot=200),
+    P((0, 72), 3, ((0, 114), (3, 116)), ((9, 41), (-5, 43))),
+    "1 · Pecho al piso", "2 · Salta arriba",
+    guides=lambda a, b: aviso("Manos al piso, pies atrás, pecho abajo, pies adelante y saltas · sin flexión si es mucho"),
+    alt="Burpee: del piso al salto")
