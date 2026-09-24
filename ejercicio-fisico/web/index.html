@@ -1,0 +1,253 @@
+<title>Rutina del tapete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f2ef; --surface:#fffefc; --surface-2:#eceae6;
+  --ink:#1b1917; --ink-2:#6d655e; --ink-3:#9a918a;
+  --line:#dcd6cf; --line-strong:#c4bcb3;
+  --accent:#cf4526; --accent-soft:#f7e3dc; --on-accent:#fffefc;
+  --steel:#33697d; --steel-soft:#e0eaee;
+  --shadow:0 1px 2px rgba(27,25,23,.06), 0 8px 24px -16px rgba(27,25,23,.3);
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#141311; --surface:#1e1c1a; --surface-2:#272421;
+    --ink:#f2eee9; --ink-2:#a79d94; --ink-3:#7b726a;
+    --line:#332f2b; --line-strong:#463f39;
+    --accent:#ff6b45; --accent-soft:#3a201a; --on-accent:#171310;
+    --steel:#79b3c8; --steel-soft:#1d2c32;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#141311; --surface:#1e1c1a; --surface-2:#272421;
+  --ink:#f2eee9; --ink-2:#a79d94; --ink-3:#7b726a;
+  --line:#332f2b; --line-strong:#463f39;
+  --accent:#ff6b45; --accent-soft:#3a201a; --on-accent:#171310;
+  --steel:#79b3c8; --steel-soft:#1d2c32;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Source Sans 3", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%;
+}
+h1,h2,h3,.disp{font-family:Oswald, "Source Sans 3", ui-sans-serif, system-ui, sans-serif; font-weight:600; letter-spacing:.01em;}
+h1,h2,h3{text-wrap:balance; margin:0}
+a{color:var(--accent)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- barra superior ---------- */
+.top{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:40;
+  background:color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter:saturate(150%) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.top-in{max-width:760px; margin:0 auto; padding:8px 16px; display:flex; align-items:center; gap:10px}
+.home{
+  font-family:Oswald,sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:.14em;
+  color:var(--ink-2); text-decoration:none; white-space:nowrap; padding:6px 0;
+}
+.home:hover{color:var(--accent)}
+.days{display:flex; gap:3px; margin-left:auto; flex-wrap:nowrap}
+.days a{
+  width:30px; height:30px; display:grid; place-items:center; text-decoration:none;
+  font-family:Oswald,sans-serif; font-size:13px; border-radius:7px;
+  color:var(--ink-2); border:1px solid transparent;
+}
+.days a:hover{background:var(--surface-2); color:var(--ink)}
+.days a[aria-current="page"]{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+
+/* ---------- estructura ---------- */
+.wrap{max-width:760px; margin:0 auto; padding-inline:16px; padding-block:0 120px}
+.hero{padding-block:26px 20px; border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:Oswald,sans-serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 6px;
+}
+.hero h1{font-size:clamp(30px,8vw,46px); line-height:1.02; text-transform:uppercase}
+.hero .focus{margin:10px 0 0; color:var(--ink-2); font-size:16px; max-width:52ch}
+.meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
+.chip{
+  font-size:12.5px; padding:4px 9px; border-radius:99px; border:1px solid var(--line-strong);
+  color:var(--ink-2); background:var(--surface);
+}
+.chip.load{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+
+/* ---------- progreso ---------- */
+.prog{display:flex; align-items:center; gap:10px; margin-top:16px}
+.bar{flex:1; height:5px; border-radius:99px; background:var(--surface-2); overflow:hidden}
+.bar i{display:block; height:100%; width:0%; background:var(--accent); transition:width .25s ease}
+.prog .n{font-family:Oswald,sans-serif; font-size:13px; color:var(--ink-2)}
+.reset{
+  background:none; border:1px solid var(--line-strong); color:var(--ink-2);
+  font:inherit; font-size:12.5px; padding:3px 10px; border-radius:99px; cursor:pointer;
+}
+.reset:hover{border-color:var(--accent); color:var(--accent)}
+
+/* ---------- bloques ---------- */
+.block{margin-top:26px}
+.bhead{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding-bottom:8px; border-bottom:1px solid var(--line)}
+.bhead h2{font-size:21px; text-transform:uppercase; letter-spacing:.03em}
+.bhead .t{font-family:Oswald,sans-serif; font-size:13px; color:var(--ink-3); margin-left:auto}
+.bhead .kind{
+  font-size:11px; font-family:Oswald,sans-serif; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--steel); background:var(--steel-soft); padding:2px 8px; border-radius:99px;
+}
+.bnote{color:var(--ink-2); font-size:14.5px; margin:10px 0 0}
+
+/* rondas */
+.rounds{display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap}
+.rounds .lb{font-family:Oswald,sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
+.rd{
+  width:36px; height:36px; border-radius:9px; border:1.5px solid var(--line-strong);
+  background:var(--surface); color:var(--ink-2); font-family:Oswald,sans-serif; font-size:15px;
+  cursor:pointer; transition:.15s;
+}
+.rd:hover{border-color:var(--accent)}
+.rd[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+
+/* ejercicios */
+.ex{list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px}
+.ex>li{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.row{display:flex; align-items:flex-start; gap:11px; padding:11px 13px; cursor:pointer}
+.row input{
+  appearance:none; -webkit-appearance:none; flex:none; margin:2px 0 0;
+  width:21px; height:21px; border-radius:6px; border:1.5px solid var(--line-strong);
+  background:var(--surface); cursor:pointer; position:relative; transition:.15s;
+}
+.row input:checked{background:var(--accent); border-color:var(--accent)}
+.row input:checked::after{
+  content:""; position:absolute; left:6px; top:2px; width:5px; height:10px;
+  border:solid var(--on-accent); border-width:0 2px 2px 0; transform:rotate(42deg);
+}
+.row input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.txt{min-width:0; flex:1}
+.nm{font-weight:600; font-size:15.5px; line-height:1.3}
+.code{
+  font-family:Oswald,sans-serif; color:var(--accent); font-size:13px; margin-right:6px;
+  letter-spacing:.06em;
+}
+.sub{display:flex; flex-wrap:wrap; gap:4px 10px; margin-top:3px; font-size:13.5px; color:var(--ink-2)}
+.sub .d{font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.row input:checked ~ .txt .nm{text-decoration:line-through; color:var(--ink-3)}
+.row input:checked ~ .txt .sub{opacity:.5}
+details.how{border-top:1px solid var(--line); background:var(--surface-2)}
+details.how summary{
+  cursor:pointer; padding:8px 13px; font-family:Oswald,sans-serif; font-size:12px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2); list-style:none;
+}
+details.how summary::-webkit-details-marker{display:none}
+details.how summary::before{content:"▸ "; color:var(--accent)}
+details.how[open] summary::before{content:"▾ "}
+details.how p{margin:0; padding:0 13px 12px; font-size:14.5px; color:var(--ink-2); max-width:62ch}
+details.how strong{color:var(--ink)}
+
+/* descanso */
+.restbtn{
+  margin-top:12px; width:100%; padding:11px; border-radius:var(--r); cursor:pointer;
+  background:var(--ink); color:var(--bg); border:none;
+  font-family:Oswald,sans-serif; font-size:14px; letter-spacing:.1em; text-transform:uppercase;
+}
+.restbtn:hover{background:var(--accent); color:var(--on-accent)}
+
+/* notas */
+.notes{
+  margin-top:28px; padding:16px 18px; border-radius:var(--r);
+  background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent);
+}
+.notes h3{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:8px}
+.notes ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px}
+.notes li{font-size:14.5px; color:var(--ink-2); max-width:62ch}
+.notes strong{color:var(--ink)}
+
+/* pie */
+.pager{display:flex; gap:10px; margin-top:30px; padding-top:18px; border-top:1px solid var(--line)}
+.pager a{
+  flex:1; text-decoration:none; padding:12px 14px; border-radius:var(--r);
+  background:var(--surface); border:1px solid var(--line); color:var(--ink);
+}
+.pager a:hover{border-color:var(--accent)}
+.pager .k{
+  display:block; font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-3); margin-bottom:2px;
+}
+.pager .v{font-family:Oswald,sans-serif; font-size:16px}
+.pager .next{text-align:right}
+
+/* ---------- cronometro ---------- */
+.timer{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  background:var(--ink); color:var(--bg);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+  transform:translateY(110%); transition:transform .22s ease;
+}
+.timer.on{transform:none}
+.timer-in{max-width:760px; margin:0 auto; display:flex; align-items:center; gap:12px}
+.timer .lb{font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.16em; text-transform:uppercase; opacity:.6}
+.timer .cd{font-family:Oswald,sans-serif; font-size:34px; line-height:1; font-variant-numeric:tabular-nums}
+.timer .tbar{flex:1; height:4px; border-radius:99px; background:rgba(128,128,128,.35); overflow:hidden}
+.timer .tbar i{display:block; height:100%; width:100%; background:var(--accent); transition:width 1s linear}
+.timer button{
+  background:none; border:1px solid rgba(128,128,128,.5); color:inherit; cursor:pointer;
+  font-family:Oswald,sans-serif; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+  padding:7px 11px; border-radius:8px;
+}
+.timer button:hover{border-color:var(--accent); color:var(--accent)}
+
+@media (max-width:420px){
+  .timer .cd{font-size:28px}
+  .home{font-size:11px}
+  .days a{width:27px; height:27px; font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; margin-top:14px}
+.card{
+  display:block; text-decoration:none; color:inherit; background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--r); padding:14px 15px;
+  box-shadow:var(--shadow); border-top:3px solid var(--accent); transition:.15s;
+}
+.card:hover{border-color:var(--accent); transform:translateY(-1px)}
+.card.rest{border-top-color:var(--steel)}
+.card .d{font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3)}
+.card h3{font-size:20px; text-transform:uppercase; margin:2px 0 6px}
+.card p{margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.4}
+.card .load{margin-top:9px; font-size:12px; color:var(--accent); font-family:Oswald,sans-serif; letter-spacing:.04em}
+.card.rest .load{color:var(--steel)}
+.sec{margin-top:34px}
+.sec>h2{font-size:22px; text-transform:uppercase; padding-bottom:8px; border-bottom:2px solid var(--ink)}
+.tw{overflow-x:auto; margin-top:12px; border:1px solid var(--line); border-radius:var(--r); background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:460px}
+th,td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line)}
+th{
+  font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-2); background:var(--surface-2); font-weight:500;
+}
+tr:last-child td{border-bottom:none}
+td strong{color:var(--ink)}
+td.k{font-family:Oswald,sans-serif; color:var(--accent); white-space:nowrap}
+.rules{margin:14px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px}
+.rules li{
+  background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--steel);
+  border-radius:var(--r); padding:12px 14px; font-size:14.5px; color:var(--ink-2); max-width:64ch;
+}
+.rules strong{color:var(--ink)}
+.lede{font-size:17px; color:var(--ink-2); max-width:56ch; margin:12px 0 0}
+.fine{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-3); max-width:62ch}
+</style>
+<header class="top"><div class="top-in"><span class="home">Rutina del tapete</span><nav class="days" aria-label="Días de la semana"><a href="dia-1.html" title="Lunes">L</a><a href="dia-2.html" title="Martes">M</a><a href="dia-3.html" title="Miércoles">M</a><a href="dia-4.html" title="Jueves">J</a><a href="dia-5.html" title="Viernes">V</a><a href="dia-6.html" title="Sábado">S</a><a href="dia-7.html" title="Domingo">D</a></nav></div></header><div class="wrap"><header class="hero"><p class="eyebrow">Entrenamiento en casa</p><h1>Rutina del tapete</h1><p class="lede">Siete rutinas de 30 minutos, una para cada día. Todos los días trabajas pierna, pecho, espalda, brazo y core, pero cada día le toca una parte distinta de cada área.</p></header><div class="grid"><a class="card" href="dia-1.html"><span class="d">Día 1</span><h3>Lunes</h3><p>Cuádriceps · pecho medio · dorsal ancho · bíceps</p><div class="load">Actual — 7,5 kg</div></a><a class="card" href="dia-2.html"><span class="d">Día 2</span><h3>Martes</h3><p>Isquios y glúteo · pecho superior · espalda media · tríceps</p><div class="load">Barra + Actual</div></a><a class="card" href="dia-3.html"><span class="d">Día 3</span><h3>Miércoles</h3><p>Unilateral · aperturas · dorsal · antebrazo</p><div class="load">5 kg y Actual</div></a><a class="card" href="dia-4.html"><span class="d">Día 4</span><h3>Jueves</h3><p>Glúteo medio · pecho inferior · trapecio · tríceps lateral</p><div class="load">2,5 kg y Actual</div></a><a class="card" href="dia-5.html"><span class="d">Día 5</span><h3>Viernes</h3><p>Complejo de barra + AMRAP metabólico</p><div class="load">Barra — ~19 kg</div></a><a class="card" href="dia-6.html"><span class="d">Día 6</span><h3>Sábado</h3><p>Pantorrilla · hombro medial · lumbares · core</p><div class="load">Pesada — 9,5 kg</div></a><a class="card rest" href="dia-7.html"><span class="d">Día 7</span><h3>Domingo</h3><p>Movilidad, respiración y core suave</p><div class="load">Sin peso</div></a></div><section class="sec"><h2>Tu equipo</h2><div class="tw"><table><tbody><tr><td class="k">2 mancuernas ajustables</td><td>Cargadas hoy a <strong>7,5 kg cada una</strong>: 2 discos de 2,5 kg y 2 de 1,25 kg por mancuerna.</td></tr><tr><td class="k">4 discos sueltos</td><td>1 kg cada uno. Son los que te dan la carga Pesada.</td></tr><tr><td class="k">Vara larga</td><td>Une las dos mancuernas en una barra de ~19 kg con todos los discos.</td></tr><tr><td class="k">Silla</td><td>Solo para sentarte. No te subes en ella ni la empujas contra la pared.</td></tr><tr><td class="k">Sofá</td><td>Borde firme para las flexiones con manos elevadas. Pesado y ancho: no se mueve.</td></tr><tr><td class="k">Tapete</td><td>Tu zona de trabajo de suelo. La baldosa es resbalosa.</td></tr><tr><td class="k">Espejo</td><td>Revisa la técnica, sobre todo en sentadilla y peso muerto.</td></tr></tbody></table></div></section><section class="sec"><h2>Configuraciones de carga</h2><p class="bnote">Cambiar discos toma 30 segundos. Cada rutina te dice cuál usar.</p><div class="tw"><table><thead><tr><th>Nombre</th><th>Cómo se arma</th><th>Peso</th></tr></thead><tbody><tr><td class="k">Ligera</td><td>Solo los discos de 1,25 kg</td><td><strong>2,5 kg por mancuerna</strong></td></tr><tr><td class="k">Media</td><td>Solo los discos de 2,5 kg</td><td><strong>5 kg por mancuerna</strong></td></tr><tr><td class="k">Actual</td><td>Como las tienes ahora</td><td><strong>7,5 kg por mancuerna</strong></td></tr><tr><td class="k">Pesada</td><td>Actual + 1 disco de 1 kg por lado</td><td><strong>9,5 kg por mancuerna</strong></td></tr><tr><td class="k">Barra</td><td>Todos los discos en la vara</td><td><strong>~19 kg en total</strong></td></tr></tbody></table></div></section><section class="sec"><h2>La rotación</h2><div class="tw"><table><thead><tr><th>Día</th><th>Pierna</th><th>Pecho</th><th>Espalda</th><th>Brazo</th></tr></thead><tbody><tr><td class="k">1 · Lun</td><td>Cuádriceps</td><td>Medio</td><td>Dorsal ancho</td><td>Bíceps</td></tr><tr><td class="k">2 · Mar</td><td>Isquios, glúteo</td><td>Superior</td><td>Media, romboides</td><td>Tríceps largo</td></tr><tr><td class="k">3 · Mié</td><td>Unilateral</td><td>Externo</td><td>Dorsal unilateral</td><td>Braquial</td></tr><tr><td class="k">4 · Jue</td><td>Glúteo medio</td><td>Inferior</td><td>Trapecio, hombro post.</td><td>Tríceps lateral</td></tr><tr><td class="k">5 · Vie</td><td>Complejo</td><td>Complejo</td><td>Complejo</td><td>Complejo</td></tr><tr><td class="k">6 · Sáb</td><td>Pantorrilla</td><td>—</td><td>Erectores</td><td>Hombro medial</td></tr><tr><td class="k">7 · Dom</td><td>Movilidad</td><td>Movilidad</td><td>Movilidad</td><td>Movilidad</td></tr></tbody></table></div><p class="bnote">El domingo es suave a propósito. Entrenas los siete días, pero uno deja que el cuerpo se reconstruya. Sin ese día, a las tres semanas se te cae el rendimiento.</p></section><section class="sec"><h2>Reglas de la casa</h2><ul class="rules"><li><strong>Tri-serie</strong> quiere decir que haces A1, A2 y A3 seguidos, sin descanso entre ellos. Al terminar los tres, descansas. Eso es una ronda.</li><li><strong>Ritmo:</strong> baja el peso en 2 segundos, súbelo en 1. Sin rebotes.</li><li><strong>Piso:</strong> el tapete para todo lo de suelo. La baldosa es resbalosa, así que entrena descalzo o con tenis, nunca en medias.</li><li><strong>La silla es solo para sentarse.</strong> Si se desliza en la baldosa cuando te sientas, ponla sobre el tapete.</li><li><strong>Espacio:</strong> todo es en el sitio. No hay zancadas caminando en esta casa.</li><li><strong>Si algo duele</strong> con dolor puntual en una articulación, no el ardor del músculo, para ese ejercicio y sigue con el resto.</li><li><strong>Descanso real entre rondas.</strong> Mirar el celular 75 segundos no es descanso. Usa el cronómetro de cada bloque.</li></ul></section><section class="sec"><h2>Progresión</h2><p class="bnote">Cuándo subir de peso, qué hacer cuando se acaben los discos y dónde anotar tus números.</p><div class="grid" style="margin-top:12px"><a class="card rest" href="progresion.html"><span class="d">Referencia</span><h3>Progresión</h3><p>La regla de las dos rondas, qué esperar mes a mes y la tabla de registro.</p><div class="load">Abrir &rarr;</div></a></div></section><p class="fine">Esto es una rutina general para alguien sano que entrena en casa y no sustituye a un profesional. Si tienes una lesión, una condición cardíaca o llevas mucho tiempo sin moverte, habla con un médico o un fisioterapeuta antes de arrancar.</p></div>

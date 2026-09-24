@@ -1,104 +1,69 @@
 # Ejercicio físico en casa
 
-Siete rutinas de **30 minutos**, una para cada día. Todos los días trabajas
-pierna, pecho, espalda, brazo y core — pero cada día le toca una **parte
-distinta** de cada área. Así nada se sobrecarga y todo avanza parejo.
+Siete rutinas de 30 minutos, una para cada día. Todos los días se trabaja
+pierna, pecho, espalda, brazo y core, pero cada día le toca una parte distinta
+de cada área.
+
+**Para usarlas:** <https://claude.ai/artifact/5dmToemYQhgZSRNAAxqaW6>
+
+Esa página se abre en el celular al lado del tapete. Tiene casillas para ir
+marcando ejercicios, contador de rondas y cronómetro de descanso.
 
 ---
 
-## Tu equipo
+## Qué hay en esta carpeta
+
+| Ruta | Qué es |
+|---|---|
+| `web/index.html` | Índice: equipo, configuraciones de carga, rotación de la semana |
+| `web/dia-1.html` … `web/dia-7.html` | Una rutina por día |
+| `web/progresion.html` | Cuándo subir peso y tabla de registro |
+| `build.py` | Genera las 9 páginas. **Aquí vive el contenido.** |
+
+Las páginas de `web/` son generadas. Para cambiar un ejercicio, edita el
+diccionario `DATA` en `build.py` y vuelve a correr:
+
+```bash
+python3 build.py
+```
+
+---
+
+## El equipo que suponen estas rutinas
 
 | Elemento | Detalle |
 |---|---|
-| 2 mancuernas ajustables | Cargadas hoy a **7,5 kg cada una** (2 discos de 2,5 kg + 2 de 1,25 kg por mancuerna) |
+| 2 mancuernas ajustables | 7,5 kg cada una: 2 discos de 2,5 kg + 2 de 1,25 kg por mancuerna |
 | 4 discos sueltos | 1 kg cada uno |
-| Vara larga | Une las dos mancuernas en una barra |
-| Silla de comedor | Banco, apoyo para remo, fondos y búlgaras |
-| Tapete | Tu zona de trabajo de suelo |
-| Espejo | Revisa la técnica, sobre todo en sentadilla y press |
+| Vara larga | Une las dos mancuernas en una barra de ~19 kg |
+| Silla | **Solo para sentarse.** No se sube uno en ella ni se empuja contra la pared |
+| Sofá | Borde firme para las flexiones con manos elevadas |
+| Tapete | Zona de trabajo de suelo |
+| Espejo | Revisar técnica en sentadilla y peso muerto |
 
-### Configuraciones de carga
-
-Cambiar discos toma 30 segundos. Las rutinas te dicen cuál usar.
-
-| Nombre | Cómo se arma | Peso |
-|---|---|---|
-| **Ligera** | Solo los discos de 1,25 kg | 2,5 kg por mancuerna |
-| **Media** | Solo los discos de 2,5 kg | 5 kg por mancuerna |
-| **Actual** | Como las tienes ahora | 7,5 kg por mancuerna |
-| **Pesada** | Actual + 1 disco de 1 kg por lado | 9,5 kg por mancuerna |
-| **Barra** | Todos los discos en la vara | ~19 kg + la vara |
+Cargas disponibles por mancuerna: **2,5 → 5 → 7,5 → 9,5 kg**.
+Con todos los discos en la vara: **~19 kg**.
 
 ---
 
-## La rotación de la semana
+## La rotación
 
-| Día | Pierna | Pecho | Espalda | Brazo | Core |
-|---|---|---|---|---|---|
-| **1 · Lun** | Cuádriceps | Medio (press plano) | Dorsal ancho | Bíceps supinado | Anti-extensión |
-| **2 · Mar** | Isquios y glúteo | Superior (inclinado) | Media, romboides | Tríceps porción larga | Anterior |
-| **3 · Mié** | Unilateral, equilibrio | Externo (aperturas) | Dorsal unilateral | Braquial, antebrazo | Oblicuos |
-| **4 · Jue** | Glúteo medio, abductores | Inferior (declinado) | Trapecio, hombro posterior | Tríceps lateral | Anti-rotación |
-| **5 · Vie** | Complejo | Complejo | Complejo | Complejo | Metabólico |
-| **6 · Sáb** | Pantorrilla | — | Erectores, lumbar | Hombro | Core completo |
-| **7 · Dom** | Movilidad | Movilidad | Movilidad | Movilidad | Suave |
+| Día | Pierna | Pecho | Espalda | Brazo |
+|---|---|---|---|---|
+| 1 · Lun | Cuádriceps | Medio | Dorsal ancho | Bíceps |
+| 2 · Mar | Isquios, glúteo | Superior | Media, romboides | Tríceps largo |
+| 3 · Mié | Unilateral | Externo | Dorsal unilateral | Braquial |
+| 4 · Jue | Glúteo medio | Inferior | Trapecio, hombro post. | Tríceps lateral |
+| 5 · Vie | Complejo | Complejo | Complejo | Complejo |
+| 6 · Sáb | Pantorrilla | — | Erectores | Hombro medial |
+| 7 · Dom | Movilidad | Movilidad | Movilidad | Movilidad |
 
-El **domingo es a propósito suave**: movilidad y core ligero. Entrenas los 7
-días, pero uno de ellos deja que el cuerpo se reconstruya. Sin ese día, a las
-tres semanas se te cae el rendimiento.
+El domingo es suave a propósito: movilidad y core ligero, sin mancuernas.
 
 ---
 
-## Los archivos
+## Lo que esto no es
 
-- [`dia-1-lunes.md`](dia-1-lunes.md) — Cuádriceps · pecho medio · dorsal · bíceps
-- [`dia-2-martes.md`](dia-2-martes.md) — Isquios y glúteo · pecho superior · remo · tríceps
-- [`dia-3-miercoles.md`](dia-3-miercoles.md) — Unilateral · aperturas · dorsal · antebrazo
-- [`dia-4-jueves.md`](dia-4-jueves.md) — Glúteo medio · pecho inferior · trapecio · tríceps
-- [`dia-5-viernes.md`](dia-5-viernes.md) — Complejo de barra + metabólico
-- [`dia-6-sabado.md`](dia-6-sabado.md) — Pantorrilla · hombro · lumbar · core
-- [`dia-7-domingo.md`](dia-7-domingo.md) — Movilidad y recuperación activa
-- [`progresion.md`](progresion.md) — Cómo subir de peso y tabla para anotar
-
----
-
-## Cómo leer las rutinas
-
-**Tri-serie** significa que haces A1, A2 y A3 seguidos, sin descanso entre
-ellos. Al terminar los tres, descansas y vuelves a empezar. Eso es una ronda.
-
-Todas las rutinas tienen la misma forma:
-
-```
-Calentamiento    4 min
-Bloque A        13 min    ← lo más pesado, cuando estás fresco
-Bloque B         9 min
-Estiramiento     4 min
-                ───────
-                30 min
-```
-
-**Ritmo:** baja el peso en 2 segundos, súbelo en 1. Sin rebotes.
-
----
-
-## Reglas de la casa
-
-- **Piso:** el tapete para todo lo de suelo. La baldosa es resbalosa — entrena
-  descalzo o con tenis, nunca en medias.
-- **La silla:** cuando te subas o te apoyes con peso, ponla contra la pared.
-  El espaldar alto la vuelve inestable si la cargas de frente.
-- **Espacio:** todo es en el sitio. No hay zancadas caminando en esta casa.
-- **Si algo duele** (dolor puntual en una articulación, no el ardor del
-  músculo), para ese ejercicio y sigue con el resto.
-- **Descanso real entre rondas.** Mirar el celular 75 segundos no es descanso,
-  es distracción. Respira y cuenta.
-
----
-
-## Lo que esta guía no es
-
-Esto es una rutina general para alguien sano que entrena en casa. No sustituye
-a un profesional. Si tienes una lesión, una condición cardíaca, o llevas
-mucho tiempo sin moverte, habla con un médico o un fisioterapeuta antes de
-arrancar — y muéstrale esto, que para eso está escrito.
+Una rutina general para alguien sano que entrena en casa. No sustituye a un
+profesional. Con una lesión, una condición cardíaca, o mucho tiempo sin
+moverse, primero un médico o un fisioterapeuta.
