@@ -15,16 +15,36 @@ marcando ejercicios, contador de rondas y cronómetro de descanso.
 
 | Ruta | Qué es |
 |---|---|
-| `web/index.html` | Índice: equipo, configuraciones de carga, rotación de la semana |
+| `web/index.html` | Índice: equipo, cargas, rotación, cómo leer una ficha |
 | `web/dia-1.html` … `web/dia-7.html` | Una rutina por día |
+| `web/aleatoria.html` | Generador: arma una rutina de 30 min al azar |
 | `web/progresion.html` | Cuándo subir peso y tabla de registro |
-| `build.py` | Genera las 9 páginas. **Aquí vive el contenido.** |
+| `build.py` | Rutinas de la semana y plantilla de las páginas |
+| `figuras.py` | Motor de dibujo: figuras de palo en SVG |
+| `dibujos.py` | Una pose por ejercicio (69 dibujos) |
+| `fichas.py` | Cadencia, hasta dónde, versión fácil y error común |
 
-Las páginas de `web/` son generadas. Para cambiar un ejercicio, edita el
-diccionario `DATA` en `build.py` y vuelve a correr:
+Las páginas de `web/` son generadas. Para regenerarlas:
 
 ```bash
 python3 build.py
+```
+
+Dónde tocar según lo que quieras cambiar:
+
+- **Un ejercicio de la semana** → diccionario `DATA` en `build.py`
+- **La cadencia, la versión fácil o el error común** → lista `FICHAS` en `fichas.py`
+- **Un dibujo** → `DIB[...]` en `dibujos.py`. Las poses se definen por coordenadas
+  (dónde va el tobillo, dónde la muñeca) y `figuras.py` resuelve los ángulos.
+- **Qué ejercicios entran al generador aleatorio** → el campo `cat` de cada ficha
+
+### Hoja de contacto de los dibujos
+
+Para revisar los 69 dibujos de una sola vez, genera una página con todos:
+
+```python
+import dibujos
+print(dibujos.DIB["sentadilla_goblet"])
 ```
 
 ---
@@ -43,6 +63,20 @@ python3 build.py
 
 Cargas disponibles por mancuerna: **2,5 → 5 → 7,5 → 9,5 kg**.
 Con todos los discos en la vara: **~19 kg**.
+
+---
+
+## Lo que trae cada ejercicio
+
+Un dibujo con la posición de inicio y la de llegada, con la línea punteada roja
+marcando hasta dónde llega el movimiento. Al lado, dos datos:
+
+- **Cadencia** — tres números: segundos para bajar, pausa abajo, segundos para
+  subir. `3-1-1` es bajar en tres, parar uno, subir en uno.
+- **Hasta dónde** — el punto exacto donde termina el recorrido.
+
+Y dentro de *Cómo se hace*: la técnica, la versión más fácil para arrancar y el
+error que casi todo el mundo comete.
 
 ---
 

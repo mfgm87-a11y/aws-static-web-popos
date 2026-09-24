@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Genera las paginas HTML de la rutina a partir de los datos."""
-import os, json, html
+import os, json, html, re
+import dibujos, fichas
 
 OUT = "/home/user/aws-static-web-popos/ejercicio-fisico/web"
 os.makedirs(OUT, exist_ok=True)
@@ -22,6 +23,7 @@ CSS = """
   --accent:#cf4526; --accent-soft:#f7e3dc; --on-accent:#fffefc;
   --steel:#33697d; --steel-soft:#e0eaee;
   --shadow:0 1px 2px rgba(27,25,23,.06), 0 8px 24px -16px rgba(27,25,23,.3);
+  --fig-bg:#faf8f5;
   --r:10px;
 }
 @media (prefers-color-scheme: dark){
@@ -33,6 +35,7 @@ CSS = """
     --accent:#ff6b45; --accent-soft:#3a201a; --on-accent:#171310;
     --steel:#79b3c8; --steel-soft:#1d2c32;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    --fig-bg:#191715;
   }
 }
 :root[data-theme="dark"]{
@@ -43,6 +46,7 @@ CSS = """
   --accent:#ff6b45; --accent-soft:#3a201a; --on-accent:#171310;
   --steel:#79b3c8; --steel-soft:#1d2c32;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    --fig-bg:#191715;
 }
 
 *{box-sizing:border-box}
@@ -77,6 +81,7 @@ a{color:var(--accent)}
 }
 .days a:hover{background:var(--surface-2); color:var(--ink)}
 .days a[aria-current="page"]{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+.days .dado{font-size:19px; line-height:1; margin-left:5px; border-left:1px solid var(--line); border-radius:0 7px 7px 0; padding-left:7px; width:auto; min-width:30px}
 
 /* ---------- estructura ---------- */
 .wrap{max-width:760px; margin:0 auto; padding-inline:16px; padding-block:0 120px}
@@ -218,6 +223,52 @@ details.how strong{color:var(--ink)}
 }
 .timer button:hover{border-color:var(--accent); color:var(--accent)}
 
+
+/* ---------- monachos ---------- */
+.figbox{border-top:1px solid var(--line); background:var(--fig-bg); padding:4px 8px 0}
+svg.fig{width:100%; height:auto; display:block; max-width:300px; margin:0 auto}
+@media (max-width:560px){ svg.fig{max-width:250px} }
+.f-l{stroke:var(--ink); stroke-width:3.4; stroke-linecap:round; fill:none}
+.f-lf{stroke:var(--ink-3); stroke-width:3; stroke-linecap:round; fill:none}
+.f-h{stroke:var(--ink); stroke-width:2.6; fill:var(--fig-bg)}
+.f-g{stroke:var(--line-strong); stroke-width:2}
+.f-mat{fill:var(--surface-2)}
+.f-box{fill:var(--surface-2); stroke:var(--line-strong); stroke-width:1.5}
+.f-obj{stroke:var(--line-strong); stroke-width:2.4; fill:none; stroke-linecap:round}
+.f-d{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:4 4; fill:none}
+.f-a{stroke:var(--accent); stroke-width:1.8; fill:none}
+.f-am{fill:var(--accent)}
+.f-e{fill:var(--accent)}
+.f-eb{stroke:var(--accent); stroke-width:2.6; stroke-linecap:round}
+.f-t{fill:var(--accent); font-family:"Source Sans 3",sans-serif; font-size:9px; font-weight:600}
+.f-c{fill:var(--ink-3); font-family:Oswald,sans-serif; font-size:9px; letter-spacing:.08em}
+:root.sin-fig .figbox{display:none}
+
+/* ---------- pistas del ejercicio ---------- */
+.cues{display:flex; flex-wrap:wrap; gap:5px; padding:9px 13px 0}
+.cue{
+  font-size:12px; line-height:1.3; padding:3px 8px; border-radius:6px;
+  background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line);
+}
+.cue b{
+  color:var(--ink-3); font-family:Oswald,sans-serif; font-weight:500;
+  font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin-right:4px;
+}
+.cue.cad b{color:var(--steel)}
+.cue.hasta{background:var(--accent-soft); border-color:var(--accent); color:var(--ink)}
+.cue.hasta b{color:var(--accent)}
+details.how p+p{margin-top:8px}
+details.how .tag{
+  font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--accent); margin-right:5px;
+}
+details.how .tag.err{color:var(--steel)}
+.figtog{
+  background:none; border:1px solid var(--line-strong); color:var(--ink-2);
+  font:inherit; font-size:12.5px; padding:3px 10px; border-radius:99px; cursor:pointer;
+}
+.figtog:hover{border-color:var(--accent); color:var(--accent)}
+
 @media (max-width:420px){
   .timer .cd{font-size:28px}
   .home{font-size:11px}
@@ -237,8 +288,7 @@ JS = """
   try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
   function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
 
-  var boxes = Array.prototype.slice.call(document.querySelectorAll('.row input[type=checkbox]'));
-  var rds   = Array.prototype.slice.call(document.querySelectorAll('.rd'));
+  var boxes = [], rds = [];
   var barEl = document.querySelector('.bar i');
   var nEl   = document.querySelector('.prog .n');
 
@@ -250,23 +300,40 @@ JS = """
     if (nEl) nEl.textContent = done + ' / ' + total;
   }
 
-  boxes.forEach(function(b){
-    if (state[b.id]) b.checked = true;
-    b.addEventListener('change', function(){
-      if (b.checked) state[b.id] = 1; else delete state[b.id];
-      save(); refresh();
-    });
-  });
+  function enlaza(){
+    boxes = Array.prototype.slice.call(document.querySelectorAll('.row input[type=checkbox]'));
+    rds   = Array.prototype.slice.call(document.querySelectorAll('.rd'));
 
-  rds.forEach(function(r){
-    if (state[r.id]) r.setAttribute('aria-pressed','true');
-    r.addEventListener('click', function(){
-      var on = r.getAttribute('aria-pressed') === 'true';
-      r.setAttribute('aria-pressed', on ? 'false' : 'true');
-      if (on) delete state[r.id]; else state[r.id] = 1;
-      save(); refresh();
+    boxes.forEach(function(b){
+      if (b.dataset.lig) return;
+      b.dataset.lig = '1';
+      if (state[b.id]) b.checked = true;
+      b.addEventListener('change', function(){
+        if (b.checked) state[b.id] = 1; else delete state[b.id];
+        save(); refresh();
+      });
     });
-  });
+
+    rds.forEach(function(r){
+      if (r.dataset.lig) return;
+      r.dataset.lig = '1';
+      if (state[r.id]) r.setAttribute('aria-pressed','true');
+      r.addEventListener('click', function(){
+        var on = r.getAttribute('aria-pressed') === 'true';
+        r.setAttribute('aria-pressed', on ? 'false' : 'true');
+        if (on) delete state[r.id]; else state[r.id] = 1;
+        save(); refresh();
+      });
+    });
+
+    document.querySelectorAll('.restbtn').forEach(function(b){
+      if (b.dataset.lig) return;
+      b.dataset.lig = '1';
+      b.addEventListener('click', function(){ start(parseInt(b.dataset.sec,10) || 60, b.dataset.label); });
+    });
+
+    refresh();
+  }
 
   var rs = document.querySelector('.reset');
   if (rs) rs.addEventListener('click', function(){
@@ -325,9 +392,6 @@ JS = """
     }, 1000);
   }
 
-  document.querySelectorAll('.restbtn').forEach(function(b){
-    b.addEventListener('click', function(){ start(parseInt(b.dataset.sec,10) || 60, b.dataset.label); });
-  });
   var plus = t && t.querySelector('[data-add]');
   if (plus) plus.addEventListener('click', function(){ left += 15; span = Math.max(span, left); paint(); });
   var sk = t && t.querySelector('[data-stop]');
@@ -346,7 +410,28 @@ JS = """
     });
   }
 
-  refresh();
+  var ft = document.querySelector('.figtog');
+  if (ft) {
+    var R = document.documentElement, KF = 'rutina:sinfig';
+    var off = false;
+    try { off = localStorage.getItem(KF) === '1'; } catch(e){}
+    var pinta = function(){
+      R.classList.toggle('sin-fig', off);
+      ft.textContent = off ? 'Mostrar dibujos' : 'Ocultar dibujos';
+    };
+    pinta();
+    ft.addEventListener('click', function(){
+      off = !off;
+      try { localStorage.setItem(KF, off ? '1' : '0'); } catch(e){}
+      pinta();
+    });
+  }
+
+  window.RUTINA_ENLAZA = function(){
+    try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+    enlaza();
+  };
+  enlaza();
 })();
 """
 
@@ -668,10 +753,12 @@ def topbar(active):
     for slug, nombre, letra in DIAS:
         cur = ' aria-current="page"' if slug == active else ''
         chips.append('<a href="%s.html"%s title="%s">%s</a>' % (slug, cur, nombre, letra))
+    dado = ('<a href="aleatoria.html"%s class="dado" title="Rutina aleatoria">&#9861;</a>'
+            % (' aria-current="page"' if active == "aleatoria" else ''))
     return ('<header class="top"><div class="top-in">'
             '<a class="home" href="index.html">&larr; Índice</a>'
-            '<nav class="days" aria-label="Días de la semana">%s</nav>'
-            '</div></header>') % ("".join(chips))
+            '<nav class="days" aria-label="Días de la semana">%s%s</nav>'
+            '</div></header>') % ("".join(chips), dado)
 
 TIMER = """<div class="timer" role="status" aria-live="polite">
   <div class="timer-in">
@@ -689,17 +776,37 @@ def render_item(bi, ii, x, checkbox=True):
     ident = "b%d-i%d" % (bi, ii)
     code = ('<span class="code">%s</span>' % E(x["code"])) if x.get("code") else ''
     load = ('<span>%s</span>' % E(x["load"])) if x.get("load") else ''
-    how = ''
+    fi = fichas.buscar(x["n"]) or {}
+
+    figura = ''
+    if fi.get("fig") and fi["fig"] in dibujos.DIB:
+        figura = '<div class="figbox">%s</div>' % dibujos.DIB[fi["fig"]]
+
+    cues = []
+    if fi.get("cad"):
+        cues.append('<span class="cue cad"><b>Cadencia</b>%s</span>' % E(fi["cad"]))
+    if fi.get("hasta"):
+        cues.append('<span class="cue hasta"><b>Hasta dónde</b>%s</span>' % E(fi["hasta"]))
+    cues = '<div class="cues">%s</div>' % "".join(cues) if cues else ''
+
+    partes = []
     if x.get("how"):
-        how = ('<details class="how"><summary>Cómo se hace</summary><p>%s</p></details>' % x["how"])
+        partes.append('<p>%s</p>' % x["how"])
+    if fi.get("facil"):
+        partes.append('<p><span class="tag">Más fácil</span>%s</p>' % E(fi["facil"]))
+    if fi.get("error"):
+        partes.append('<p><span class="tag err">Error común</span>%s</p>' % E(fi["error"]))
+    how = ('<details class="how"><summary>Cómo se hace</summary>%s</details>'
+           % "".join(partes)) if partes else ''
+
     return (
       '<li>'
       '<label class="row" for="%s">'
       '<input type="checkbox" id="%s">'
       '<span class="txt"><span class="nm">%s%s</span>'
       '<span class="sub"><span class="d">%s</span>%s</span></span>'
-      '</label>%s</li>'
-    ) % (ident, ident, code, E(x["n"]), E(x["d"]), load, how)
+      '</label>%s%s%s</li>'
+    ) % (ident, ident, code, E(x["n"]), E(x["d"]), load, figura, cues, how)
 
 def render_block(bi, b):
     tag = '<span class="kind">%s</span>' % E(b["tag"]) if b.get("tag") else ''
@@ -746,6 +853,7 @@ def render_day(slug, d):
       '<p class="focus">%s</p>'
       '<div class="meta"><span class="chip">%d minutos</span><span class="chip load">%s</span></div>'
       '<div class="prog"><span class="bar"><i></i></span><span class="n num">0 / 0</span>'
+      '<button type="button" class="figtog">Ocultar dibujos</button>'
       '<button type="button" class="reset">Reiniciar</button></div>'
       '</header>'
       '%s%s%s</div>%s'
@@ -775,6 +883,8 @@ INDEX_CSS_EXTRA = """
 }
 .card:hover{border-color:var(--accent); transform:translateY(-1px)}
 .card.rest{border-top-color:var(--steel)}
+.card.alea{border-top-color:var(--steel); border-style:dashed; border-top-style:solid}
+.card.alea .load{color:var(--steel)}
 .card .d{font-family:Oswald,sans-serif; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3)}
 .card h3{font-size:20px; text-transform:uppercase; margin:2px 0 6px}
 .card p{margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.4}
@@ -854,6 +964,21 @@ def render_index():
     rt = "".join('<tr><td class="k">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>'
                  % tuple(E(x) for x in r) for r in rot)
 
+    leer_filas = [
+      ("Cadencia", "Tres números: segundos para <strong>bajar</strong>, segundos de "
+                   "<strong>pausa</strong> abajo y segundos para <strong>subir</strong>. "
+                   "<strong>3-1-1</strong> es bajar en tres, parar uno, subir en uno. "
+                   "Bajar lento es la mitad del trabajo y casi nadie lo hace."),
+      ("Hasta dónde", "El punto exacto donde termina el recorrido. Más abajo no siempre "
+                      "es mejor: en varios ejercicios pasarse es justo lo que lesiona."),
+      ("El dibujo", "Posición 1 y posición 2. La línea punteada roja marca la altura o la "
+                    "alineación que tienes que buscar."),
+      ("Cuántas veces", "Cada músculo se trabaja una vez por semana en su día fuerte y "
+                        "aparece de refilón en otros dos. Por eso puedes entrenar a diario "
+                        "sin quemarte."),
+    ]
+    leer = "".join('<tr><td class="k">%s</td><td>%s</td></tr>' % (E(a), b) for a, b in leer_filas)
+
     reglas = [
       "<strong>Tri-serie</strong> quiere decir que haces A1, A2 y A3 seguidos, sin descanso entre ellos. Al terminar los tres, descansas. Eso es una ronda.",
       "<strong>Ritmo:</strong> baja el peso en 2 segundos, súbelo en 1. Sin rebotes.",
@@ -874,6 +999,17 @@ def render_index():
       'pierna, pecho, espalda, brazo y core, pero cada día le toca una parte distinta de cada área.</p>'
       '</header>'
       '<div class="grid">%s</div>'
+      '<div class="grid" style="margin-top:10px">'
+      '<a class="card alea" href="aleatoria.html"><span class="d">Cuando quieras</span>'
+      '<h3>Aleatoria</h3><p>Treinta minutos armados al azar con los mismos ejercicios, '
+      'para los días en que la rutina fija te aburre. Con HIIT si lo pides.</p>'
+      '<div class="load">Generar &rarr;</div></a></div>'
+      '<section class="sec"><h2>Cómo leer cada ejercicio</h2>'
+      '<p class="bnote">Cada ejercicio trae un dibujo con la posición de inicio y la de '
+      'llegada, y dos datos que valen tanto como las repeticiones.</p>'
+      '<div class="tw"><table><tbody>%s</tbody></table></div>'
+      '<p class="bnote">Y dentro de <strong>Cómo se hace</strong> están la técnica, la '
+      'versión más fácil para arrancar y el error que casi todo el mundo comete.</p></section>'
       '<section class="sec"><h2>Tu equipo</h2><div class="tw"><table>'
       '<tbody>%s</tbody></table></div></section>'
       '<section class="sec"><h2>Configuraciones de carga</h2>'
@@ -896,7 +1032,7 @@ def render_index():
       'a un profesional. Si tienes una lesión, una condición cardíaca o llevas mucho tiempo sin moverte, '
       'habla con un médico o un fisioterapeuta antes de arrancar.</p>'
       '</div>'
-    ) % (cards, eq, cg, rt, rl)
+    ) % (cards, leer, eq, cg, rt, rl)
 
     return (HEAD.format(title="Rutina del tapete", css=CSS + INDEX_CSS_EXTRA)
             + '<header class="top"><div class="top-in">'
@@ -1065,3 +1201,174 @@ with open(os.path.join(OUT, "progresion.html"), "w", encoding="utf-8") as f:
     f.write(render_prog())
 
 print("ok:", sorted(os.listdir(OUT)))
+
+
+
+# ---------------------------------------------------------------- aleatoria
+
+CAT = fichas.catalogo()
+CATALOGO = {}
+for cat, lista in CAT.items():
+    CATALOGO[cat] = [dict(n=d["nombre"], d=d["reps"] or "", carga=d["carga"] or "",
+                          cad=d["cad"] or "", hasta=d["hasta"] or "",
+                          facil=d["facil"] or "", error=d["error"] or "",
+                          fig=dibujos.DIB.get(d["fig"], ""))
+                     for d in lista]
+
+ALEA_CSS = INDEX_CSS_EXTRA + """
+.dados{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:18px}
+.bigbtn{
+  flex:1; min-width:190px; padding:14px 18px; border-radius:var(--r); cursor:pointer;
+  background:var(--accent); color:var(--on-accent); border:none;
+  font-family:Oswald,sans-serif; font-size:16px; letter-spacing:.08em; text-transform:uppercase;
+}
+.bigbtn:hover{filter:brightness(1.08)}
+.opt{display:flex; align-items:center; gap:8px; font-size:14px; color:var(--ink-2); cursor:pointer}
+.opt input{width:19px; height:19px; accent-color:var(--accent); cursor:pointer}
+#salida:empty::after{
+  content:"Dale a generar y te armo una rutina de 30 minutos con lo que tienes en casa.";
+  display:block; margin-top:22px; padding:22px; text-align:center; color:var(--ink-3);
+  border:1.5px dashed var(--line-strong); border-radius:var(--r); font-size:15px;
+}
+"""
+
+ALEA_JS = """
+var CAT = __CATALOGO__;
+
+function elige(cat, n, usados){
+  var pool = (CAT[cat] || []).filter(function(x){ return usados.indexOf(x.n) < 0; });
+  var out = [];
+  for (var i = 0; i < n && pool.length; i++){
+    var k = Math.floor(Math.random() * pool.length);
+    out.push(pool[k]); usados.push(pool[k].n); pool.splice(k, 1);
+  }
+  return out;
+}
+
+function arma(conHiit){
+  var u = [], piernaA = Math.random() < 0.5 ? 'pierna_rodilla' : 'pierna_cadera';
+  var b = [];
+  b.push({ nombre:'Calentamiento', tag:'Seguido', mins:4, rondas:0, rest:0,
+           nota:'Uno detrás de otro, sin peso y sin descanso.',
+           ej: elige('calent', 5, u) });
+  b.push({ nombre:'Bloque A', tag:'Tri-serie', mins: conHiit ? 11 : 13, rondas:3, rest:75,
+           nota:'A1 → A2 → A3 seguidos. Al terminar los tres, descansas y repites.',
+           ej: elige(piernaA,1,u).concat(elige('empuje',1,u), elige('jalon',1,u)) });
+  b.push({ nombre:'Bloque B', tag:'Tri-serie', mins: conHiit ? 7 : 9, rondas:3, rest:60,
+           nota:'', ej: elige('pierna_acc',1,u).concat(elige('brazo',1,u), elige('core',1,u)) });
+  if (conHiit){
+    b.push({ nombre:'HIIT · AMRAP 5 min', tag:'Tantas rondas como puedas', mins:5,
+             rondas:0, rest:0,
+             nota:'Cinco minutos de reloj. Descansas cuando lo necesites y sigues.',
+             ej: elige('hiit', 3, u) });
+  }
+  b.push({ nombre:'Estiramiento', tag:'Sostenido', mins: conHiit ? 3 : 4, rondas:0, rest:0,
+           nota:'', ej: elige('estiram', conHiit ? 3 : 4, u) });
+  return b;
+}
+
+function esc(t){
+  return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+
+function pinta(bloques){
+  var h = '', bi = 0;
+  bloques.forEach(function(b){
+    h += '<section class="block"><div class="bhead"><h2>' + esc(b.nombre) + '</h2>' +
+         '<span class="kind">' + esc(b.tag) + '</span>' +
+         '<span class="t">' + b.mins + ' min</span></div>';
+    if (b.nota) h += '<p class="bnote">' + esc(b.nota) + '</p>';
+    if (b.rondas > 1){
+      h += '<div class="rounds"><span class="lb">Rondas</span>';
+      for (var r = 1; r <= b.rondas; r++)
+        h += '<button type="button" class="rd" id="a' + bi + '-r' + r + '" aria-pressed="false">' + r + '</button>';
+      h += '</div>';
+    }
+    h += '<ul class="ex">';
+    b.ej.forEach(function(x, ii){
+      var id = 'a' + bi + '-i' + ii;
+      var codigo = b.rondas > 1 ? String.fromCharCode(64 + bi) + (ii + 1) : '';
+      h += '<li><label class="row" for="' + id + '"><input type="checkbox" id="' + id + '">' +
+           '<span class="txt"><span class="nm">' +
+           (codigo ? '<span class="code">' + codigo + '</span>' : '') + esc(x.n) + '</span>' +
+           '<span class="sub"><span class="d">' + esc(x.d) + '</span>' +
+           (x.carga ? '<span>' + esc(x.carga) + '</span>' : '') + '</span></span></label>';
+      if (x.fig) h += '<div class="figbox">' + x.fig + '</div>';
+      var cues = '';
+      if (x.cad)   cues += '<span class="cue cad"><b>Cadencia</b>' + esc(x.cad) + '</span>';
+      if (x.hasta) cues += '<span class="cue hasta"><b>Hasta dónde</b>' + esc(x.hasta) + '</span>';
+      if (cues) h += '<div class="cues">' + cues + '</div>';
+      var det = '';
+      if (x.facil) det += '<p><span class="tag">Más fácil</span>' + esc(x.facil) + '</p>';
+      if (x.error) det += '<p><span class="tag err">Error común</span>' + esc(x.error) + '</p>';
+      if (det) h += '<details class="how"><summary>Cómo se hace</summary>' + det + '</details>';
+      h += '</li>';
+    });
+    h += '</ul>';
+    if (b.rest) h += '<button type="button" class="restbtn" data-sec="' + b.rest +
+                     '" data-label="Descanso entre rondas">Descanso ' + b.rest + ' s</button>';
+    h += '</section>';
+    bi++;
+  });
+  document.getElementById('salida').innerHTML = h;
+  if (window.RUTINA_ENLAZA) window.RUTINA_ENLAZA();
+  window.scrollTo({ top: document.getElementById('salida').offsetTop - 70, behavior: 'smooth' });
+}
+
+(function(){
+  var hiit = document.getElementById('con-hiit');
+  var KEY = 'rutina:aleatoria';
+  try {
+    var g = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (g && g.bloques){ pinta(g.bloques); if (hiit) hiit.checked = !!g.hiit; }
+  } catch(e){}
+
+  document.getElementById('generar').addEventListener('click', function(){
+    var conHiit = hiit && hiit.checked;
+    var b = arma(conHiit);
+    pinta(b);
+    try { localStorage.setItem(KEY, JSON.stringify({ bloques: b, hiit: conHiit })); } catch(e){}
+    try { localStorage.removeItem('rutina:aleatoria-estado'); } catch(e){}
+  });
+})();
+"""
+
+
+def render_alea():
+    body = (
+      '<div class="wrap">'
+      '<header class="hero">'
+      '<p class="eyebrow">Para no aburrirte</p><h1>Rutina aleatoria</h1>'
+      '<p class="lede">Treinta minutos armados al azar con los mismos ejercicios de la '
+      'semana. Respeta la estructura: una pierna, un empuje, un jalón, un brazo y core. '
+      'Nunca te va a salir dos veces la misma.</p>'
+      '<div class="dados">'
+      '<button type="button" class="bigbtn" id="generar">Generar rutina</button>'
+      '<label class="opt" for="con-hiit"><input type="checkbox" id="con-hiit">'
+      'Con HIIT al final</label>'
+      '</div>'
+      '<div class="prog"><span class="bar"><i></i></span><span class="n num">0 / 0</span>'
+      '<button type="button" class="figtog">Ocultar dibujos</button>'
+      '<button type="button" class="reset">Reiniciar</button></div>'
+      '</header>'
+      '<div id="salida"></div>'
+      '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
+      '<span class="v">Índice</span></a>'
+      '<a class="next" href="progresion.html"><span class="k">Ver</span>'
+      '<span class="v">Progresión</span></a></nav>'
+      '</div>' + TIMER
+    )
+    js = ALEA_JS.replace("__CATALOGO__", json.dumps(CATALOGO, ensure_ascii=False).replace("</", "<\\/"))
+    return (HEAD.format(title="Rutina aleatoria — Rutina del tapete", css=CSS + ALEA_CSS)
+            + topbar("aleatoria") + body
+            + '<script>window.PAGE_KEY="aleatoria-estado";</script>'
+            + '<script>%s</script>' % JS
+            + '<script>%s</script>' % js)
+
+
+with open(os.path.join(OUT, "aleatoria.html"), "w", encoding="utf-8") as f:
+    f.write(render_alea())
+
+print("aleatoria ok ·", sum(len(v) for v in CATALOGO.values()), "ejercicios en el catálogo")
