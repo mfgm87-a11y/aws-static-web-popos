@@ -4,10 +4,15 @@ Siete rutinas de 30 minutos, una para cada día. Todos los días se trabaja
 pierna, pecho, espalda, brazo y core, pero cada día le toca una parte distinta
 de cada área.
 
-**Para usarlas:** <https://claude.ai/artifact/5dmToemYQhgZSRNAAxqaW6>
+**En línea:** <https://claude.ai/artifact/5dmToemYQhgZSRNAAxqaW6>
 
-Esa página se abre en el celular al lado del tapete. Tiene casillas para ir
-marcando ejercicios, contador de rondas y cronómetro de descanso.
+**Para el celular, sin internet:** `rutina-del-tapete.html`, un solo archivo de
+1 MB con todo adentro. Se descarga y se abre con cualquier navegador. Lo único
+que pide la red son las tipografías; sin conexión usa las del sistema y se ve
+igual de bien.
+
+Las dos versiones tienen casillas para ir marcando, contador de rondas y
+cronómetro. Lo marcado se guarda en el navegador del teléfono.
 
 ---
 
@@ -28,13 +33,14 @@ progresión.
 | `web/banco.html` | Los 97 ejercicios con su dibujo, con buscador |
 | `web/guia.html` | Equipo, cargas, cómo leer una ficha, reglas |
 | `web/progresion.html` | Cuándo subir peso y tabla de registro |
+| `rutina-del-tapete.html` | **Todo en un solo archivo**, para descargar |
 | `build.py` | Rutinas de la semana y plantilla de todas las páginas |
 | `secciones.py` | Rutinas de abdominales y pecho |
 | `figuras.py` | Motor de dibujo: figuras de palo en SVG |
 | `dibujos.py` | Una pose por ejercicio (89 dibujos) |
 | `fichas.py` | Cadencia, hasta dónde, versión fácil y error común |
 
-Las páginas de `web/` son generadas. Para regenerarlas:
+Las páginas de `web/` y el archivo único son generados. Para regenerarlos:
 
 ```bash
 python3 build.py
@@ -48,6 +54,11 @@ Dónde tocar según lo que quieras cambiar:
 - **Un dibujo** → `DIB[...]` en `dibujos.py`. Las poses se definen por coordenadas
   (dónde va el tobillo, dónde la muñeca) y `figuras.py` resuelve los ángulos.
 - **Qué ejercicios entran al generador aleatorio** → el campo `cat` de cada ficha
+
+El archivo único se arma al final de `build.py`: toma las páginas ya generadas,
+les recorta la barra y el contenido, les pone prefijo a los `id` para que no
+choquen entre secciones, y las junta con un enrutador por `#hash` y un solo
+cronómetro compartido.
 
 ### Hoja de contacto de los dibujos
 

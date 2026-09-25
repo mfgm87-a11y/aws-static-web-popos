@@ -1232,6 +1232,7 @@ ALEA_CSS = INDEX_CSS_EXTRA + """
 
 ALEA_JS = """
 var CAT = __CATALOGO__;
+function raizSalida(){ return document.querySelector('.salida'); }
 
 function elige(cat, n, usados){
   var pool = (CAT[cat] || []).filter(function(x){ return usados.indexOf(x.n) < 0; });
@@ -1310,9 +1311,9 @@ function pinta(bloques){
     h += '</section>';
     bi++;
   });
-  document.getElementById('salida').innerHTML = h;
+  raizSalida().innerHTML = h;
   if (window.RUTINA_ENLAZA) window.RUTINA_ENLAZA();
-  window.scrollTo({ top: document.getElementById('salida').offsetTop - 70, behavior: 'smooth' });
+  window.scrollTo({ top: raizSalida().offsetTop - 70, behavior: 'smooth' });
 }
 
 (function(){
@@ -1351,7 +1352,7 @@ def render_alea():
       '<button type="button" class="figtog">Ocultar dibujos</button>'
       '<button type="button" class="reset">Reiniciar</button></div>'
       '</header>'
-      '<div id="salida"></div>'
+      '<div id="salida" class="salida"></div>'
       '<nav class="pager"><a href="index.html"><span class="k">Volver</span>'
       '<span class="v">Menú</span></a>'
       '<a class="next" href="banco.html"><span class="k">Ver</span>'
@@ -1718,7 +1719,7 @@ GRUPOS = [
   ("jalon",          "Jalón · espalda"),
   ("brazo",          "Brazo"),
   ("core",           "Abdomen"),
-  ("core_obl",       "Abdomen · costados"),
+  ("core_obl",       "Abdomen · costados y oblicuos"),
   ("core_bajo",      "Abdomen · bajo"),
   ("hiit",           "Quema"),
   ("calent",         "Calentamiento y movilidad"),
@@ -1755,8 +1756,9 @@ BANCO_JS = """
     var total = 0;
     document.querySelectorAll('.gr').forEach(function(g){
       var n = 0;
+      var grupo = q && sin(g.querySelector('h2').textContent).indexOf(q) >= 0;
       g.querySelectorAll('li[data-nombre]').forEach(function(li){
-        var ok = !q || sin(li.dataset.nombre).indexOf(q) >= 0;
+        var ok = !q || grupo || sin(li.dataset.nombre).indexOf(q) >= 0;
         li.hidden = !ok;
         if (ok) n++;
       });
@@ -1840,3 +1842,302 @@ with open(os.path.join(OUT, "banco.html"), "w", encoding="utf-8") as f:
     f.write(render_banco())
 
 print("guía y banco ok")
+
+
+# ---------------------------------------------------------------- un solo archivo
+# Version de una sola pagina para descargar y usar sin internet.
+
+PAGINAS = ["index", "dias", "dia-1", "dia-2", "dia-3", "dia-4", "dia-5", "dia-6",
+           "dia-7", "aleatoria", "abdominales", "pecho", "banco", "guia", "progresion"]
+
+# ids que hay que separar por seccion para que no choquen entre si
+# (los de dentro de los SVG se dejan quietos: el marcador de flecha es el mismo)
+RE_ID = re.compile(r'\b(id|for)="((?:b\d+-[ir]\d+|w\d+-d\d+-[prn]|salida|generar|con-hiit|q-banco))"')
+
+UNICO_CSS = """
+.pg[hidden]{display:none !important}
+.volver{
+  position:fixed; right:14px; bottom:calc(14px + env(safe-area-inset-bottom,0px)); z-index:55;
+  width:46px; height:46px; border-radius:50%; border:1px solid var(--line-strong);
+  background:var(--surface); color:var(--ink-2); box-shadow:var(--shadow);
+  font-size:20px; line-height:1; cursor:pointer; display:none;
+}
+.volver:hover{border-color:var(--accent); color:var(--accent)}
+.volver.on{display:block}
+.cronometrando .volver{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+"""
+
+UNICO_JS = r"""
+(function(){
+  var secs = Array.prototype.slice.call(document.querySelectorAll('.pg'));
+  var crono = document.querySelector('.timer');
+  var volver = document.querySelector('.volver');
+
+  /* ---------------- cronometro, uno para toda la pagina ---------------- */
+  var cd = crono && crono.querySelector('.cd');
+  var tb = crono && crono.querySelector('.tbar i');
+  var tl = crono && crono.querySelector('.lb');
+  var iv = null, left = 0, span = 0, lock = null;
+
+  function fmt(s){ var m = Math.floor(s/60), r = s%60; return m ? m+':'+(r<10?'0':'')+r : ''+r; }
+  function pinta(){ if(cd) cd.textContent = fmt(left); if(tb) tb.style.width = span ? (left/span*100)+'%' : '0%'; }
+  function beep(){
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+      var c = new AC(), o = c.createOscillator(), g = c.createGain();
+      o.type='sine'; o.frequency.value=660;
+      g.gain.setValueAtTime(.001,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.3,c.currentTime+.02);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.55);
+      o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+.6);
+      setTimeout(function(){ try{c.close();}catch(e){} }, 900);
+    }catch(e){}
+  }
+  function parar(){ if(iv) clearInterval(iv); iv=null;
+                    if(crono) crono.classList.remove('on');
+                    document.documentElement.classList.remove('cronometrando');
+                    if(lock){ try{lock.release();}catch(e){} lock=null; } }
+  function arranca(seg, et){
+    if(!crono) return;
+    if(iv) clearInterval(iv);
+    span = left = seg; if(tl) tl.textContent = et || 'Descanso';
+    crono.classList.add('on');
+    document.documentElement.classList.add('cronometrando'); pinta();
+    iv = setInterval(function(){ left--; pinta();
+      if(left<=0){ clearInterval(iv); iv=null; beep(); setTimeout(parar,1600); } }, 1000);
+  }
+  if (crono){
+    var mas = crono.querySelector('[data-add]');
+    if (mas) mas.addEventListener('click', function(){ left+=15; span=Math.max(span,left); pinta(); });
+    var ya = crono.querySelector('[data-stop]');
+    if (ya) ya.addEventListener('click', parar);
+  }
+
+  /* ---------------- progreso de la seccion visible ---------------- */
+  var raiz = null, clave = 'x', st = {}, cajas = [], rondas = [];
+
+  function guarda(){ try{ localStorage.setItem('rutina:'+clave, JSON.stringify(st)); }catch(e){} }
+  function ambito(){ return (raiz && raiz.querySelector('.rutina:not([hidden])')) || raiz || document; }
+
+  function refresca(){
+    var tot = cajas.length + rondas.length, ok = 0;
+    cajas.forEach(function(b){ if(b.checked) ok++; });
+    rondas.forEach(function(r){ if(r.getAttribute('aria-pressed')==='true') ok++; });
+    var bar = raiz && raiz.querySelector('.bar i'), n = raiz && raiz.querySelector('.prog .n');
+    if (bar) bar.style.width = tot ? Math.round(ok/tot*100)+'%' : '0%';
+    if (n) n.textContent = ok + ' / ' + tot;
+  }
+
+  function enlaza(){
+    if (!raiz) return;
+    var a = ambito();
+    cajas  = Array.prototype.slice.call(a.querySelectorAll('.row input[type=checkbox]'));
+    rondas = Array.prototype.slice.call(a.querySelectorAll('.rd'));
+
+    cajas.forEach(function(b){
+      if (st[b.id]) b.checked = true;
+      if (b.dataset.lig) return;
+      b.dataset.lig = '1';
+      b.addEventListener('change', function(){
+        if (b.checked) st[b.id] = 1; else delete st[b.id];
+        guarda(); refresca();
+      });
+    });
+    rondas.forEach(function(r){
+      r.setAttribute('aria-pressed', st[r.id] ? 'true' : 'false');
+      if (r.dataset.lig) return;
+      r.dataset.lig = '1';
+      r.addEventListener('click', function(){
+        var on = r.getAttribute('aria-pressed')==='true';
+        r.setAttribute('aria-pressed', on?'false':'true');
+        if (on) delete st[r.id]; else st[r.id] = 1;
+        guarda(); refresca();
+      });
+    });
+    raiz.querySelectorAll('.restbtn').forEach(function(b){
+      if (b.dataset.lig) return;
+      b.dataset.lig = '1';
+      b.addEventListener('click', function(){ arranca(parseInt(b.dataset.sec,10)||60, b.dataset.label); });
+    });
+    refresca();
+  }
+  window.RUTINA_ENLAZA = enlaza;
+
+  /* ---------------- dibujos on/off, global ---------------- */
+  var KF = 'rutina:sinfig', sinFig = false;
+  try{ sinFig = localStorage.getItem(KF)==='1'; }catch(e){}
+  function pintaFig(){
+    document.documentElement.classList.toggle('sin-fig', sinFig);
+    document.querySelectorAll('.figtog').forEach(function(b){
+      b.textContent = sinFig ? 'Mostrar dibujos' : 'Ocultar dibujos';
+    });
+  }
+  document.querySelectorAll('.figtog').forEach(function(b){
+    b.addEventListener('click', function(){
+      sinFig = !sinFig; try{ localStorage.setItem(KF, sinFig?'1':'0'); }catch(e){}
+      pintaFig();
+    });
+  });
+  pintaFig();
+
+  /* ---------------- reiniciar, por seccion ---------------- */
+  document.querySelectorAll('.reset').forEach(function(r){
+    r.addEventListener('click', function(){
+      cajas.forEach(function(b){ b.checked=false; delete st[b.id]; });
+      rondas.forEach(function(x){ x.setAttribute('aria-pressed','false'); delete st[x.id]; });
+      guarda(); refresca();
+    });
+  });
+
+  /* ---------------- selector de rutina (abdominales y pecho) ---------------- */
+  secs.forEach(function(sec){
+    var bs = Array.prototype.slice.call(sec.querySelectorAll('.picker button'));
+    if (!bs.length) return;
+    var K = 'rutina:sel:' + sec.dataset.key;
+    function muestra(id, g){
+      sec.querySelectorAll('.rutina').forEach(function(r){ r.hidden = (r.dataset.rid !== id); });
+      bs.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.rid===id ? 'true':'false'); });
+      if (g){ try{ localStorage.setItem(K, id); }catch(e){} }
+      if (sec === raiz) enlaza();
+    }
+    var ini = bs[0].dataset.rid;
+    try{ var g = localStorage.getItem(K);
+         if (g && sec.querySelector('.rutina[data-rid="'+g+'"]')) ini = g; }catch(e){}
+    muestra(ini, false);
+    bs.forEach(function(b){
+      b.addEventListener('click', function(){
+        muestra(b.dataset.rid, true);
+        var r = sec.querySelector('.rutina:not([hidden])');
+        if (r) window.scrollTo({ top: r.offsetTop - 70, behavior:'smooth' });
+      });
+    });
+    var v = sec.querySelector('details.verdad');
+    if (v){
+      var KV = 'rutina:verdad:' + sec.dataset.key;
+      try{ if (localStorage.getItem(KV)==='0') v.open = false; }catch(e){}
+      v.addEventListener('toggle', function(){
+        try{ localStorage.setItem(KV, v.open?'1':'0'); }catch(e){}
+      });
+    }
+  });
+
+  /* ---------------- buscador del banco ---------------- */
+  (function(){
+    var sec = document.querySelector('.pg[data-key="banco"]');
+    if (!sec) return;
+    var inp = sec.querySelector('.buscar'); if (!inp) return;
+    var sin = function(t){ return t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); };
+    inp.addEventListener('input', function(){
+      var q = sin(inp.value.trim()), tot = 0;
+      sec.querySelectorAll('.gr').forEach(function(g){
+        var n = 0;
+        var grupo = q && sin(g.querySelector('h2').textContent).indexOf(q) >= 0;
+        g.querySelectorAll('li[data-nombre]').forEach(function(li){
+          var ok = !q || grupo || sin(li.dataset.nombre).indexOf(q) >= 0;
+          li.hidden = !ok; if (ok) n++;
+        });
+        g.hidden = n === 0; tot += n;
+      });
+      sec.querySelector('.vacio').hidden = tot > 0;
+    });
+  })();
+
+  /* ---------------- registro de la progresion ---------------- */
+  (function(){
+    var sec = document.querySelector('.pg[data-key="progresion"]'); if (!sec) return;
+    var K = 'rutina:registro', d = {};
+    try{ d = JSON.parse(localStorage.getItem(K)||'{}')||{}; }catch(e){}
+    sec.querySelectorAll('.reg input').forEach(function(i){
+      if (d[i.id] != null) i.value = d[i.id];
+      i.addEventListener('input', function(){
+        d[i.id] = i.value;
+        try{ localStorage.setItem(K, JSON.stringify(d)); }catch(e){}
+      });
+    });
+    var b = sec.querySelector('.clearreg');
+    if (b) b.addEventListener('click', function(){
+      d = {}; try{ localStorage.removeItem(K); }catch(e){}
+      sec.querySelectorAll('.reg input').forEach(function(i){ i.value=''; });
+    });
+  })();
+
+  /* ---------------- navegacion entre secciones ---------------- */
+  function ir(id, empujar){
+    var sec = document.querySelector('.pg[data-key="'+id+'"]') || secs[0];
+    secs.forEach(function(s){ s.hidden = (s !== sec); });
+    raiz = sec; clave = sec.dataset.key;
+    try{ st = JSON.parse(localStorage.getItem('rutina:'+clave)||'{}')||{}; }catch(e){ st = {}; }
+    parar();
+    enlaza();
+    if (volver) volver.classList.toggle('on', clave !== 'index');
+    if (empujar && location.hash !== '#'+clave){
+      try{ history.pushState(null,'','#'+clave); }catch(e){ location.hash = clave; }
+    }
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener('click', function(ev){
+    var a = ev.target.closest && ev.target.closest('a[href^="#"]');
+    if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    if (!document.querySelector('.pg[data-key="'+id+'"]')) return;
+    ev.preventDefault();
+    ir(id, true);
+  });
+  window.addEventListener('popstate', function(){ ir((location.hash||'#index').slice(1), false); });
+  if (volver) volver.addEventListener('click', function(){ ir('index', true); });
+
+  ir((location.hash||'#index').slice(1), false);
+})();
+"""
+
+
+def _cuerpo(archivo, clave):
+    """Saca la barra y el contenido de una pagina ya generada."""
+    txt = open(os.path.join(OUT, archivo), encoding="utf-8").read()
+    ini = txt.index('<header class="top">')
+    fin = txt.find("<script", ini)
+    if fin < 0:
+        fin = len(txt)
+    html = txt[ini:fin]
+    html = html.replace(TIMER, "")                       # el cronometro va aparte
+    html = re.sub(r'href="([a-z0-9-]+)\.html"', r'href="#\1"', html)
+    html = RE_ID.sub(lambda m: '%s="%s__%s"' % (m.group(1), clave, m.group(2)), html)
+    return '<section class="pg" data-key="%s" hidden>%s</section>' % (clave, html)
+
+
+TODO_CSS = (CSS + INDEX_CSS_EXTRA + MENU_CSS + SEC_CSS + BANCO_CSS + PROG_CSS
+            + ALEA_CSS + UNICO_CSS)
+
+alea_js = (ALEA_JS
+           .replace("__CATALOGO__",
+                    json.dumps(CATALOGO, ensure_ascii=False).replace("</", "<\\/"))
+           .replace("document.getElementById('generar')", "document.querySelector('.bigbtn')")
+           .replace("document.getElementById('con-hiit')", "document.querySelector('.opt input')"))
+
+unico = (
+    '<!doctype html><html lang="es"><head><meta charset="utf-8">'
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+    '<title>Rutina del tapete</title>'
+    '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
+    'family=Oswald:wght@400;500;600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400'
+    '&display=swap">'
+    '<style>:root{padding-top:env(safe-area-inset-top,0px);'
+    'padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}'
+    'body{margin:0}img{max-width:100%}[hidden]{display:none!important}'
+    + TODO_CSS + '</style></head><body>'
+    + "".join(_cuerpo(("index" if p == "index" else p) + ".html", p) for p in PAGINAS)
+    + TIMER
+    + '<button type="button" class="volver" title="Volver al menú" aria-label="Volver al menú">&#9737;</button>'
+    + '<script>' + alea_js + '</script>'
+    + '<script>' + UNICO_JS + '</script>'
+    + '</body></html>'
+)
+
+RUTA_UNICO = os.path.join(os.path.dirname(OUT), "rutina-del-tapete.html")
+with open(RUTA_UNICO, "w", encoding="utf-8") as f:
+    f.write(unico)
+
+print("archivo unico: %.0f KB" % (len(unico.encode("utf-8")) / 1024))
