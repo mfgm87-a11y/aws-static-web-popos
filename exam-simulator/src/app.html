@@ -1,0 +1,1584 @@
+<!--HEAD-->
+<title>Simulador KCNA y KCSA</title>
+<meta name="description" content="Simulador de los exámenes KCNA y KCSA: preguntas en inglés, explicaciones en español, modo práctica y modo examen con o sin tiempo.">
+<meta name="theme-color" content="#f3f5fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
+<style>
+:root{
+  /* Layout: una columna de lectura (máx. 46rem). En sesión: barra superior con progreso y reloj, y barra inferior de acciones al alcance del pulgar. */
+  --bg:#f3f5fa;--surface:#ffffff;--surface-2:#eaeef6;--ink:#0f1728;--muted:#556075;--line:#d7deea;
+  --kcna:#326ce5;--kcna-soft:#dde7fb;--kcsa:#4a3aa7;--kcsa-soft:#e5e1f5;
+  --accent:var(--kcna);--accent-soft:var(--kcna-soft);--on-accent:#ffffff;
+  --good:#0ca30c;--good-soft:#e2f4e2;--bad:#d03b3b;--bad-soft:#fbe4e4;--warn:#c98500;--warn-soft:#fbf0d6;
+  --scrim:rgb(8 12 24 / 55%);
+  --shadow:0 1px 2px rgb(15 23 40 / 6%),0 12px 32px rgb(15 23 40 / 8%);
+  --font-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1020;--surface:#131b2e;--surface-2:#1a2440;--ink:#e8ecf4;--muted:#a3adc2;--line:#2a3552;
+  --kcna:#5b8def;--kcna-soft:#1c2c50;--kcsa:#9085e9;--kcsa-soft:#272148;--on-accent:#0b1020;
+  --good:#0ca30c;--good-soft:#12301b;--bad:#d03b3b;--bad-soft:#3a1819;--warn:#fab219;--warn-soft:#382c0e;
+  --scrim:rgb(0 0 0 / 65%);
+  --shadow:0 1px 2px rgb(0 0 0 / 40%),0 12px 32px rgb(0 0 0 / 35%);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1020;--surface:#131b2e;--surface-2:#1a2440;--ink:#e8ecf4;--muted:#a3adc2;--line:#2a3552;
+  --kcna:#5b8def;--kcna-soft:#1c2c50;--kcsa:#9085e9;--kcsa-soft:#272148;--on-accent:#0b1020;
+  --good:#0ca30c;--good-soft:#12301b;--bad:#d03b3b;--bad-soft:#3a1819;--warn:#fab219;--warn-soft:#382c0e;
+  --scrim:rgb(0 0 0 / 65%);
+  --shadow:0 1px 2px rgb(0 0 0 / 40%),0 12px 32px rgb(0 0 0 / 35%);
+  color-scheme:dark;
+}
+[data-exam="kcsa"]{--accent:var(--kcsa);--accent-soft:var(--kcsa-soft)}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.55 var(--font-body);overflow-wrap:break-word;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.qtext,.otext,.explain,.rsum,.ropts li > span,.dbar-foot,.hist li,.resume-text,.bar-summary,.sheet-body{overflow-wrap:anywhere}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+a{color:inherit;text-decoration-color:var(--accent);text-underline-offset:3px}
+p{margin:0}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);border-radius:5px;padding:.08em .32em;overflow-wrap:anywhere}
+pre.code{margin:12px 0;padding:12px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;overflow-x:auto;font:400 .84rem/1.5 var(--font-mono);font-weight:400}
+pre.code code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.wrap{max-width:46rem;margin-inline:auto;padding-inline:16px;padding-block:20px 150px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1,.h2,.syllabus summary{font-family:var(--font-display)}
+h1{font-size:clamp(1.75rem,6.4vw,2.4rem);line-height:1.04;font-weight:780;letter-spacing:-.015em}
+.h2{font-size:1.2rem;line-height:1.2;font-weight:720}
+.eyebrow,.label{font:600 .72rem/1.35 var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{margin-bottom:6px}
+.label{margin-bottom:10px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Inicio */
+.mast{display:flex;gap:14px;align-items:center;margin-bottom:24px}
+.helm{width:48px;height:48px;flex:none;color:var(--accent)}
+.resume{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--accent);border-radius:16px;padding:14px 16px;margin-bottom:24px}
+.resume-text{display:grid;gap:2px;min-width:0}
+.resume-text span{color:var(--muted);font-size:.92rem}
+.resume-actions{display:flex;gap:8px;flex-wrap:wrap}
+.block{margin-bottom:24px}
+.exams{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:12px}
+.exam{position:relative;display:grid;gap:6px;align-content:start;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px 50px 14px 16px;min-width:0}
+.exam[data-x="kcna"]{--x:var(--kcna)}
+.exam[data-x="kcsa"]{--x:var(--kcsa)}
+.exam[aria-checked="true"]{border-color:var(--x);box-shadow:var(--shadow)}
+.exam .code{font:800 1.65rem/1 var(--font-display);letter-spacing:-.01em}
+.exam .name{font-size:.95rem;line-height:1.3}
+.exam .spec{margin-top:4px;font:400 .78rem/1.55 var(--font-mono);color:var(--muted)}
+.exam .tick{position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:transparent}
+.exam .tick svg{width:15px;height:15px}
+.exam[aria-checked="true"] .tick{background:var(--x);border-color:var(--x);color:var(--on-accent)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{display:grid;gap:4px;align-content:start;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.mode[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.mode-name{font-weight:700}
+.mode-desc{font-size:.84rem;line-height:1.35;color:var(--muted)}
+@media (max-width:370px){.modes{grid-template-columns:1fr}}
+.toggle{position:relative;display:flex;align-items:center;gap:12px;margin-top:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer}
+.toggle input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.toggle-ui{flex:none;width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:background-color .2s}
+.toggle-ui::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgb(0 0 0 / 30%);transition:transform .2s}
+.toggle input:checked + .toggle-ui{background:var(--accent)}
+.toggle input:checked + .toggle-ui::after{transform:translateX(18px)}
+.toggle input:focus-visible + .toggle-ui{outline:3px solid var(--accent);outline-offset:2px}
+.toggle-text{display:grid;min-width:0}
+.toggle-text small{color:var(--muted);font-size:.84rem;line-height:1.35}
+.info{margin-top:10px;font-size:.88rem;color:var(--muted)}
+.field{display:grid;gap:8px;margin-bottom:16px}
+.field-label{font-weight:600;font-size:.92rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;min-height:40px;font-size:.92rem}
+.chip[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-bottom:18px}
+.panel-head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.badge{display:inline-flex;align-items:center;gap:6px;font:600 .7rem/1.2 var(--font-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.badge.on::before{background:var(--good)}
+.ready{display:grid;gap:10px;margin-bottom:18px}
+.ready-top{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.hero-num{font:700 3.3rem/1 var(--font-body);letter-spacing:-.01em}
+.hero-unit{font:600 1.4rem/1 var(--font-body);color:var(--muted)}
+.ready-label{font-size:.88rem;color:var(--muted);margin-right:6px}
+.meter{position:relative;height:14px;border-radius:4px;background:var(--m-soft,var(--accent-soft))}
+.meter-fill{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--m,var(--accent))}
+.goal{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink)}
+.m-good{--m:var(--accent);--m-soft:var(--accent-soft)}
+.m-warn{--m:var(--warn);--m-soft:var(--warn-soft)}
+.m-bad{--m:var(--bad);--m-soft:var(--bad-soft)}
+.status{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.status svg,.smini svg{flex:none}
+.status svg{width:22px;height:22px}
+.smini{display:inline-flex;align-items:center;gap:5px;font-weight:700;white-space:nowrap}
+.smini svg{width:16px;height:16px}
+.note{font-size:.86rem;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 20px;padding:0;list-style:none}
+@media (min-width:560px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{background:var(--surface-2);border-radius:12px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.kpi-label{font-size:.8rem;color:var(--muted)}
+.kpi-value{font-weight:700;font-size:1.3rem;line-height:1.2}
+.dbars{display:grid;gap:16px}
+.dbar{display:grid;gap:6px;min-width:0}
+.dbar-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.dbar-name{font-weight:600;font-size:.94rem;min-width:0}
+.dbar-w{color:var(--muted);font:500 .74rem/1.6 var(--font-mono);white-space:nowrap}
+.dbar-row{display:grid;grid-template-columns:minmax(0,1fr) 3.6rem;align-items:center;gap:10px}
+.dbar-track{position:relative;height:12px;border-radius:4px;background:var(--accent-soft)}
+.dbar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--accent)}
+.dbar-val{text-align:right;font-weight:700}
+.dbar-foot{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:.82rem;color:var(--muted)}
+.actions-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.subhead{font:700 1rem/1.3 var(--font-body);margin:22px 0 4px}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.hist .hmode{font-weight:600}
+.hist .hdate{grid-column:1;font-size:.82rem}
+.hist .hscore{grid-row:1 / span 2;grid-column:2}
+.empty{color:var(--muted);font-size:.92rem;padding:10px 0}
+.syllabus summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:1.1rem;font-weight:700}
+.syllabus summary::-webkit-details-marker{display:none}
+.syllabus summary::after{content:"+";font:600 1.2rem/1 var(--font-mono);color:var(--muted)}
+.syllabus[open] summary::after{content:"−"}
+.syl-body{margin-top:12px}
+.syl-body > p{margin-bottom:6px}
+.sdom{border-top:1px solid var(--line);padding:12px 0}
+.sdom h3{display:flex;justify-content:space-between;gap:12px;font:700 .98rem/1.35 var(--font-body)}
+.sdom ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:.9rem}
+.tips{margin:6px 0 0;padding-left:18px}
+.tips li{margin-bottom:6px}
+.foot{margin-top:8px;font-size:.82rem;color:var(--muted)}
+
+/* Sesión */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;gap:10px;margin:-20px -16px 18px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.icon-btn{flex:none;width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.icon-btn svg{width:18px;height:18px}
+.tb-main{flex:1;min-width:0;display:grid;gap:7px}
+.tb-row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tb-title{font:600 .74rem/1.2 var(--font-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tb-timer{display:inline-flex;align-items:center;gap:5px;font:700 1rem/1 var(--font-mono);font-variant-numeric:tabular-nums}
+.tb-timer svg{width:15px;height:15px;color:var(--muted)}
+.tb-timer.low,.tb-timer.low svg{color:var(--bad)}
+.track{height:6px;border-radius:3px;background:var(--accent-soft);overflow:hidden}
+.track span{display:block;height:100%;width:0;background:var(--accent);border-radius:0 3px 3px 0;transition:width .3s}
+.count-btn{flex:none;min-width:66px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font:700 .88rem/1 var(--font-mono);font-variant-numeric:tabular-nums;padding:0 10px}
+.qmeta{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:12px}
+.qnum{font:700 .8rem/1.3 var(--font-mono);letter-spacing:.03em}
+.qdom{font-size:.82rem;color:var(--muted)}
+.qtext{font-size:1.1rem;line-height:1.55;font-weight:600}
+.qtext p + p{margin-top:.6em}
+.qtext.small{font-size:1rem}
+.hint{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:6px 12px;border-radius:999px;background:var(--accent-soft);font-size:.9rem;font-weight:700}
+.opts{display:grid;gap:10px;margin-top:18px}
+.opt{display:grid;grid-template-columns:2.1rem minmax(0,1fr);align-items:start;gap:12px;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:56px;line-height:1.45;transition:border-color .15s,background-color .15s}
+.opt:not(:disabled):hover{border-color:var(--accent)}
+.opt .letter{display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:50%;border:1.5px solid var(--line);font:700 .86rem/1 var(--font-mono);color:var(--muted)}
+.opts.multi .letter{border-radius:7px}
+.otext{display:grid;gap:6px;padding-top:.2rem;min-width:0}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] .letter{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.opt:disabled{cursor:default}
+.opt.is-correct{border-color:var(--good);background:var(--good-soft)}
+.opt.is-wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.is-dim{opacity:.72}
+.tag{display:inline-flex;align-items:center;gap:5px;font:700 .72rem/1.2 var(--font-mono);letter-spacing:.04em;text-transform:uppercase}
+.tag svg{width:14px;height:14px}
+.tag-ok svg{color:var(--good)}
+.tag-bad svg{color:var(--bad)}
+.feedback{margin-top:18px;border:1.5px solid var(--line);border-radius:14px;padding:16px;background:var(--surface);scroll-margin-bottom:110px}
+.verdict{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;margin-bottom:10px}
+.verdict svg{width:24px;height:24px;flex:none}
+.explain{font-size:.98rem;line-height:1.6}
+.explain p + p{margin-top:.7em}
+.kbd-hint{margin-top:18px;font:500 .76rem/1.4 var(--font-mono);color:var(--muted)}
+@media (hover:none){.kbd-hint{display:none}}
+
+/* Barras fijas */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgb(15 23 40 / 7%)}
+.bar-inner{max-width:46rem;margin:0 auto;display:flex;align-items:center;gap:10px}
+.bar-summary{flex:1;min-width:0;font-size:.86rem;line-height:1.3;color:var(--muted)}
+.bar-summary b{color:var(--ink)}
+.trio .btn{flex:1 1 0;min-width:0;padding-inline:10px}
+.trio .btn.primary{flex:1.5 1 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:.96rem;line-height:1.15;text-align:center}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.big{min-height:52px;padding-inline:26px}
+.btn.danger{border-color:var(--bad)}
+.btn.danger svg{color:var(--bad)}
+.btn[aria-pressed="true"]{background:var(--warn-soft);border-color:var(--warn)}
+.btn[aria-pressed="true"] svg{color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.linkbtn{background:none;border:0;padding:4px 0;font-size:.84rem;font-weight:700;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+.linkbtn.quiet{color:var(--muted);font-weight:400}
+
+/* Resultados */
+.res-head{margin-bottom:20px}
+.res-head .hero-num{font-size:4.6rem}
+.res-head .status{margin-top:10px}
+.res-sub{color:var(--muted);margin-top:6px}
+.review{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ritem{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.ritem summary{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:10px;align-items:start;padding:12px 14px;cursor:pointer;list-style:none}
+.ritem summary::-webkit-details-marker{display:none}
+.rn{font:700 .85rem/1.5 var(--font-mono);min-width:1.6rem}
+.rsum{font-size:.92rem;line-height:1.45;min-width:0}
+.mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%}
+.mark svg{width:14px;height:14px}
+.mark.ok{background:var(--good-soft);color:var(--good)}
+.mark.bad{background:var(--bad-soft);color:var(--bad)}
+.mark.skip{background:var(--surface-2);color:var(--muted)}
+.rbody{padding:0 14px 16px;display:grid;gap:10px}
+.ropts{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.ropts li{display:grid;grid-template-columns:1.7rem minmax(0,1fr);gap:8px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);font-size:.94rem}
+.ropts li.correct{border-color:var(--good);background:var(--good-soft)}
+.ropts li.picked-wrong{border-color:var(--bad);background:var(--bad-soft)}
+.ropts .l{font:700 .82rem/1.6 var(--font-mono);color:var(--muted)}
+.ropts .rtags{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+
+/* Hojas y avisos */
+.overlay{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+@media (min-width:600px){.overlay{align-items:center}}
+.sheet{width:100%;max-width:32rem;max-height:calc(100% - 8px);overflow:auto;background:var(--surface);border-radius:18px;padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow)}
+.sheet h2{font:720 1.25rem/1.2 var(--font-display);margin-bottom:8px}
+.sheet-body > p{color:var(--muted);margin-bottom:10px}
+.sheet-actions{display:grid;gap:8px;margin-top:16px}
+.navgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:8px;margin:12px 0}
+.navgrid button{position:relative;height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font:700 .84rem/1 var(--font-mono)}
+.navgrid .answered{background:var(--accent-soft);border-color:var(--accent)}
+.navgrid .ok{background:var(--good-soft);border-color:var(--good)}
+.navgrid .bad{background:var(--bad-soft);border-color:var(--bad);border-style:dashed}
+.navgrid .current{outline:3px solid var(--ink);outline-offset:1px}
+.navgrid .flagged::after{content:"";position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--line);background:var(--surface)}
+.legend i.answered{background:var(--accent-soft);border-color:var(--accent)}
+.legend i.ok{background:var(--good-soft);border-color:var(--good)}
+.legend i.bad{background:var(--bad-soft);border-color:var(--bad);border-style:dashed}
+.legend i.flag{border-radius:50%;width:9px;height:9px;border:0;background:var(--warn)}
+.summary-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+.summary-list li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-size:.9rem;box-shadow:var(--shadow)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+<!--/HEAD-->
+<div class="wrap">
+  <section id="homeView" aria-labelledby="appTitle">
+    <header class="mast">
+      <svg class="helm" id="helm" viewBox="0 0 48 48" aria-hidden="true"></svg>
+      <div>
+        <p class="eyebrow">Preparación CNCF · preguntas en inglés, explicaciones en español</p>
+        <h1 id="appTitle">Simulador KCNA y KCSA</h1>
+      </div>
+    </header>
+
+    <div class="resume" id="resume" hidden>
+      <div class="resume-text"><strong>Tienes una sesión sin terminar</strong><span id="resumeInfo"></span></div>
+      <div class="resume-actions">
+        <button class="btn primary" id="resumeBtn" type="button">Continuar</button>
+        <button class="btn" id="discardBtn" type="button">Descartar</button>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="hExam">
+      <h2 class="label" id="hExam">Examen</h2>
+      <div class="exams" id="examPicker" role="radiogroup" aria-labelledby="hExam"></div>
+    </section>
+
+    <section class="block" aria-labelledby="hMode">
+      <h2 class="label" id="hMode">Modo</h2>
+      <div class="modes" id="modePicker" role="radiogroup" aria-labelledby="hMode">
+        <button class="mode" type="button" role="radio" data-mode="practice" aria-checked="true">
+          <span class="mode-name">Simulador</span>
+          <span class="mode-desc">Respondes y ves al instante si acertaste, con la explicación.</span>
+        </button>
+        <button class="mode" type="button" role="radio" data-mode="exam" aria-checked="false">
+          <span class="mode-name">Examen</span>
+          <span class="mode-desc">Como el real: sin pistas, puedes marcar y revisar, nota al final.</span>
+        </button>
+      </div>
+      <label class="toggle" for="timedInput">
+        <input type="checkbox" id="timedInput">
+        <span class="toggle-ui" aria-hidden="true"></span>
+        <span class="toggle-text"><b>Con tiempo</b><small id="timeHint"></small></span>
+      </label>
+      <p class="info" id="examInfo" hidden></p>
+    </section>
+
+    <section class="block" id="practiceOpts" aria-labelledby="hOpts">
+      <h2 class="label" id="hOpts">Qué practicar</h2>
+      <div class="field">
+        <span class="field-label" id="lCount">Número de preguntas</span>
+        <div class="chips" id="countChips" role="radiogroup" aria-labelledby="lCount"></div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="domainSelect">Dominio</label>
+        <select id="domainSelect"></select>
+      </div>
+      <div class="field">
+        <span class="field-label" id="lSource">Preguntas</span>
+        <div class="chips" id="sourceChips" role="radiogroup" aria-labelledby="lSource"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="hStats">
+      <div class="panel-head">
+        <h2 class="h2" id="hStats">Tu progreso</h2>
+        <span class="badge" id="syncBadge">Guardado en este dispositivo</span>
+      </div>
+      <div id="statsBody"></div>
+    </section>
+
+    <details class="panel syllabus" id="syllabus">
+      <summary id="sylTitle">Temario oficial y consejos</summary>
+      <div class="syl-body" id="sylBody"></div>
+    </details>
+
+    <p class="foot">Preguntas originales escritas a partir del <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">currículo oficial de la CNCF</a> y la documentación de Kubernetes v1.37 (octubre de 2026). No son preguntas filtradas del examen real.</p>
+  </section>
+
+  <section id="sessionView" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="exitBtn" type="button" aria-label="Salir de la sesión"></button>
+      <div class="tb-main">
+        <div class="tb-row"><span class="tb-title" id="tbTitle"></span><span class="tb-timer" id="timer" role="timer"></span></div>
+        <div class="track" aria-hidden="true"><span id="trackFill"></span></div>
+      </div>
+      <button class="count-btn" id="navBtn" type="button" aria-label="Ver todas las preguntas"><span id="navCount"></span></button>
+    </div>
+    <article id="qcard">
+      <div class="qmeta"><span class="qnum" id="qNum"></span><span class="qdom" id="qDom"></span></div>
+      <div class="qtext" id="qText"></div>
+      <p class="hint" id="qHint" hidden></p>
+      <div class="opts" id="opts" role="group" aria-label="Opciones de respuesta"></div>
+      <div class="feedback" id="feedback" aria-live="polite" hidden>
+        <p class="verdict" id="verdict"></p>
+        <div class="explain" id="explain"></div>
+      </div>
+    </article>
+    <p class="kbd-hint">Teclado: 1–5 o A–E elige · Enter confirma · ← → navega · F marca</p>
+  </section>
+
+  <section id="resultsView" hidden aria-labelledby="rEyebrow">
+    <header class="res-head">
+      <p class="eyebrow" id="rEyebrow"></p>
+      <div class="ready-top"><span class="hero-num" id="rScore"></span><span class="hero-unit" id="rUnit">%</span></div>
+      <div id="rStatus"></div>
+      <p class="res-sub" id="rSub"></p>
+    </header>
+    <section class="panel" aria-labelledby="hRDom">
+      <div class="panel-head"><h2 class="h2" id="hRDom">Por dominio</h2><span class="note">La línea marca el 75 % para aprobar</span></div>
+      <div class="dbars" id="rDomains"></div>
+    </section>
+    <section class="panel" aria-labelledby="hReview">
+      <div class="panel-head"><h2 class="h2" id="hReview">Revisión</h2><div class="chips" id="rFilter" role="radiogroup" aria-label="Filtrar revisión"></div></div>
+      <ol class="review" id="rList"></ol>
+    </section>
+  </section>
+</div>
+
+<div class="bar" id="homeBar">
+  <div class="bar-inner">
+    <p class="bar-summary" id="startSummary"></p>
+    <button class="btn primary big" id="startBtn" type="button">Empezar</button>
+  </div>
+</div>
+<div class="bar" id="sessionBar" hidden>
+  <div class="bar-inner trio">
+    <button class="btn" id="prevBtn" type="button">Anterior</button>
+    <button class="btn" id="midBtn" type="button">Marcar</button>
+    <button class="btn primary" id="mainBtn" type="button">Siguiente</button>
+  </div>
+</div>
+<div class="bar" id="resultsBar" hidden>
+  <div class="bar-inner trio">
+    <button class="btn" id="homeBtn" type="button">Inicio</button>
+    <button class="btn" id="retryWrongBtn" type="button">Repasar falladas</button>
+    <button class="btn primary" id="againBtn" type="button">Otro intento</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle"></h2>
+    <div class="sheet-body" id="sheetBody"></div>
+    <div class="sheet-actions" id="sheetActions"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script type="application/json" id="bank">__BANK_JSON__</script>
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- banco de preguntas ---------- */
+  let DATA = { exams: {} };
+  try { DATA = JSON.parse(document.getElementById('bank').textContent); } catch (e) { /* banco ilegible: la página muestra el estado vacío */ }
+  const EXAMS = DATA.exams || {};
+  const EXAM_KEYS = Object.keys(EXAMS);
+  const BYID = new Map();
+  for (const key of EXAM_KEYS) for (const q of EXAMS[key].bank) { q.x = key; BYID.set(q.i, q); }
+
+  const MODE_NAME = { practice: 'Simulador', exam: 'Examen' };
+  const LETTERS = 'ABCDE';
+  const COUNTS = [10, 20, 30, 60, 'all'];
+  const motionOK = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* ---------- almacenamiento local (puede no estar disponible) ---------- */
+  const LS = {
+    get(key, fallback) { try { const raw = localStorage.getItem(key); return raw == null ? fallback : JSON.parse(raw); } catch (e) { return fallback; } },
+    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* sin almacenamiento */ } },
+    del(key) { try { localStorage.removeItem(key); } catch (e) { /* sin almacenamiento */ } },
+  };
+  const KEYS = { settings: 'k8sim.settings.v1', progress: 'k8sim.progress.v1', session: 'k8sim.session.v1', result: 'k8sim.result.v1' };
+
+  /* ---------- utilidades ---------- */
+  const $ = (id) => document.getElementById(id);
+  const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ESC[c]);
+  function inline(text) {
+    const codes = [];
+    let s = esc(text).replace(/`([^`]+)`/g, (m, c) => { codes.push(c); return '\u0001' + (codes.length - 1) + '\u0002'; });
+    s = s.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/(^|[^\w*])\*([^*\s][^*\n]*?)\*(?![\w*])/g, '$1<em>$2</em>');
+    return s.replace(/\u0001(\d+)\u0002/g, (m, i) => '<code>' + codes[Number(i)] + '</code>');
+  }
+  function paragraphs(text) {
+    return text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+      .map((p) => '<p>' + inline(p).replace(/\n/g, '<br>') + '</p>').join('');
+  }
+  function rich(text) {
+    const parts = [];
+    const re = /```[\w-]*\n([\s\S]*?)```/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      parts.push(paragraphs(text.slice(last, m.index)));
+      parts.push('<pre class="code"><code>' + esc(m[1].replace(/\n+$/, '')) + '</code></pre>');
+      last = re.lastIndex;
+    }
+    parts.push(paragraphs(text.slice(last)));
+    return parts.join('');
+  }
+  const plain = (text) => text.replace(/```[\s\S]*?```/g, ' [YAML] ').replace(/[`*]/g, '').replace(/\s+/g, ' ').trim();
+  const trunc = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+  const pad = (n) => String(n).padStart(2, '0');
+  const clock = (sec) => { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + pad(sec % 60); };
+  const durLabel = (sec) => (sec < 60 ? sec + ' s' : Math.round(sec / 60) + ' min');
+  function dateLabel(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleDateString('es', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ''; }
+  }
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    return list;
+  }
+  function apportion(weights, n) {
+    const total = weights.reduce((a, b) => a + b, 0);
+    if (!total || n <= 0) return weights.map(() => 0);
+    const raw = weights.map((w) => (w * n) / total);
+    const out = raw.map(Math.floor);
+    const order = raw.map((r, i) => [r - Math.floor(r), i]).filter((x) => weights[x[1]] > 0).sort((a, b) => b[0] - a[0]);
+    let rest = n - out.reduce((a, b) => a + b, 0);
+    for (let k = 0; rest > 0 && order.length; k++, rest--) out[order[k % order.length][1]]++;
+    return out;
+  }
+
+  const ICON = {
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>',
+    dash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12h10" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>',
+    flag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4m0 0h11l-2.5 4.5L17 13H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4.5l3 2M9.5 2.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    multi: '<svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 7l1.5 1.5L9 5.5M15 17l1.5 1.5L19 15.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  };
+  function statusIcon(kind) {
+    if (kind === 'good') return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--good)"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    if (kind === 'bad') return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--bad)"/><path d="M8.2 8.2l7.6 7.6M15.8 8.2l-7.6 7.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2L23 21.3H1z" fill="var(--warn)"/><path d="M12 9v5.6M12 17.6v.2" stroke="#1b1300" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  }
+  const statusHTML = (kind, label) => '<span class="status">' + statusIcon(kind) + '<span>' + label + '</span></span>';
+  const statusMini = (kind, label) => '<span class="smini">' + statusIcon(kind) + '<span>' + label + '</span></span>';
+
+  /* ---------- estado ---------- */
+  function normalizeProgress(p) {
+    const out = { v: 1, updated: 0, stats: {}, history: [] };
+    if (!p || typeof p !== 'object') return out;
+    if (p.stats && typeof p.stats === 'object') {
+      for (const [id, s] of Object.entries(p.stats)) {
+        if (BYID.has(id) && s && typeof s.s === 'number') out.stats[id] = { s: s.s | 0, w: s.w | 0, l: s.l ? 1 : 0, t: Number(s.t) || 0 };
+      }
+    }
+    if (Array.isArray(p.history)) out.history = p.history.filter((h) => h && h.id && EXAMS[h.exam] && Array.isArray(h.dom)).slice(0, 200);
+    out.updated = Number(p.updated) || 0;
+    return out;
+  }
+  function mergeProgress(a, b) {
+    const out = { v: 1, updated: Math.max(a.updated || 0, b.updated || 0), stats: {}, history: [] };
+    const ids = new Set(Object.keys(a.stats).concat(Object.keys(b.stats)));
+    for (const id of ids) {
+      const x = a.stats[id];
+      const y = b.stats[id];
+      if (!x || !y) { out.stats[id] = Object.assign({}, x || y); continue; }
+      const newer = x.t >= y.t ? x : y;
+      out.stats[id] = { s: Math.max(x.s, y.s), w: Math.max(x.w, y.w), l: newer.l, t: newer.t };
+    }
+    const seen = new Map();
+    for (const h of a.history.concat(b.history)) if (!seen.has(h.id)) seen.set(h.id, h);
+    out.history = Array.from(seen.values()).sort((p, q) => q.ts - p.ts).slice(0, 200);
+    return out;
+  }
+  function validSession(s) {
+    if (!s || typeof s !== 'object' || !EXAMS[s.exam] || !Array.isArray(s.qids) || !s.qids.length) return null;
+    if (!s.qids.every((id) => BYID.has(id))) return null;
+    for (const key of ['perm', 'ans', 'checked', 'flags']) if (!s[key] || typeof s[key] !== 'object') s[key] = {};
+    for (const id of s.qids) {
+      const n = BYID.get(id).o.length;
+      const p = s.perm[id];
+      if (!Array.isArray(p) || p.length !== n) s.perm[id] = shuffle(Array.from({ length: n }, (_, k) => k));
+    }
+    s.cur = Math.min(Math.max(0, s.cur | 0), s.qids.length - 1);
+    s.opts = s.opts || { exam: s.exam, mode: s.mode, timed: s.timed, count: s.qids.length, domain: 'all', source: 'all' };
+    return s;
+  }
+  const validResult = (r) => (r && r.entry && validSession(r.session) ? r : null);
+
+  const DEFAULTS = { exam: EXAM_KEYS[0] || 'kcna', mode: 'practice', timed: true, count: 20, domain: 'all', source: 'all' };
+  let settings = Object.assign({}, DEFAULTS, LS.get(KEYS.settings, {}));
+  if (!EXAMS[settings.exam]) settings.exam = DEFAULTS.exam;
+  if (!COUNTS.includes(settings.count)) settings.count = DEFAULTS.count;
+  let progress = normalizeProgress(LS.get(KEYS.progress, null));
+  let session = validSession(LS.get(KEYS.session, null));
+  let result = validResult(LS.get(KEYS.result, null));
+  let view = 'home';
+  let reviewFilter = 'all';
+
+  const saveSettings = () => LS.set(KEYS.settings, settings);
+  const saveSession = () => { if (session) LS.set(KEYS.session, session); };
+  function saveProgress(pushNow) { LS.set(KEYS.progress, progress); schedulePush(pushNow ? 0 : 4000); }
+
+  const isCorrect = (q, sel) => !!sel && sel.length === q.a.length && q.a.every((k) => sel.includes(k));
+  const isWrong = (id) => { const s = progress.stats[id]; return !!s && s.l === 0; };
+  function bumpStat(id, ok, ts) {
+    const now = ts || Date.now();
+    const s = progress.stats[id] || { s: 0, w: 0, l: 0, t: 0 };
+    s.s += 1;
+    if (!ok) s.w += 1;
+    s.l = ok ? 1 : 0;
+    s.t = now;
+    progress.stats[id] = s;
+    progress.updated = now;
+  }
+
+  /* ---------- selección de preguntas ---------- */
+  function pickFrom(pool, n, mode) {
+    const fresh = [];
+    const failed = [];
+    const known = [];
+    for (const q of pool) {
+      const s = progress.stats[q.i];
+      if (!s) fresh.push(q);
+      else if (s.l === 0) failed.push(q);
+      else known.push(q);
+    }
+    shuffle(fresh);
+    shuffle(failed);
+    known.sort((a, b) => progress.stats[a.i].t - progress.stats[b.i].t);
+    const head = mode === 'exam' ? fresh.concat(failed) : shuffle(fresh.concat(failed));
+    return head.concat(known).slice(0, n);
+  }
+  function stratified(pool, n, weights, mode) {
+    n = Math.min(n, pool.length);
+    const byDom = weights.map(() => []);
+    for (const q of pool) byDom[q.d].push(q);
+    const quotas = apportion(weights.map((w, i) => (byDom[i].length ? w : 0)), n);
+    let picked = [];
+    let short = 0;
+    quotas.forEach((k, i) => {
+      const take = Math.min(k, byDom[i].length);
+      picked = picked.concat(pickFrom(byDom[i], take, mode));
+      short += k - take;
+    });
+    if (short > 0) {
+      const used = new Set(picked.map((q) => q.i));
+      picked = picked.concat(pickFrom(pool.filter((q) => !used.has(q.i)), short, mode));
+    }
+    return shuffle(picked);
+  }
+  function practicePool(opts) {
+    let pool = EXAMS[opts.exam].bank;
+    if (opts.domain !== 'all') pool = pool.filter((q) => q.d === Number(opts.domain));
+    if (opts.source === 'new') pool = pool.filter((q) => !progress.stats[q.i]);
+    else if (opts.source === 'wrong') pool = pool.filter((q) => isWrong(q.i));
+    return pool;
+  }
+  function createSession(opts) {
+    const ex = EXAMS[opts.exam];
+    const weights = ex.domains.map((d) => d.weight);
+    let qs;
+    if (opts.qids) qs = shuffle(opts.qids.map((id) => BYID.get(id)).filter(Boolean));
+    else if (opts.mode === 'exam') qs = stratified(ex.bank, ex.questions, weights, 'exam');
+    else {
+      const pool = practicePool(opts);
+      const n = opts.count === 'all' ? pool.length : Math.min(Number(opts.count) || 20, pool.length);
+      qs = stratified(pool, n, weights, 'practice');
+    }
+    if (!qs.length) return null;
+    const now = Date.now();
+    const limit = opts.timed ? Math.round((qs.length * ex.minutes * 60) / ex.questions) : 0;
+    const perm = {};
+    for (const q of qs) perm[q.i] = shuffle(q.o.map((_, k) => k));
+    return {
+      v: 1,
+      id: now.toString(36) + Math.random().toString(36).slice(2, 7),
+      exam: opts.exam,
+      mode: opts.mode,
+      timed: !!opts.timed,
+      opts: { exam: opts.exam, mode: opts.mode, timed: !!opts.timed, count: opts.count, domain: opts.domain, source: opts.source, qids: opts.qids || null },
+      qids: qs.map((q) => q.i),
+      perm,
+      ans: {},
+      checked: {},
+      flags: {},
+      cur: 0,
+      startedAt: now,
+      endsAt: limit ? now + limit * 1000 : 0,
+      limit,
+    };
+  }
+
+  /* ---------- elementos ---------- */
+  const homeView = $('homeView');
+  const sessionView = $('sessionView');
+  const resultsView = $('resultsView');
+  const homeBar = $('homeBar');
+  const sessionBar = $('sessionBar');
+  const resultsBar = $('resultsBar');
+  const optsEl = $('opts');
+  const feedback = $('feedback');
+  const timerEl = $('timer');
+  const overlay = $('overlay');
+  const toastEl = $('toast');
+  const prevBtn = $('prevBtn');
+  const midBtn = $('midBtn');
+  const mainBtn = $('mainBtn');
+
+  function show(next) {
+    view = next;
+    homeView.hidden = next !== 'home';
+    homeBar.hidden = next !== 'home';
+    sessionView.hidden = next !== 'session';
+    sessionBar.hidden = next !== 'session';
+    resultsView.hidden = next !== 'results';
+    resultsBar.hidden = next !== 'results';
+    window.scrollTo(0, 0);
+  }
+
+  let toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3400);
+  }
+
+  /* ---------- hoja modal ---------- */
+  let lastFocus = null;
+  let sheetCleanup = null;
+  function openSheet(title, bodyHTML, actions, onMount) {
+    $('sheetTitle').textContent = title;
+    $('sheetBody').innerHTML = bodyHTML;
+    const box = $('sheetActions');
+    box.innerHTML = '';
+    for (const a of actions) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn' + (a.kind ? ' ' + a.kind : '');
+      b.innerHTML = a.label;
+      b.addEventListener('click', () => { closeSheet(); if (a.run) a.run(); });
+      box.appendChild(b);
+    }
+    lastFocus = document.activeElement;
+    overlay.hidden = false;
+    sheetCleanup = onMount ? onMount($('sheetBody')) : null;
+    const target = box.querySelector('.primary') || box.querySelector('button');
+    if (target) target.focus();
+  }
+  function closeSheet() {
+    overlay.hidden = true;
+    if (typeof sheetCleanup === 'function') sheetCleanup();
+    sheetCleanup = null;
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  }
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeSheet(); });
+
+  /* ---------- inicio ---------- */
+  function drawHelm() {
+    const r1 = 7;
+    const r2 = 21;
+    let spokes = '';
+    for (let k = 0; k < 7; k++) {
+      const a = (-90 + (k * 360) / 7) * (Math.PI / 180);
+      spokes += '<line x1="' + (24 + r1 * Math.cos(a)).toFixed(2) + '" y1="' + (24 + r1 * Math.sin(a)).toFixed(2) + '" x2="' + (24 + r2 * Math.cos(a)).toFixed(2) + '" y2="' + (24 + r2 * Math.sin(a)).toFixed(2) + '"/>';
+    }
+    $('helm').innerHTML = '<circle cx="24" cy="24" r="14.5" fill="none" stroke="currentColor" stroke-width="3"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round">' + spokes + '</g><circle cx="24" cy="24" r="4.5" fill="currentColor"/>';
+  }
+
+  function renderExamPicker() {
+    $('examPicker').innerHTML = EXAM_KEYS.map((k) => {
+      const ex = EXAMS[k];
+      return '<button type="button" class="exam" role="radio" data-x="' + k + '" aria-checked="' + (settings.exam === k) + '">'
+        + '<span class="tick" aria-hidden="true">' + ICON.check + '</span>'
+        + '<span class="code">' + esc(ex.code) + '</span>'
+        + '<span class="name">' + esc(ex.name) + '</span>'
+        + '<span class="spec">' + ex.questions + ' preguntas · ' + ex.minutes + ' min · aprobar ≥ ' + ex.pass + ' %<br>' + ex.bank.length + ' en el banco · ' + ex.domains.length + ' dominios</span>'
+        + '</button>';
+    }).join('');
+  }
+
+  function renderModes() {
+    const ex = EXAMS[settings.exam];
+    for (const b of $('modePicker').querySelectorAll('.mode')) b.setAttribute('aria-checked', String(b.dataset.mode === settings.mode));
+    $('timedInput').checked = !!settings.timed;
+    $('timeHint').textContent = settings.mode === 'exam'
+      ? ex.minutes + ' minutos para ' + ex.questions + ' preguntas, como el examen real'
+      : 'Unos 90 segundos por pregunta, el ritmo del examen real';
+    const isExam = settings.mode === 'exam';
+    $('practiceOpts').hidden = isExam;
+    const info = $('examInfo');
+    info.hidden = !isExam;
+    if (isExam) {
+      const quotas = apportion(ex.domains.map((d) => d.weight), ex.questions);
+      info.textContent = 'Reparto por dominio como el oficial: ' + quotas.join(' · ') + ' preguntas. Prioriza las que todavía no has visto.';
+    }
+  }
+
+  function renderPracticeOpts() {
+    const ex = EXAMS[settings.exam];
+    const sel = $('domainSelect');
+    sel.innerHTML = '<option value="all">Todos los dominios (reparto oficial)</option>'
+      + ex.domains.map((d, i) => '<option value="' + i + '">' + esc(d.name) + ' · ' + d.weight + ' %</option>').join('');
+    sel.value = String(settings.domain);
+    if (sel.value !== String(settings.domain)) { settings.domain = 'all'; sel.value = 'all'; }
+    const base = Object.assign({}, settings, { source: 'all' });
+    const totalAll = practicePool(base).length;
+    const nNew = practicePool(Object.assign({}, base, { source: 'new' })).length;
+    const nWrong = practicePool(Object.assign({}, base, { source: 'wrong' })).length;
+    $('sourceChips').innerHTML = [['all', 'Todas', totalAll], ['new', 'Nuevas', nNew], ['wrong', 'Falladas', nWrong]]
+      .map(([v, label, n]) => '<button type="button" class="chip" role="radio" data-source="' + v + '" aria-checked="' + (settings.source === v) + '"' + (n ? '' : ' disabled') + '>' + label + ' <span class="num">(' + n + ')</span></button>').join('');
+    const avail = practicePool(settings).length;
+    $('countChips').innerHTML = COUNTS.map((c) => {
+      const label = c === 'all' ? 'Todas (' + avail + ')' : String(c);
+      return '<button type="button" class="chip num" role="radio" data-count="' + c + '" aria-checked="' + (settings.count === c) + '">' + label + '</button>';
+    }).join('');
+  }
+
+  function startPlan() {
+    const ex = EXAMS[settings.exam];
+    if (settings.mode === 'exam') return { n: ex.questions, sec: settings.timed ? ex.minutes * 60 : 0 };
+    const pool = practicePool(settings);
+    const n = settings.count === 'all' ? pool.length : Math.min(Number(settings.count), pool.length);
+    return { n, sec: settings.timed ? Math.round((n * ex.minutes * 60) / ex.questions) : 0 };
+  }
+  function renderStartBar() {
+    const ex = EXAMS[settings.exam];
+    const plan = startPlan();
+    $('startBtn').disabled = !plan.n;
+    $('startSummary').innerHTML = plan.n
+      ? '<b>' + esc(ex.code) + ' · ' + MODE_NAME[settings.mode] + '</b><br>' + plan.n + ' preguntas · ' + (plan.sec ? durLabel(plan.sec) : 'sin tiempo')
+      : 'No hay preguntas con estos filtros';
+  }
+
+  function renderResume() {
+    const box = $('resume');
+    if (!session) { box.hidden = true; return; }
+    const ex = EXAMS[session.exam];
+    const done = session.qids.filter((id) => (session.mode === 'practice' ? session.checked[id] : (session.ans[id] || []).length)).length;
+    let info = ex.code + ' · ' + MODE_NAME[session.mode] + ' · ' + done + ' de ' + session.qids.length + ' respondidas';
+    if (session.endsAt) info += ' · quedan ' + clock((session.endsAt - Date.now()) / 1000);
+    $('resumeInfo').textContent = info;
+    box.hidden = false;
+  }
+
+  function examStats(key) {
+    const ex = EXAMS[key];
+    const doms = ex.domains.map(() => ({ total: 0, seen: 0, right: 0 }));
+    let seen = 0;
+    let attempts = 0;
+    let misses = 0;
+    for (const q of ex.bank) {
+      const d = doms[q.d];
+      d.total++;
+      const st = progress.stats[q.i];
+      if (st) { d.seen++; seen++; attempts += st.s; misses += st.w; if (st.l) d.right++; }
+    }
+    let wsum = 0;
+    let acc = 0;
+    ex.domains.forEach((dm, i) => { if (doms[i].seen) { wsum += dm.weight; acc += (dm.weight * doms[i].right) / doms[i].seen; } });
+    const exams = progress.history.filter((h) => h.exam === key && h.mode === 'exam');
+    return {
+      doms,
+      seen,
+      total: ex.bank.length,
+      est: wsum ? Math.round((100 * acc) / wsum) : null,
+      weightCovered: wsum,
+      exams,
+      best: exams.length ? Math.max.apply(null, exams.map((h) => h.score)) : null,
+      acc: attempts ? Math.round((100 * (attempts - misses)) / attempts) : null,
+      wrong: ex.bank.filter((q) => isWrong(q.i)).length,
+    };
+  }
+
+  function domainBars(ex, rows, ctx) {
+    return ex.domains.map((dm, i) => {
+      const r = rows[i];
+      const has = r.seen > 0;
+      const pct = has ? Math.round((100 * r.right) / r.seen) : 0;
+      let foot;
+      if (ctx === 'home') foot = has ? r.right + ' de ' + r.seen + ' bien en su último intento · ' + r.seen + '/' + r.total + ' vistas' : 'Sin practicar · ' + r.total + ' preguntas en el banco';
+      else foot = has ? r.right + ' de ' + r.seen + ' correctas' : 'Sin preguntas de este dominio en la sesión';
+      const flag = has && pct < ex.pass ? statusMini('warn', 'Refuerza') : '';
+      const link = ctx === 'home' ? '<button type="button" class="linkbtn" data-practice-domain="' + i + '">Practicar</button>' : '';
+      return '<div class="dbar"><div class="dbar-head"><span class="dbar-name">' + esc(dm.name) + '</span><span class="dbar-w">peso ' + dm.weight + ' %</span></div>'
+        + '<div class="dbar-row"><div class="dbar-track" role="img" aria-label="' + (has ? pct + ' % de aciertos' : 'Sin datos') + ', meta ' + ex.pass + ' %">'
+        + (has ? '<span class="dbar-fill" style="width:' + pct + '%"></span>' : '') + '<span class="goal" style="left:' + ex.pass + '%"></span></div>'
+        + '<span class="dbar-val num">' + (has ? pct + ' %' : '—') + '</span></div>'
+        + '<div class="dbar-foot">' + flag + '<span>' + foot + '</span>' + link + '</div></div>';
+    }).join('');
+  }
+
+  function readiness(est) {
+    if (est >= 85) return ['good', 'm-good', 'Listo para presentar: mantén el ritmo'];
+    if (est >= 75) return ['good', 'm-good', 'En zona de aprobado, con poco margen'];
+    if (est >= 60) return ['warn', 'm-warn', 'Cerca: refuerza tus dominios débiles'];
+    return ['bad', 'm-bad', 'Todavía lejos del 75 %: sigue practicando'];
+  }
+
+  function renderStats() {
+    const key = settings.exam;
+    const ex = EXAMS[key];
+    const st = examStats(key);
+    $('hStats').textContent = 'Tu progreso en ' + ex.code;
+    let html = '';
+    if (st.est == null) {
+      html += '<div class="ready"><p class="ready-label">Dominio estimado</p><div class="ready-top"><span class="hero-num">—</span></div>'
+        + '<p class="note">Todavía no has respondido preguntas de ' + esc(ex.code) + '. Empieza con 20 preguntas en modo Simulador y aquí verás tu nivel por dominio, ponderado con el peso oficial de cada uno.</p></div>';
+    } else {
+      const [kind, cls, label] = readiness(st.est);
+      const partial = st.weightCovered < 100 || st.seen < 40;
+      html += '<div class="ready"><p class="ready-label">Dominio estimado (ponderado por el peso oficial)</p>'
+        + '<div class="ready-top"><span class="hero-num">' + st.est + '</span><span class="hero-unit">%</span></div>'
+        + '<div class="meter ' + cls + '" role="img" aria-label="' + st.est + ' %, meta ' + ex.pass + ' %"><span class="meter-fill" style="width:' + st.est + '%"></span><span class="goal" style="left:' + ex.pass + '%"></span></div>'
+        + statusHTML(kind, label)
+        + (partial ? '<p class="note">Cálculo provisional: llevas ' + st.seen + ' de ' + st.total + ' preguntas vistas' + (st.weightCovered < 100 ? ' y hay dominios sin practicar' : '') + '.</p>' : '')
+        + '</div>';
+    }
+    html += '<ul class="kpis">'
+      + '<li class="kpi"><span class="kpi-label">Preguntas vistas</span><span class="kpi-value">' + st.seen + ' / ' + st.total + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Aciertos totales</span><span class="kpi-value">' + (st.acc == null ? '—' : st.acc + ' %') + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Simulacros de examen</span><span class="kpi-value">' + st.exams.length + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Mejor simulacro</span><span class="kpi-value">' + (st.best == null ? '—' : st.best + ' %') + '</span></li>'
+      + '</ul>';
+    html += '<div class="dbars">' + domainBars(ex, st.doms, 'home') + '</div>';
+    html += '<div class="actions-row"><button type="button" class="btn" id="reviewWrongBtn"' + (st.wrong ? '' : ' disabled') + '>' + ICON.x + 'Repasar falladas (' + st.wrong + ')</button>'
+      + '<button type="button" class="btn" id="weakBtn">Practicar mi dominio más débil</button></div>';
+    const hist = progress.history.filter((h) => h.exam === key).slice(0, 8);
+    html += '<h3 class="subhead">Últimos intentos</h3><ul class="hist">'
+      + (hist.length ? hist.map((h) => '<li><span class="hmode">' + MODE_NAME[h.mode] + (h.timed ? '' : ' · sin tiempo') + '</span>'
+        + '<span class="hdate muted num">' + dateLabel(h.ts) + ' · ' + h.correct + '/' + h.counted + ' · ' + durLabel(h.dur) + '</span>'
+        + '<span class="hscore num">' + statusMini(h.score >= ex.pass ? 'good' : 'bad', h.score + ' %') + '</span></li>').join('')
+        : '<li class="empty">Aún no hay intentos de ' + esc(ex.code) + '.</li>')
+      + '</ul>';
+    html += '<p style="margin-top:14px"><button type="button" class="linkbtn quiet" id="resetBtn">Borrar mi progreso de ' + esc(ex.code) + '</button></p>';
+    $('statsBody').innerHTML = html;
+  }
+
+  const SYLLABUS_NOTE = {
+    kcna: 'Temario vigente desde noviembre de 2025 (44 / 28 / 16 / 12). Muchas guías en internet todavía muestran el anterior, que tenía cinco dominios (46 / 22 / 16 / 8 / 8).',
+    kcsa: 'Temario oficial de la CNCF en seis dominios (14 / 22 / 22 / 16 / 16 / 10). El banco también cubre en profundidad cadena de suministro, RBAC y seguridad en tiempo de ejecución, que aparecen en varios dominios.',
+  };
+  const TIPS = '<h3 class="subhead">Cómo es el examen</h3><ul class="tips">'
+    + '<li>60 preguntas de opción múltiple en 90 minutos, en línea y con supervisión remota. Apruebas con 75 %, es decir, 45 correctas.</li>'
+    + '<li>Se presenta en inglés (el KCNA también en japonés), por eso aquí las preguntas están en inglés y las explicaciones en español.</li>'
+    + '<li>Tienes unos 90 segundos por pregunta. Si dudas, márcala y sigue; vuelve a ella al final.</li>'
+    + '<li>Lee con lupa NOT, EXCEPT, BEST, MOST o FIRST: cambian por completo la respuesta.</li>'
+    + '<li>Las respuestas incorrectas no restan, así que no dejes ninguna en blanco.</li>'
+    + '<li>Meta práctica antes de agendar: superar el 85 % en varios simulacros seguidos con tiempo.</li>'
+    + '</ul>';
+  function renderSyllabus() {
+    const ex = EXAMS[settings.exam];
+    $('sylTitle').textContent = 'Temario oficial de ' + ex.code + ' y consejos';
+    $('sylBody').innerHTML = '<p class="note">' + esc(SYLLABUS_NOTE[settings.exam] || '') + '</p>'
+      + ex.domains.map((d) => '<div class="sdom"><h3><span>' + esc(d.name) + '</span><span class="num">' + d.weight + ' %</span></h3><ul>'
+        + (d.syllabus || d.topics).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>').join('')
+      + TIPS;
+  }
+
+  function renderHome() {
+    document.body.dataset.exam = settings.exam;
+    renderExamPicker();
+    renderModes();
+    renderPracticeOpts();
+    renderStartBar();
+    renderResume();
+    renderStats();
+    renderSyllabus();
+    show('home');
+  }
+  function refreshHome() {
+    const y = window.scrollY;
+    renderHome();
+    window.scrollTo(0, y);
+  }
+
+  /* ---------- empezar ---------- */
+  function launch(opts) {
+    const begin = () => {
+      const s = createSession(opts);
+      if (!s) { toast('No hay preguntas con esa combinación de filtros.'); return; }
+      session = s;
+      saveSession();
+      result = null;
+      LS.del(KEYS.result);
+      openSession();
+    };
+    if (session) {
+      openSheet('¿Empezar una sesión nueva?', '<p>Tienes una sesión sin terminar. Si empiezas otra, se descarta sin guardar su resultado.</p>', [
+        { label: 'Descartar y empezar', kind: 'primary', run: () => { discardSession(); begin(); } },
+        { label: 'Continuar la que tengo', run: openSession },
+        { label: 'Cancelar' },
+      ]);
+    } else begin();
+  }
+  function discardSession() {
+    session = null;
+    LS.del(KEYS.session);
+    stopTimer();
+    keepAwake(false);
+  }
+
+  /* ---------- sesión ---------- */
+  function openSession() {
+    if (!session) return renderHome();
+    document.body.dataset.exam = session.exam;
+    show('session');
+    renderSession();
+    startTimer();
+    keepAwake(true);
+  }
+
+  function answeredCount(s) {
+    return s.qids.filter((id) => (s.mode === 'practice' ? s.checked[id] : (s.ans[id] || []).length)).length;
+  }
+
+  function renderSession(focusKey) {
+    const s = session;
+    if (!s) return;
+    const ex = EXAMS[s.exam];
+    const id = s.qids[s.cur];
+    const q = BYID.get(id);
+    const total = s.qids.length;
+    const multi = q.a.length > 1;
+    const sel = s.ans[id] || [];
+    const practice = s.mode === 'practice';
+    const done = practice && !!s.checked[id];
+    const last = s.cur === total - 1;
+
+    $('exitBtn').innerHTML = ICON.close;
+    $('tbTitle').textContent = ex.code + ' · ' + MODE_NAME[s.mode] + (s.timed ? '' : ' · sin tiempo');
+    $('trackFill').style.width = ((100 * answeredCount(s)) / total).toFixed(1) + '%';
+    $('navCount').textContent = s.cur + 1 + '/' + total;
+    $('qNum').textContent = 'Pregunta ' + (s.cur + 1) + ' de ' + total;
+    $('qDom').textContent = ex.domains[q.d].name + ' · ' + q.t;
+    $('qText').innerHTML = rich(q.q);
+    const hint = $('qHint');
+    hint.hidden = !multi;
+    if (multi) hint.innerHTML = ICON.multi + 'Elige ' + q.a.length + ' respuestas';
+    optsEl.classList.toggle('multi', multi);
+    optsEl.setAttribute('aria-label', multi ? 'Opciones: elige ' + q.a.length : 'Opciones: elige una');
+    optsEl.innerHTML = s.perm[id].map((k, pos) => {
+      const picked = sel.includes(k);
+      let cls = 'opt';
+      let tag = '';
+      if (done) {
+        if (q.a.includes(k)) { cls += ' is-correct'; tag = '<span class="tag tag-ok">' + ICON.check + (picked ? 'Correcta · tu respuesta' : 'Correcta') + '</span>'; }
+        else if (picked) { cls += ' is-wrong'; tag = '<span class="tag tag-bad">' + ICON.x + 'Tu respuesta</span>'; }
+        else cls += ' is-dim';
+      }
+      return '<button type="button" class="' + cls + '" data-k="' + k + '" aria-pressed="' + picked + '"' + (done ? ' disabled' : '') + '>'
+        + '<span class="letter" aria-hidden="true">' + LETTERS[pos] + '</span>'
+        + '<span class="otext"><span><span class="sr-letter" hidden>' + LETTERS[pos] + '. </span>' + inline(q.o[k]) + '</span>' + tag + '</span></button>';
+    }).join('');
+
+    if (done) {
+      const ok = isCorrect(q, sel);
+      const letters = s.perm[id].map((k, pos) => (q.a.includes(k) ? LETTERS[pos] : '')).filter(Boolean).join(' y ');
+      $('verdict').innerHTML = statusIcon(ok ? 'good' : 'bad') + '<span>' + (ok ? 'Correcto' : 'Incorrecto · la respuesta es ' + letters) + '</span>';
+      $('explain').innerHTML = rich(q.e);
+      feedback.hidden = false;
+    } else feedback.hidden = true;
+
+    prevBtn.disabled = s.cur === 0;
+    if (practice && !done) {
+      midBtn.removeAttribute('aria-pressed');
+      midBtn.textContent = 'Saltar';
+      midBtn.disabled = last;
+    } else {
+      const flagged = !!s.flags[id];
+      midBtn.setAttribute('aria-pressed', String(flagged));
+      midBtn.innerHTML = ICON.flag + '<span>' + (flagged ? 'Marcada' : 'Marcar') + '</span>';
+      midBtn.disabled = false;
+    }
+    if (practice) {
+      if (!done) { mainBtn.textContent = 'Comprobar'; mainBtn.disabled = sel.length !== q.a.length; }
+      else { mainBtn.textContent = last ? 'Ver resultados' : 'Siguiente'; mainBtn.disabled = false; }
+    } else {
+      mainBtn.textContent = last ? 'Revisar y terminar' : 'Siguiente';
+      mainBtn.disabled = false;
+    }
+    if (focusKey != null) {
+      const btn = optsEl.querySelector('[data-k="' + focusKey + '"]');
+      if (btn) btn.focus();
+    }
+  }
+
+  function choose(k) {
+    const s = session;
+    const id = s.qids[s.cur];
+    const q = BYID.get(id);
+    if (s.mode === 'practice' && s.checked[id]) return;
+    let sel = (s.ans[id] || []).slice();
+    if (q.a.length > 1) {
+      sel = sel.includes(k) ? sel.filter((x) => x !== k) : sel.concat(k);
+      while (sel.length > q.a.length) sel.shift();
+    } else sel = sel[0] === k && s.mode === 'exam' ? [] : [k];
+    s.ans[id] = sel;
+    saveSession();
+    const hadFocus = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('opt');
+    renderSession(hadFocus ? k : null);
+  }
+
+  function go(index) {
+    const s = session;
+    s.cur = Math.min(Math.max(0, index), s.qids.length - 1);
+    saveSession();
+    renderSession();
+    window.scrollTo(0, 0);
+  }
+
+  function primaryAction() {
+    const s = session;
+    if (!s || mainBtn.disabled) return;
+    const id = s.qids[s.cur];
+    const q = BYID.get(id);
+    const last = s.cur === s.qids.length - 1;
+    if (s.mode === 'practice') {
+      if (!s.checked[id]) {
+        const sel = s.ans[id] || [];
+        if (sel.length !== q.a.length) return;
+        s.checked[id] = true;
+        bumpStat(id, isCorrect(q, sel));
+        saveProgress(false);
+        saveSession();
+        renderSession();
+        feedback.scrollIntoView({ behavior: motionOK ? 'smooth' : 'auto', block: 'nearest' });
+        return;
+      }
+      if (last) { finishSession('done'); return; }
+      go(s.cur + 1);
+      return;
+    }
+    if (last) { openFinishSheet(); return; }
+    go(s.cur + 1);
+  }
+
+  function midAction() {
+    const s = session;
+    const id = s.qids[s.cur];
+    if (s.mode === 'practice' && !s.checked[id]) { if (s.cur < s.qids.length - 1) go(s.cur + 1); return; }
+    if (s.flags[id]) delete s.flags[id]; else s.flags[id] = 1;
+    saveSession();
+    renderSession();
+  }
+
+  function navGrid(s) {
+    return '<div class="navgrid">' + s.qids.map((id, i) => {
+      const q = BYID.get(id);
+      const sel = s.ans[id] || [];
+      let cls = '';
+      let state = 'sin responder';
+      if (s.mode === 'practice') {
+        if (s.checked[id]) { const ok = isCorrect(q, sel); cls = ok ? 'ok' : 'bad'; state = ok ? 'correcta' : 'incorrecta'; }
+      } else if (sel.length) { cls = 'answered'; state = 'respondida'; }
+      if (s.flags[id]) { cls += ' flagged'; state += ', marcada'; }
+      if (i === s.cur) cls += ' current';
+      return '<button type="button" class="num ' + cls.trim() + '" data-go="' + i + '" aria-label="Pregunta ' + (i + 1) + ', ' + state + '">' + (i + 1) + '</button>';
+    }).join('') + '</div>';
+  }
+  function navLegend(s) {
+    return '<p class="legend">' + (s.mode === 'practice'
+      ? '<span><i class="ok"></i>Correcta</span><span><i class="bad"></i>Incorrecta</span><span><i></i>Sin responder</span>'
+      : '<span><i class="answered"></i>Respondida</span><span><i></i>Sin responder</span>')
+      + '<span><i class="flag"></i>Marcada</span></p>';
+  }
+  function bindGrid(body) {
+    const handler = (e) => {
+      const b = e.target.closest('[data-go]');
+      if (!b) return;
+      closeSheet();
+      go(Number(b.dataset.go));
+    };
+    body.addEventListener('click', handler);
+    return () => body.removeEventListener('click', handler);
+  }
+  function openNavigator() {
+    const s = session;
+    const done = answeredCount(s);
+    const flagged = Object.keys(s.flags).length;
+    openSheet('Preguntas', '<p>' + done + ' de ' + s.qids.length + (s.mode === 'practice' ? ' comprobadas' : ' respondidas') + ' · ' + plural(flagged, 'marcada', 'marcadas') + '. Toca un número para ir a esa pregunta.</p>' + navGrid(s) + navLegend(s), [
+      { label: s.mode === 'exam' ? 'Terminar y calificar' : 'Terminar práctica', kind: 'primary', run: s.mode === 'exam' ? openFinishSheet : () => finishSession('done') },
+      { label: 'Seguir respondiendo' },
+    ], bindGrid);
+  }
+  function openFinishSheet() {
+    const s = session;
+    const answered = answeredCount(s);
+    const blank = s.qids.length - answered;
+    const flagged = Object.keys(s.flags).length;
+    openSheet('¿Terminar el examen?', '<ul class="summary-list">'
+      + '<li><span>Respondidas</span><b class="num">' + answered + ' / ' + s.qids.length + '</b></li>'
+      + '<li><span>Sin responder</span><b class="num">' + blank + '</b></li>'
+      + '<li><span>Marcadas para revisar</span><b class="num">' + flagged + '</b></li></ul>'
+      + (blank ? '<p style="margin-top:12px">Las preguntas sin responder cuentan como incorrectas. Toca un número para ir a ella.</p>' : '<p style="margin-top:12px">Toca un número si quieres revisar alguna antes de calificar.</p>')
+      + navGrid(s) + navLegend(s), [
+      { label: 'Terminar y calificar', kind: 'primary', run: () => finishSession('done') },
+      { label: 'Volver a las preguntas' },
+    ], bindGrid);
+  }
+  function openExitSheet() {
+    const s = session;
+    openSheet('¿Salir de la sesión?', '<p>Tu sesión queda guardada en este dispositivo y puedes continuarla desde el inicio.' + (s.endsAt ? ' Ojo: el reloj sigue corriendo, como en el examen real.' : '') + '</p>', [
+      { label: 'Seguir aquí', kind: 'primary' },
+      { label: 'Salir al inicio', run: () => { stopTimer(); keepAwake(false); renderHome(); } },
+      { label: ICON.x + 'Abandonar sin guardar', kind: 'danger', run: () => { discardSession(); renderHome(); toast('Sesión descartada.'); } },
+    ]);
+  }
+
+  function finishSession(reason) {
+    const s = session;
+    if (!s) return;
+    stopTimer();
+    keepAwake(false);
+    const ex = EXAMS[s.exam];
+    const now = Date.now();
+    const end = s.endsAt ? Math.min(now, s.endsAt) : now;
+    const per = ex.domains.map(() => [0, 0]);
+    let correct = 0;
+    let answered = 0;
+    let counted = 0;
+    for (const id of s.qids) {
+      const q = BYID.get(id);
+      const sel = s.ans[id] || [];
+      if (s.mode === 'practice' && !s.checked[id]) continue;
+      counted++;
+      if (sel.length) answered++;
+      const ok = isCorrect(q, sel);
+      if (ok) correct++;
+      per[q.d][1]++;
+      if (ok) per[q.d][0]++;
+      if (s.mode === 'exam') bumpStat(id, ok, now);
+    }
+    const entry = {
+      id: s.id, exam: s.exam, mode: s.mode, timed: s.timed, n: s.qids.length, counted, answered, correct,
+      score: counted ? Math.round((100 * correct) / counted) : 0,
+      dur: Math.max(0, Math.round((end - s.startedAt) / 1000)), ts: now, dom: per, reason,
+    };
+    if (counted) {
+      progress.history.unshift(entry);
+      progress.history = progress.history.slice(0, 200);
+      progress.updated = now;
+    }
+    saveProgress(true);
+    result = { entry, session: s };
+    LS.set(KEYS.result, result);
+    session = null;
+    LS.del(KEYS.session);
+    reviewFilter = 'all';
+    showResults();
+    if (reason === 'time') toast('Se acabó el tiempo. Calificamos lo que alcanzaste a responder.');
+  }
+
+  /* ---------- reloj ---------- */
+  let tick = 0;
+  let warned = false;
+  function startTimer() {
+    stopTimer();
+    warned = !!(session && session.endsAt && session.endsAt - Date.now() <= 300000);
+    updateTimer();
+    tick = setInterval(updateTimer, 1000);
+  }
+  function stopTimer() { clearInterval(tick); tick = 0; }
+  function updateTimer() {
+    if (!session || view !== 'session') { stopTimer(); return; }
+    const now = Date.now();
+    if (session.endsAt) {
+      const left = Math.max(0, Math.round((session.endsAt - now) / 1000));
+      timerEl.innerHTML = ICON.clock + '<span>' + clock(left) + '</span>';
+      timerEl.classList.toggle('low', left <= 300);
+      timerEl.setAttribute('aria-label', 'Tiempo restante ' + clock(left));
+      if (left <= 300 && !warned && left > 0) { warned = true; toast('Quedan 5 minutos.'); }
+      if (left <= 0) finishSession('time');
+    } else {
+      timerEl.classList.remove('low');
+      timerEl.innerHTML = ICON.clock + '<span>' + clock((now - session.startedAt) / 1000) + '</span>';
+      timerEl.setAttribute('aria-label', 'Tiempo transcurrido');
+    }
+  }
+
+  /* ---------- pantalla encendida durante la sesión ---------- */
+  let wakeLock = null;
+  async function keepAwake(on) {
+    try {
+      if (on) {
+        if (!wakeLock && navigator.wakeLock && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        }
+      } else if (wakeLock) {
+        const lock = wakeLock;
+        wakeLock = null;
+        await lock.release();
+      }
+    } catch (e) { wakeLock = null; }
+  }
+
+  /* ---------- resultados ---------- */
+  function resultItems(r) {
+    const s = r.session;
+    return s.qids.map((id, idx) => {
+      const q = BYID.get(id);
+      const sel = s.ans[id] || [];
+      const graded = s.mode === 'exam' || !!s.checked[id];
+      return { id, idx, q, sel, graded, ok: graded && isCorrect(q, sel), flagged: !!s.flags[id] };
+    });
+  }
+  function showResults() {
+    const r = result;
+    if (!r) { renderHome(); return; }
+    const e = r.entry;
+    const ex = EXAMS[e.exam];
+    document.body.dataset.exam = e.exam;
+    $('rEyebrow').textContent = ex.code + ' · ' + MODE_NAME[e.mode] + (e.timed ? ' · con tiempo' : ' · sin tiempo');
+    if (!e.counted) {
+      $('rScore').textContent = '—';
+      $('rUnit').hidden = true;
+      $('rStatus').innerHTML = '<p class="note" style="margin-top:8px">No comprobaste ninguna pregunta, así que no hay nota para esta práctica.</p>';
+      $('rSub').textContent = '';
+    } else {
+      $('rScore').textContent = String(e.score);
+      $('rUnit').hidden = false;
+      const pass = e.score >= ex.pass;
+      $('rStatus').innerHTML = e.mode === 'exam'
+        ? statusHTML(pass ? 'good' : 'bad', pass ? 'Aprobado · el mínimo es ' + ex.pass + ' %' : 'No aprobado · necesitas ' + ex.pass + ' %')
+        : statusHTML(pass ? 'good' : 'warn', pass ? 'Por encima del ' + ex.pass + ' % que pide el examen' : 'Por debajo del ' + ex.pass + ' % que pide el examen');
+      let sub = e.correct + ' de ' + e.counted + ' correctas · ' + durLabel(e.dur);
+      if (e.mode === 'exam' && e.answered < e.n) sub += ' · ' + (e.n - e.answered) + ' sin responder';
+      if (e.mode === 'practice' && e.counted < e.n) sub += ' · ' + (e.n - e.counted) + ' sin comprobar';
+      if (e.reason === 'time') sub += ' · se acabó el tiempo';
+      $('rSub').textContent = sub;
+    }
+    $('rDomains').innerHTML = domainBars(ex, e.dom.map((d) => ({ right: d[0], seen: d[1] })), 'result');
+    const wrong = resultItems(r).filter((it) => it.graded && !it.ok).length;
+    const retry = $('retryWrongBtn');
+    retry.disabled = !wrong;
+    retry.textContent = wrong ? 'Repasar (' + wrong + ')' : 'Sin falladas';
+    retry.setAttribute('aria-label', wrong ? 'Repasar las ' + plural(wrong, 'pregunta fallada', 'preguntas falladas') : 'No hay preguntas falladas');
+    renderReview();
+    show('results');
+  }
+  function renderReview() {
+    const items = resultItems(result);
+    const counts = {
+      all: items.length,
+      wrong: items.filter((it) => it.graded && !it.ok).length,
+      flagged: items.filter((it) => it.flagged).length,
+    };
+    if (!counts[reviewFilter]) reviewFilter = 'all';
+    $('rFilter').innerHTML = [['all', 'Todas'], ['wrong', 'Incorrectas'], ['flagged', 'Marcadas']]
+      .map(([v, label]) => '<button type="button" class="chip" role="radio" data-filter="' + v + '" aria-checked="' + (reviewFilter === v) + '"' + (counts[v] ? '' : ' disabled') + '>' + label + ' <span class="num">(' + counts[v] + ')</span></button>').join('');
+    const list = items.filter((it) => reviewFilter === 'all' || (reviewFilter === 'wrong' ? it.graded && !it.ok : it.flagged));
+    const perm = result.session.perm;
+    $('rList').innerHTML = list.map((it) => {
+      const q = it.q;
+      const state = !it.graded ? 'skip' : it.ok ? 'ok' : 'bad';
+      const mark = '<span class="mark ' + state + '" role="img" aria-label="' + (state === 'ok' ? 'Correcta' : state === 'bad' ? 'Incorrecta' : 'Sin comprobar') + '">' + (state === 'ok' ? ICON.check : state === 'bad' ? ICON.x : ICON.dash) + '</span>';
+      const order = perm[q.i] || q.o.map((_, k) => k);
+      const options = order.map((k, pos) => {
+        const isAns = q.a.includes(k);
+        const picked = it.sel.includes(k);
+        const cls = isAns ? 'correct' : picked ? 'picked-wrong' : '';
+        const tags = (isAns ? '<span class="tag tag-ok">' + ICON.check + 'Correcta</span>' : '') + (picked ? '<span class="tag' + (isAns ? '' : ' tag-bad') + '">' + (isAns ? '' : ICON.x) + 'Tu respuesta</span>' : '');
+        return '<li class="' + cls + '"><span class="l">' + LETTERS[pos] + '</span><span>' + inline(q.o[k]) + (tags ? '<span class="rtags">' + tags + '</span>' : '') + '</span></li>';
+      }).join('');
+      return '<li><details class="ritem"' + (reviewFilter === 'wrong' ? ' open' : '') + '><summary><span class="rn num">' + (it.idx + 1) + '</span>' + mark + '<span class="rsum">' + esc(trunc(plain(q.q), 120)) + '</span></summary>'
+        + '<div class="rbody"><p class="qdom">' + esc(EXAMS[q.x].domains[q.d].name) + ' · ' + esc(q.t) + (it.flagged ? ' · marcada' : '') + '</p>'
+        + '<div class="qtext small">' + rich(q.q) + '</div><ol class="ropts">' + options + '</ol><div class="explain">' + rich(q.e) + '</div></div></details></li>';
+    }).join('');
+  }
+
+  /* ---------- sincronización opcional con tu cuenta (solo en el enlace publicado) ---------- */
+  const cloud = { ref: null, busy: false, again: false, timer: 0, retried: false };
+  function setSync(state) {
+    const badge = $('syncBadge');
+    const text = { local: 'Guardado en este dispositivo', syncing: 'Sincronizando…', cloud: 'Sincronizado con tu cuenta', error: 'Sin sincronizar · guardado aquí' }[state];
+    badge.textContent = text;
+    badge.classList.toggle('on', state === 'cloud');
+  }
+  function schedulePush(delay) {
+    if (!cloud.ref) return;
+    clearTimeout(cloud.timer);
+    cloud.timer = setTimeout(pushCloud, delay);
+  }
+  async function pushCloud() {
+    if (!cloud.ref) return;
+    if (cloud.busy) { cloud.again = true; return; }
+    cloud.busy = true;
+    setSync('syncing');
+    try {
+      await cloud.ref.set(JSON.parse(JSON.stringify(progress)));
+      cloud.retried = false;
+      setSync('cloud');
+    } catch (e) {
+      setSync('error');
+      if (e && e.code === 'unavailable' && !cloud.retried) { cloud.retried = true; schedulePush(1500 + Math.random() * 2000); }
+      if (e && e.code === 'revoked') cloud.ref = null;
+    } finally {
+      cloud.busy = false;
+      if (cloud.again) { cloud.again = false; pushCloud(); }
+    }
+  }
+  async function initCloud() {
+    const host = window.claude;
+    if (!host || typeof host.use !== 'function') return;
+    try {
+      const [db, user] = await Promise.all([host.use('db'), host.use('user')]);
+      if (!db || !user) return;
+      const uid = await user.id();
+      if (!uid) return;
+      let ref;
+      try { ref = db.doc('data/users/' + uid + '/progress'); } catch (e) { return; }
+      setSync('syncing');
+      const snap = await ref.get();
+      const remote = snap.exists ? normalizeProgress(snap.data()) : null;
+      const merged = remote ? mergeProgress(progress, remote) : progress;
+      const localChanged = JSON.stringify(merged) !== JSON.stringify(progress);
+      progress = merged;
+      LS.set(KEYS.progress, progress);
+      cloud.ref = ref;
+      if (!remote || JSON.stringify(remote) !== JSON.stringify(merged)) await pushCloud();
+      else setSync('cloud');
+      if (localChanged && view === 'home') refreshHome();
+    } catch (e) {
+      setSync('error');
+    }
+  }
+
+  /* ---------- eventos ---------- */
+  $('examPicker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-x]');
+    if (!b || settings.exam === b.dataset.x) return;
+    settings.exam = b.dataset.x;
+    settings.domain = 'all';
+    saveSettings();
+    refreshHome();
+  });
+  $('modePicker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-mode]');
+    if (!b) return;
+    settings.mode = b.dataset.mode;
+    saveSettings();
+    renderModes();
+    renderStartBar();
+  });
+  $('timedInput').addEventListener('change', (e) => {
+    settings.timed = e.target.checked;
+    saveSettings();
+    renderModes();
+    renderStartBar();
+  });
+  $('countChips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-count]');
+    if (!b) return;
+    settings.count = b.dataset.count === 'all' ? 'all' : Number(b.dataset.count);
+    saveSettings();
+    renderPracticeOpts();
+    renderStartBar();
+  });
+  $('sourceChips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-source]');
+    if (!b || b.disabled) return;
+    settings.source = b.dataset.source;
+    saveSettings();
+    renderPracticeOpts();
+    renderStartBar();
+  });
+  $('domainSelect').addEventListener('change', (e) => {
+    settings.domain = e.target.value === 'all' ? 'all' : Number(e.target.value);
+    saveSettings();
+    renderPracticeOpts();
+    renderStartBar();
+  });
+  $('startBtn').addEventListener('click', () => {
+    launch({ exam: settings.exam, mode: settings.mode, timed: settings.timed, count: settings.count, domain: settings.domain, source: settings.source });
+  });
+  $('resumeBtn').addEventListener('click', openSession);
+  $('discardBtn').addEventListener('click', () => {
+    openSheet('¿Descartar la sesión?', '<p>Se borra la sesión en curso. Las preguntas que ya comprobaste en modo Simulador siguen contando en tu progreso.</p>', [
+      { label: 'Descartar', kind: 'primary', run: () => { discardSession(); refreshHome(); } },
+      { label: 'Cancelar' },
+    ]);
+  });
+  $('statsBody').addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t) return;
+    if (t.id === 'reviewWrongBtn') {
+      const ids = shuffle(EXAMS[settings.exam].bank.filter((q) => isWrong(q.i)).map((q) => q.i)).slice(0, 60);
+      if (ids.length) launch({ exam: settings.exam, mode: 'practice', timed: false, qids: ids, count: ids.length, domain: 'all', source: 'wrong' });
+    } else if (t.id === 'weakBtn') {
+      const st = examStats(settings.exam);
+      const ex = EXAMS[settings.exam];
+      let best = 0;
+      let bestScore = Infinity;
+      st.doms.forEach((d, i) => {
+        const score = d.seen ? d.right / d.seen : -1 + i * 0.001;
+        if (score < bestScore) { bestScore = score; best = i; }
+      });
+      toast('Practicando: ' + ex.domains[best].name);
+      launch({ exam: settings.exam, mode: 'practice', timed: settings.timed, count: 20, domain: best, source: 'all' });
+    } else if (t.dataset.practiceDomain != null) {
+      const d = Number(t.dataset.practiceDomain);
+      launch({ exam: settings.exam, mode: 'practice', timed: settings.timed, count: 20, domain: d, source: 'all' });
+    } else if (t.id === 'resetBtn') {
+      const ex = EXAMS[settings.exam];
+      openSheet('¿Borrar tu progreso de ' + ex.code + '?', '<p>Se eliminan tus aciertos, fallos e intentos de ' + esc(ex.code) + ' en este dispositivo' + (cloud.ref ? ' y en tu cuenta' : '') + '. No se puede deshacer.</p>', [
+        { label: 'Borrar progreso', kind: 'primary', run: () => {
+          const prefix = settings.exam + '-';
+          for (const id of Object.keys(progress.stats)) if (id.startsWith(prefix)) delete progress.stats[id];
+          progress.history = progress.history.filter((h) => h.exam !== settings.exam);
+          progress.updated = Date.now();
+          saveProgress(true);
+          refreshHome();
+          toast('Progreso de ' + ex.code + ' borrado.');
+        } },
+        { label: 'Cancelar' },
+      ]);
+    }
+  });
+
+  optsEl.addEventListener('click', (e) => {
+    const b = e.target.closest('.opt');
+    if (!b || b.disabled) return;
+    choose(Number(b.dataset.k));
+  });
+  prevBtn.addEventListener('click', () => { if (session && session.cur > 0) go(session.cur - 1); });
+  midBtn.addEventListener('click', () => { if (session) midAction(); });
+  mainBtn.addEventListener('click', primaryAction);
+  $('navBtn').addEventListener('click', () => { if (session) openNavigator(); });
+  $('exitBtn').addEventListener('click', () => { if (session) openExitSheet(); });
+
+  $('rFilter').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-filter]');
+    if (!b || b.disabled) return;
+    reviewFilter = b.dataset.filter;
+    renderReview();
+  });
+  $('homeBtn').addEventListener('click', () => { refreshHome(); window.scrollTo(0, 0); });
+  $('retryWrongBtn').addEventListener('click', () => {
+    if (!result) return;
+    const ids = resultItems(result).filter((it) => it.graded && !it.ok).map((it) => it.id);
+    if (ids.length) launch({ exam: result.entry.exam, mode: 'practice', timed: false, qids: ids, count: ids.length, domain: 'all', source: 'wrong' });
+  });
+  $('againBtn').addEventListener('click', () => {
+    if (!result) return;
+    const o = result.session.opts || {};
+    launch({ exam: result.entry.exam, mode: o.mode || result.entry.mode, timed: o.timed != null ? o.timed : result.entry.timed, count: o.qids ? o.qids.length : (o.count || 20), domain: o.domain != null ? o.domain : 'all', source: o.qids ? 'all' : (o.source || 'all'), qids: o.qids || null });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!overlay.hidden) {
+      if (e.key === 'Escape') { e.preventDefault(); closeSheet(); }
+      return;
+    }
+    if (view !== 'session' || !session || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    const key = e.key.toLowerCase();
+    let idx = '12345'.indexOf(key);
+    if (idx < 0) idx = 'abcde'.indexOf(key);
+    if (idx >= 0 && key.length === 1) {
+      const btn = optsEl.children[idx];
+      if (btn && !btn.disabled) { e.preventDefault(); choose(Number(btn.dataset.k)); }
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (t && t.classList && t.classList.contains('opt')) return;
+      if (t && t.tagName === 'BUTTON' && t !== mainBtn) return;
+      e.preventDefault();
+      primaryAction();
+    } else if (e.key === 'ArrowRight') { e.preventDefault(); if (session.cur < session.qids.length - 1) go(session.cur + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); if (session.cur > 0) go(session.cur - 1); }
+    else if (key === 'f' && (session.mode === 'exam' || session.checked[session.qids[session.cur]])) { e.preventDefault(); midAction(); }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      if (view === 'session' && session) { keepAwake(true); updateTimer(); }
+      if (view === 'home') renderResume();
+    } else {
+      saveSession();
+      if (cloud.ref && cloud.timer) { clearTimeout(cloud.timer); cloud.timer = 0; pushCloud(); }
+    }
+  });
+
+  /* ---------- arranque ---------- */
+  function start(hotData) {
+    drawHelm();
+    const wanted = hotData && hotData.view;
+    if (session && session.endsAt && Date.now() >= session.endsAt) {
+      finishSession('time');
+    } else if (wanted === 'session' && session) {
+      openSession();
+    } else if (wanted === 'results' && result) {
+      showResults();
+    } else {
+      renderHome();
+    }
+    initCloud();
+  }
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.snapshot === 'function') { try { hot.snapshot(() => ({ view })); } catch (e) { /* sin recarga en caliente */ } }
+  if (hot && typeof hot.ready === 'function') hot.ready(start);
+  else start((hot && hot.data) || {});
+})();
+</script>
