@@ -342,11 +342,11 @@ Which statement about Kubernetes Secrets is true?
 
 ### [2/Security/2]
 Which statement about ServiceAccount tokens in current Kubernetes versions is correct?
-- [ ] Each ServiceAccount automatically gets a non-expiring token Secret
+- [ ] Each ServiceAccount automatically gets a non-expiring token stored in a Secret
 - [x] Pods get short-lived, audience-bound tokens that are rotated automatically
-- [ ] ServiceAccount tokens are disabled by default for every Pod
-- [ ] Tokens are only issued to Pods that run in `kube-system`
-> Gracias a la API TokenRequest, los Pods reciben tokens con caducidad y audiencia, montados en un volumen proyectado que el kubelet renueva. Desde 1.24 ya no se crean automáticamente Secrets con tokens sin caducidad. Si un Pod no necesita la API, se puede usar `automountServiceAccountToken: false`.
+- [ ] ServiceAccount tokens are disabled by default and must be requested per Pod
+- [ ] Tokens are only issued to Pods that run in the `kube-system` namespace
+> Gracias a la API TokenRequest, los Pods reciben tokens con caducidad y audiencia, montados en un volumen proyectado que el kubelet renueva. Desde 1.24 ya no se crean automáticamente Secrets con tokens sin caducidad. Los tokens se montan por defecto en cualquier namespace; si un Pod no necesita la API, se puede usar `automountServiceAccountToken: false`.
 
 ### [2/Security/2]
 A Pod does not need to talk to the Kubernetes API. What is a good hardening step?

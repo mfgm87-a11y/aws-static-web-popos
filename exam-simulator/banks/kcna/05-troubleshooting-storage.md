@@ -273,12 +273,14 @@ Which objects let you take point-in-time snapshots of persistent volumes with CS
 > La API de snapshots (VolumeSnapshot, VolumeSnapshotContent y VolumeSnapshotClass) permite crear instantáneas con drivers CSI compatibles y restaurarlas creando un PVC cuyo `dataSource` apunta a la snapshot.
 
 ### [2/Storage/2]
-Which annotation marks a StorageClass as the cluster default?
-- [ ] `kubernetes.io/default-storage-class: "enabled"`
-- [x] `storageclass.kubernetes.io/is-default-class: "true"`
-- [ ] `storage.k8s.io/is-primary-storageclass: "yes"`
-- [ ] `storageclass.k8s.io/default-for-cluster: "true"`
-> La StorageClass por defecto se usa para los PVC que no indican `storageClassName`, y se marca con la anotación `storageclass.kubernetes.io/is-default-class: "true"`. `kubectl get storageclass` la muestra con "(default)".
+A PVC does not set `storageClassName`, and the cluster has several StorageClasses. Which one is used for dynamic provisioning?
+- [ ] The StorageClass that was created most recently
+- [x] The StorageClass marked as the cluster default
+- [ ] The StorageClass whose name sorts first alphabetically
+- [ ] None, because a PVC must always name its StorageClass
+> Si un PVC no indica `storageClassName`, el admission controller *DefaultStorageClass* le asigna la StorageClass marcada como predeterminada (anotación `storageclass.kubernetes.io/is-default-class: "true"`; `kubectl get storageclass` la muestra con "(default)").
+>
+> No se elige por fecha ni por orden alfabético, y el campo no es obligatorio. Si no hay ninguna clase por defecto, el PVC solo puede enlazarse a un PV estático compatible.
 
 ### [2/Storage/2]
 Which CNCF graduated project orchestrates Ceph to provide block, file and object storage inside Kubernetes?

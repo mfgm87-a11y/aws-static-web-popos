@@ -25,14 +25,6 @@ Which communication crosses the trust boundary between the control plane and the
 > La frontera control plane ↔ nodos la cruzan los kubelets cuando reportan al API server y el API server cuando llama al kubelet (logs, exec, port-forward). Por eso ambos sentidos deben autenticarse y cifrarse, y el kubelet debe limitarse con el autorizador Node y NodeRestriction.
 
 ### [4/Trust Boundaries/2]
-Why is the namespace boundary considered weak from a threat modeling perspective?
-- [ ] Because namespaces cannot have RBAC rules applied to them
-- [x] Workloads still share nodes, the kernel and the network
-- [ ] Because namespaces are deleted whenever a node restarts
-- [ ] Because every namespace shares the same ServiceAccount token
-> Los namespaces separan nombres y permiten aplicar políticas, pero las cargas comparten nodos, kernel, red plana por defecto y recursos de ámbito de clúster. Un escape de contenedor o un error de RBAC puede cruzar esa frontera, así que no hay que tratarla como un aislamiento fuerte.
-
-### [4/Trust Boundaries/2]
 Why is the boundary between a cluster and its cloud provider account important in the threat model?
 - [ ] Because the cloud account can never be reached from inside Pods
 - [x] Node or Pod credentials may let a compromised workload reach cloud APIs

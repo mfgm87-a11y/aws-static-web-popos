@@ -38,7 +38,9 @@ What is the main responsibility of kube-proxy?
 - [ ] Encrypt the traffic between Pods that run on different nodes
 - [x] Maintain node network rules that implement Service virtual IPs
 - [ ] Assign IP addresses to new Pods from each node's Pod CIDR range
-> kube-proxy corre en cada nodo y programa reglas (iptables, nftables o IPVS) para que el tráfico hacia la IP virtual de un Service llegue a alguno de sus endpoints. No cifra tráfico (eso lo hace un service mesh o el CNI) ni asigna IPs a los Pods (eso es del plugin CNI/IPAM).
+> kube-proxy corre en cada nodo y programa reglas de red (iptables por defecto, o nftables; el modo IPVS está obsoleto desde v1.35) para que el tráfico hacia la IP virtual de un Service llegue a alguno de sus Pods.
+>
+> No hace de proxy para `kubectl` (eso es `kubectl proxy`), no cifra tráfico (eso lo hace un service mesh o el CNI) ni asigna IPs a los Pods (eso es del plugin CNI/IPAM).
 
 ### [1/Core Concepts/2]
 Which control plane component runs controllers such as the Node, ReplicaSet, EndpointSlice and ServiceAccount controllers?
@@ -67,18 +69,22 @@ What is the smallest deployable unit of computing that you can create and manage
 ### [1/Core Concepts/2]
 Two containers in the same Pod need to communicate over the network. How can container A reach container B listening on port 8080?
 - [x] `localhost:8080`
-- [ ] The Pod's Service name on port 8080
+- [ ] Container B's name, resolved by cluster DNS, on port 8080
 - [ ] Container B's own IP address on port 8080
 - [ ] `127.0.0.2:8080`, because each container has its own loopback
-> Todos los contenedores de un Pod comparten el mismo *network namespace*: misma IP y mismo espacio de puertos, así que se comunican por `localhost`. No existe una IP distinta por contenedor, y un Service se usa para llegar a Pods desde fuera de ellos.
+> Todos los contenedores de un Pod comparten el mismo *network namespace*: misma IP y mismo espacio de puertos, así que se comunican por `localhost`.
+>
+> No existe una IP ni un loopback distinto por contenedor, y el DNS del clúster no crea registros con nombres de contenedores: solo crea registros para Services y Pods.
 
 ### [1/Core Concepts/2]
 What is the purpose of init containers in a Pod?
-- [ ] They run alongside the app containers for the whole Pod lifetime
+- [ ] They run alongside the app containers for the entire lifetime of the Pod
 - [x] They run to completion, one at a time, before the app containers start
 - [ ] They restart the app containers when liveness probes fail
-- [ ] They prepare the node before the kubelet starts
+- [ ] They prepare the node's network and storage before the kubelet starts
 > Los init containers se ejecutan en orden, uno tras otro, y cada uno debe terminar con éxito antes de que arranque el siguiente; solo después arrancan los contenedores de la aplicación. Sirven para preparar configuración, esperar dependencias o ejecutar migraciones.
+>
+> Seguir corriendo junto a la app toda la vida del Pod es lo que hace un *sidecar* (un init container con `restartPolicy: Always`), no un init container normal. Reiniciar contenedores cuando falla la liveness probe lo hace el kubelet, y los init containers viven dentro del Pod: no preparan el nodo.
 
 ### [1/Core Concepts/3]
 How do you declare a native sidecar container that starts before the main containers and keeps running for the whole life of the Pod?
@@ -155,10 +161,12 @@ Which of the following resources is cluster-scoped (not namespaced)?
 ### [1/Core Concepts/2]
 What is stored in the `kube-node-lease` namespace?
 - [ ] Certificates used for kubelet TLS bootstrapping
-- [x] Lease objects that nodes renew as lightweight heartbeats
+- [x] One Lease per node, used as a kubelet heartbeat
 - [ ] DaemonSet Pods that must run on every node
-- [ ] The history of node labels and taints
-> Cada nodo tiene un objeto Lease en `kube-node-lease` que su kubelet renueva periódicamente. Es un *heartbeat* barato que permite al node controller detectar rápido si un nodo dejó de responder, sin actualizar todo el objeto Node en cada latido.
+- [ ] The Lease used for kube-scheduler leader election
+> Cada nodo tiene un objeto Lease en `kube-node-lease`, y su kubelet lo renueva cada pocos segundos. Es un *heartbeat* liviano: el control plane lo usa para detectar si un nodo dejó de responder, sin tener que actualizar todo el objeto Node en cada latido.
+>
+> Ojo: no todos los Leases viven ahí. Por defecto, los Leases de elección de líder del kube-scheduler y del kube-controller-manager están en `kube-system`. Los Pods de un DaemonSet van en el namespace del propio DaemonSet.
 
 ### [1/Core Concepts/1]
 Which namespace contains control plane and system add-on components such as CoreDNS in most clusters?
@@ -179,10 +187,12 @@ A container needs a non-sensitive configuration file. Which object is designed f
 ### [1/Core Concepts/2]
 By default, how are the values of a Kubernetes Secret stored in etcd?
 - [ ] Encrypted with AES-256 using a cluster-wide key generated at install
-- [x] Base64-encoded only, unless encryption at rest is configured
+- [x] Unencrypted, unless encryption at rest is configured
 - [ ] Hashed with SHA-256 so that nobody can ever read the values back
 - [ ] Encrypted by the kubelet before they are sent to the API server
-> Por defecto los Secrets se guardan **sin cifrar** en etcd: los campos `data` solo están en base64, que no es cifrado. Para protegerlos hay que habilitar cifrado en reposo (EncryptionConfiguration, idealmente con KMS), restringir el acceso con RBAC y proteger etcd y sus backups.
+> Por defecto los Secrets se guardan **sin cifrar** en etcd: quien tenga acceso a etcd o a sus backups puede leerlos. El base64 que ves en el campo `data` de un Secret es solo una codificación, no un cifrado.
+>
+> Para protegerlos hay que habilitar el cifrado en reposo (EncryptionConfiguration, idealmente con KMS), restringir el acceso con RBAC y proteger etcd. Kubernetes no aplica AES ni hashes por defecto, y el kubelet no cifra los Secrets antes de enviarlos.
 
 ### [1/Core Concepts/3]
 A ConfigMap is consumed by a Pod both as environment variables and as a mounted volume (without `subPath`). You update the ConfigMap. What happens?
@@ -243,10 +253,12 @@ Which of these is NOT a valid Pod phase?
 ### [1/Core Concepts/2]
 You delete a Deployment with `kubectl delete deployment web`. What happens to its ReplicaSets and Pods by default?
 - [ ] They keep running as orphaned objects
-- [x] They are removed by cascading deletion based on owner references
+- [x] They are deleted too, through cascading deletion
 - [ ] Only the Pods are deleted; ReplicaSets are kept for rollback
-- [ ] They are moved to the `default` namespace
-> Los ReplicaSets tienen `ownerReferences` al Deployment y los Pods al ReplicaSet. El *garbage collector* aplica borrado en cascada (por defecto en *background*), así que se eliminan todos. Para dejarlos huérfanos habría que usar `--cascade=orphan`.
+- [ ] They are deleted only if you add `--cascade=foreground`
+> Los ReplicaSets tienen `ownerReferences` que apuntan al Deployment, y los Pods apuntan a su ReplicaSet. Por defecto Kubernetes hace borrado en cascada en *background*: borra el Deployment y el garbage collector elimina después sus ReplicaSets y Pods.
+>
+> `--cascade=foreground` también borra todo; solo cambia el orden (primero los dependientes y al final el dueño). Para dejarlos corriendo como huérfanos habría que usar `--cascade=orphan`.
 
 ### [1/Core Concepts/3]
 A namespace has been stuck in `Terminating` for a long time. What is the most likely cause?

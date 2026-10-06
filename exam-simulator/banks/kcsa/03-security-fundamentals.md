@@ -401,14 +401,6 @@ How can you ensure that sensitive workloads never share nodes with untrusted wor
 > Los taints mantienen fuera de los nodos dedicados a las cargas que no los toleran, y la afinidad obliga a las cargas sensibles a ir a esos nodos. Así no comparten kernel con código no confiable. Los namespaces por sí solos no controlan en qué nodo corre cada Pod.
 
 ### [3/Isolation & Segmentation/2]
-Why should a ResourceQuota be applied to each tenant namespace?
-- [ ] To encrypt the tenant's data on disk
-- [x] To stop one tenant from exhausting cluster resources
-- [ ] To give the tenant access to every node
-- [ ] To hide the tenant's Pods from all the other tenants
-> Sin cuotas, un inquilino (por error o malicia) podría consumir CPU, memoria, almacenamiento u objetos hasta afectar a los demás: una denegación de servicio. Las ResourceQuotas y los LimitRanges acotan el consumo por namespace y por contenedor.
-
-### [3/Isolation & Segmentation/2]
 Which approach provides the strongest isolation between tenants?
 - [ ] One namespace per tenant with shared nodes
 - [x] A separate cluster for each tenant

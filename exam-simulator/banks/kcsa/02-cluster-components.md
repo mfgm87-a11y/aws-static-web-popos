@@ -49,14 +49,6 @@ How does the API server make sure it is talking to the real kubelet when it conn
 > Por defecto el API server **no verifica** el certificado de servicio del kubelet, lo que expone la conexión a ataques *man-in-the-middle*. Con `--kubelet-certificate-authority` le indicas la CA con la que comprobarlo (y conviene que los kubelets obtengan certificados firmados por el clúster). El API server se autentica ante el kubelet con `--kubelet-client-certificate`.
 
 ### [2/API Server/2]
-Which API server feature protects it from being overwhelmed by too many requests from a single client or controller?
-- [ ] NodeRestriction
-- [x] API Priority and Fairness
-- [ ] The Node authorizer
-- [ ] Pod Security Admission
-> **API Priority and Fairness** clasifica las peticiones en niveles de prioridad y colas justas, de modo que un cliente que inunda el API server no puede dejar sin servicio al resto (incluidos los controladores críticos). Es una defensa contra denegación de servicio.
-
-### [2/API Server/2]
 Why does the CIS Kubernetes Benchmark recommend setting `--profiling=false` on control plane components?
 - [ ] Profiling stores Secrets in plain text on the node disk
 - [x] It exposes debugging data that production does not need
@@ -110,7 +102,9 @@ Why is kube-controller-manager a high-value target for attackers?
 - [x] It holds broad credentials and signing keys for the cluster
 - [ ] It terminates TLS for all Ingress traffic of the cluster
 - [ ] It runs inside every Pod as an injected sidecar container
-> El controller-manager tiene permisos amplios sobre casi todos los recursos y suele tener acceso a claves sensibles: la clave para firmar tokens de ServiceAccount (heredado) y la CA del clúster para firmar CSRs aprobadas. Comprometerlo puede llevar al control total del clúster.
+> El controller-manager tiene permisos amplios sobre casi todos los recursos y acceso a claves sensibles: la CA del clúster, con la que firma las CSRs aprobadas, y la clave privada de ServiceAccount (`--service-account-private-key-file`), con la que firma los tokens antiguos guardados en Secrets. Comprometerlo puede llevar al control total del clúster.
+>
+> No guarda imágenes (eso es el registro), no termina TLS de Ingress (eso es el Ingress controller) y no corre dentro de los Pods.
 
 ### [2/Controller Manager/2]
 The CIS Benchmark recommends binding kube-controller-manager and kube-scheduler to `127.0.0.1`. Why?

@@ -262,7 +262,9 @@ In a multi-tenant cluster, which admission plugin ensures that a private image a
 - [x] AlwaysPullImages
 - [ ] LimitRanger
 - [ ] DefaultStorageClass
-> Con `IfNotPresent`, un Pod de otro inquilino podría usar una imagen privada que ya estaba en la caché del nodo sin tener credenciales. **AlwaysPullImages** fuerza `imagePullPolicy: Always`, así el registro verifica las credenciales en cada arranque (a cambio de más descargas).
+> Con `IfNotPresent`, un Pod de otro inquilino podría usar una imagen privada que ya estaba en la caché del nodo sin tener credenciales. El plugin de admisión **AlwaysPullImages** fuerza `imagePullPolicy: Always`, así el registro verifica las credenciales en cada arranque (a cambio de más descargas).
+>
+> Desde v1.35 el kubelet también puede verificar las credenciales de imágenes ya presentes en el nodo (*KubeletEnsureSecretPulledImages*, beta y activo por defecto), pero eso es configuración del kubelet, no un plugin de admisión.
 
 ### [1/Artifact & Image Security/2]
 A developer added an API key in one Dockerfile layer and deleted the file in a later layer. Is the key still exposed?

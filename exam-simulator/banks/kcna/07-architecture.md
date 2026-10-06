@@ -87,7 +87,7 @@ Which CNCF graduated projects are mainly used to collect and forward logs?
 - [x] Fluentd and Fluent Bit
 - [ ] Envoy and Linkerd
 - [ ] etcd and TiKV
-> **Fluentd** y su versión ligera **Fluent Bit** son proyectos graduados de la CNCF para recoger, procesar y enrutar logs; Fluent Bit es ideal como DaemonSet por su bajo consumo. Jaeger es trazado; Envoy y Linkerd son proxy y service mesh; etcd y TiKV son almacenes clave-valor.
+> **Fluentd** es un proyecto graduado de la CNCF y **Fluent Bit** es su subproyecto ligero, bajo el mismo paraguas. Ambos recogen, procesan y enrutan logs; Fluent Bit es ideal como DaemonSet por su bajo consumo. Jaeger es trazado; Envoy y Linkerd son proxy y service mesh; etcd y TiKV son almacenes clave-valor.
 
 ### [4/Observability/2]
 Which CNCF graduated project is a distributed tracing platform?

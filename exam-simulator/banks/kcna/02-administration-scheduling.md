@@ -222,7 +222,7 @@ Which kubectl output option prints only the IP addresses of the Pods by using a 
 - [x] `-o jsonpath='{.items[*].status.podIP}'`
 - [ ] `-o yaml --field=status.podIP`
 - [ ] `--output=ip --show-pod-addresses`
-> `-o jsonpath` permite extraer campos concretos del JSON del objeto. `-o wide` añade columnas (incluida la IP), pero muestra toda la tabla. `--field` y `--show-pod-ip` no existen.
+> `-o jsonpath` permite extraer campos concretos del JSON del objeto. `-o wide` añade columnas (incluida la IP), pero muestra toda la tabla. Las opciones `--columns`, `--field`, `--output=ip` y `--show-pod-addresses` no existen.
 
 ### [1/Administration/2]
 Which file on a kubeadm control plane node grants full administrative access and should be protected like a root password?
@@ -274,11 +274,13 @@ A node has the taint `gpu=true:NoSchedule`. Which Pods can be scheduled on it?
 
 ### [1/Scheduling/3]
 You want GPU nodes to run ONLY GPU workloads, and GPU workloads to run ONLY on GPU nodes. What is the correct combination?
-- [ ] Add a matching toleration to the GPU Pods only
-- [ ] Add node affinity for GPU nodes to the GPU Pods only
-- [x] Taint the GPU nodes and give GPU Pods a toleration plus node affinity
-- [ ] Taint every non-GPU node so that GPU Pods are repelled from them
-> El taint mantiene fuera a los Pods que no son de GPU; la toleration deja entrar a los de GPU; y la node affinity (o un nodeSelector) obliga a los de GPU a ir a esos nodos, porque una toleration **no atrae**, solo permite. Las dos piezas juntas logran la dedicación en ambos sentidos.
+- [ ] Give GPU Pods a matching toleration, without tainting any node
+- [ ] Give GPU Pods node affinity for GPU nodes, without any taint
+- [x] Taint GPU nodes; give GPU Pods a toleration and node affinity
+- [ ] Taint all non-GPU nodes so that GPU Pods are repelled from them
+> El taint mantiene fuera a los Pods que no son de GPU; la toleration deja entrar a los de GPU; y la node affinity (o un nodeSelector) obliga a los de GPU a ir a esos nodos, porque una toleration **no atrae**, solo permite. Se necesitan las dos piezas para lograr la dedicación en ambos sentidos.
+>
+> Solo la toleration no fuerza nada, solo la affinity deja que otros Pods sigan entrando a los nodos GPU, y poner taints a todos los demás nodos sacaría de ellos al resto de cargas.
 
 ### [1/Scheduling/2]
 Which taint effect also evicts already-running Pods that do not tolerate it?
