@@ -46,7 +46,9 @@ Which set lists the core functions of the NIST Cybersecurity Framework 2.0?
 - [x] Govern, Identify, Protect, Detect, Respond and Recover
 - [ ] Spoofing, Tampering, Repudiation and Disclosure
 - [ ] Develop, Distribute, Deploy and Runtime
-> El **NIST CSF 2.0** (2024) organiza la ciberseguridad en seis funciones: **Govern** (añadida en la versión 2.0), Identify, Protect, Detect, Respond y Recover. "Plan-Do-Check-Act" es el ciclo de mejora de ISO, STRIDE es un modelo de amenazas y las cuatro fases son del ciclo de vida cloud native.
+> El **NIST CSF 2.0** (2024) organiza la ciberseguridad en seis funciones: **Govern** (nueva en la versión 2.0), Identify, Protect, Detect, Respond y Recover. La versión 1.1 tenía cinco funciones (sin Govern) y ninguna versión incluye "Report".
+>
+> Spoofing, Tampering, Repudiation… son categorías de STRIDE, y Develop, Distribute, Deploy y Runtime son las fases del ciclo de vida cloud native.
 
 ### [6/Compliance Frameworks/2]
 Which guidance document was published by the NSA and CISA specifically for hardening Kubernetes?

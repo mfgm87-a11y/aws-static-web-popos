@@ -185,14 +185,6 @@ What is cryptojacking in a Kubernetes context?
 > Es uno de los ataques más comunes contra clústeres expuestos: el atacante despliega mineros que consumen CPU a costa de la víctima. Se detecta por picos de consumo, conexiones a *mining pools* y reglas de runtime (Falco); se previene con buenas credenciales, admisión estricta y límites de recursos.
 
 ### [4/Malicious Code/2]
-Which combination of Pod settings makes a container escape to the node trivial?
-- [ ] `runAsNonRoot: true` and `readOnlyRootFilesystem: true`
-- [x] `privileged: true` and `hostPID: true`
-- [ ] `allowPrivilegeEscalation: false` and `drop: [ALL]`
-- [ ] `seccompProfile: RuntimeDefault` and a memory limit
-> Con un contenedor privilegiado que comparte el espacio de procesos del host, basta con entrar en los namespaces del proceso 1 del nodo (por ejemplo, `nsenter -t 1 -m -u -i -n -p -- bash`) para obtener una shell root en el host. Las otras combinaciones son configuraciones de endurecimiento.
-
-### [4/Malicious Code/2]
 Why does mounting the host's root filesystem (`hostPath: /`) into a container enable a full node compromise?
 - [ ] Because it silently disables the container runtime's seccomp profile
 - [x] The attacker can rewrite host files such as cron jobs or SSH keys
@@ -295,22 +287,6 @@ A Deployment passes a database password with `env.value: "S3cr3t"` instead of `s
 - [ ] The password is rotated automatically by the kubelet every day
 - [ ] The Pod is rejected by the API server for containing a password
 > Un valor literal queda dentro del manifiesto, en etcd como parte del objeto, en Git y en la salida de `kubectl get -o yaml`, visible para cualquiera que pueda leer Deployments o Pods (permiso mucho más común que leer Secrets). Hay que referenciar un Secret o un gestor externo.
-
-### [4/Sensitive Data/2]
-Why should audit policies avoid logging the request and response bodies of Secrets and TokenReviews?
-- [ ] Because those requests are never sent to the API server
-- [x] To keep secret values and tokens out of the audit logs
-- [ ] Because logging them makes the API server read-only
-- [ ] Because audit logs cannot store JSON objects
-> Los cuerpos de esas peticiones contienen valores secretos y tokens. Si se registran con nivel `Request` o `RequestResponse`, el sistema de logs pasa a ser un almacén de secretos con controles más débiles. Se registran a nivel `Metadata`.
-
-### [4/Sensitive Data/2]
-Which Kubernetes feature reduces the impact of a stolen ServiceAccount token?
-- [ ] Long-lived tokens stored as Secrets in every namespace
-- [x] Short-lived tokens bound to an audience and a Pod
-- [ ] Sharing a single token among all the workloads
-- [ ] Mounting the token into every container of the node
-> Los tokens emitidos por TokenRequest caducan, están limitados a una audiencia y ligados al Pod: si el Pod se elimina, el token deja de ser válido. Un token robado sirve poco tiempo y solo para lo que fue emitido.
 
 ### [4/Sensitive Data/2]
 How can a workload use a database password without it ever being stored in etcd?

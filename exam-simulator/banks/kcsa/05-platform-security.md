@@ -153,14 +153,6 @@ Why should audit logs and security alerts be shipped off the cluster, for exampl
 > Si los logs solo viven en el clúster, un atacante con suficientes privilegios puede borrarlos o alterarlos. Enviarlos a un sistema externo (SIEM) protege su integridad, permite correlacionar eventos de distintas fuentes y conservarlos el tiempo que exige el cumplimiento normativo.
 
 ### [5/Observability/2]
-Which of the following is a typical Falco detection rule?
-- [ ] An image tag was pushed to the registry twice
-- [x] A terminal shell was spawned inside a container
-- [ ] A Deployment was scaled up by the HPA
-- [ ] A ConfigMap was mounted as a volume
-> Reglas típicas de Falco: shell interactiva en un contenedor, escritura bajo `/etc` o directorios binarios, lectura de archivos sensibles como `/etc/shadow`, ejecución de binarios no esperados o conexiones salientes inusuales. Escalar o montar un ConfigMap es comportamiento normal.
-
-### [5/Observability/2]
 Why are Kubernetes Events not a substitute for audit logs in security investigations?
 - [ ] Events are encrypted and cannot be read by cluster administrators
 - [x] Events are short-lived operational notes, not a full audit trail
@@ -337,14 +329,6 @@ In which order are the admission phases executed for a request to the API server
 > Primero se ejecutan los controladores y webhooks **mutantes** (pueden cambiar el objeto), luego se valida el esquema del objeto y al final los **validantes** (solo aceptan o rechazan). Así la validación ve el objeto final, tal como se guardará en etcd.
 
 ### [5/Admission Control/2]
-What does `failurePolicy: Ignore` on a validating webhook mean for security?
-- [ ] Requests are always rejected whenever the webhook is slow to answer
-- [x] If the webhook is unavailable, requests are admitted unchecked
-- [ ] The webhook's decisions are logged but never enforced
-- [ ] The webhook only runs for requests from administrators
-> Con `Ignore`, si el webhook no responde (caída, timeout), la petición se admite sin pasar la política: falla "abierto". Un atacante que logre tumbar el webhook podría saltarse los controles. Con `Fail` se falla "cerrado", a costa de la disponibilidad.
-
-### [5/Admission Control/2]
 What is ValidatingAdmissionPolicy?
 - [ ] A webhook that must be deployed as a separate service
 - [x] A built-in, in-process admission check written in CEL
@@ -375,14 +359,6 @@ What does the ImagePolicyWebhook admission plugin do?
 - [ ] It converts image tags into digests automatically
 - [ ] It signs images with the cluster CA before they run
 > ImagePolicyWebhook envía a un servicio externo una revisión (`ImageReview`) con las imágenes del Pod, y ese servicio decide si se permiten. Hoy es más común hacerlo con Kyverno, Gatekeeper o políticas CEL, pero sigue siendo un plugin de admisión integrado.
-
-### [5/Admission Control/2]
-Why do mutating admission webhooks run before validating ones?
-- [ ] Because mutating webhooks are always faster to respond
-- [x] So validation sees the final object after every mutation
-- [ ] Because validating webhooks cannot read object fields
-- [ ] So that mutations can undo a validation rejection
-> Si la validación ocurriera antes, un webhook mutante podría cambiar después el objeto y saltarse la política (por ejemplo, añadiendo un contenedor privilegiado). Validar al final garantiza que lo que se evalúa es exactamente lo que se guardará.
 
 ### [5/Admission Control/2]
 Which built-in admission plugin enforces the Pod Security Standards?

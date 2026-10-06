@@ -49,12 +49,12 @@ Which volume type is allowed under the Restricted profile?
 > *Restricted* solo permite volúmenes `configMap`, `csi`, `downwardAPI`, `emptyDir`, `ephemeral`, `persistentVolumeClaim`, `projected` y `secret`. Los volúmenes de red declarados directamente en el Pod (como `nfs` o `iscsi`) y `hostPath` no cumplen el perfil; para almacenamiento de red se usan PVCs.
 
 ### [3/Pod Security Standards/2]
-Which control appears in the Restricted profile but not in Baseline?
-- [ ] Privileged containers are not allowed in the Pod
-- [x] `allowPrivilegeEscalation` must be set to false
-- [ ] Host namespaces such as hostPID must not be shared
-- [ ] HostPath volumes are forbidden
-> `allowPrivilegeEscalation: false` (que activa `no_new_privs` e impide ganar privilegios con binarios setuid) es obligatorio en *Restricted*. Las otras tres opciones ya están prohibidas en *Baseline*.
+A namespace moves from `enforce=baseline` to `enforce=restricted`. Its Pods already pass Baseline. Which setting must their containers now add?
+- [ ] `privileged: false` on every container
+- [x] `allowPrivilegeEscalation: false` on every container
+- [ ] `hostPID: false` on the Pod spec
+- [ ] Removing every `hostPath` volume
+> Si los Pods ya cumplen *Baseline*, ya no son privilegiados, no comparten `hostPID` y no usan `hostPath`: eso lo exige *Baseline*. *Restricted* añade, entre otras cosas, `allowPrivilegeEscalation: false` (activa `no_new_privs` e impide ganar privilegios con binarios setuid), además de `runAsNonRoot: true`, `drop: [ALL]` y un perfil seccomp explícito.
 
 ### [3/Pod Security Standards/2]
 What is the relationship between the Pod Security Standards and Pod Security Admission?
@@ -247,14 +247,6 @@ What does the `escalate` verb on Roles and ClusterRoles allow?
 - [ ] Temporarily acting as the cluster-admin user
 - [ ] Approving pending CertificateSigningRequests
 > RBAC impide por defecto crear o modificar un rol con permisos que el usuario no tiene. Con `escalate` esa protección desaparece: el usuario puede añadir cualquier permiso a un rol que ya tenga asignado y escalar sus privilegios.
-
-### [3/Authorization/3]
-A developer only has `create` permission on Pods in the namespace `dev`. Which hidden risk does this carry?
-- [ ] None, because creating Pods does not give access to other resources
-- [x] They can mount any Secret and use any ServiceAccount in `dev`
-- [ ] They can create Pods in every namespace of the cluster
-- [ ] They can modify the RBAC roles of the `dev` namespace
-> Quien crea Pods en un namespace puede montar cualquier Secret, ConfigMap o PVC de ese namespace y ejecutar el Pod con cualquier ServiceAccount del namespace, heredando sus permisos. Si además puede crear Pods privilegiados, podría llegar al nodo. Por eso se combina RBAC con Pod Security y con namespaces separados por nivel de confianza.
 
 ### [3/Authorization/2]
 Why is the `list` verb on Secrets as sensitive as `get`?

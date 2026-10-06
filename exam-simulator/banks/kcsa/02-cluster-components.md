@@ -251,14 +251,6 @@ Vulnerabilities such as CVE-2019-5736 and CVE-2024-21626 ("Leaky Vessels") in ru
 > Ambas vulnerabilidades del runtime de bajo nivel permitían a un contenedor malicioso escapar al host (sobrescribiendo el binario de runc o abusando de descriptores de archivo filtrados). Mantener el runtime actualizado y añadir capas como seccomp, AppArmor/SELinux o runtimes con sandbox reduce el riesgo.
 
 ### [2/Container Runtime/2]
-What is the main security benefit of a sandboxed runtime selected with a RuntimeClass?
-- [ ] It makes the containers start much faster than with runc
-- [x] It adds an isolation layer in front of the host kernel
-- [ ] It removes the need for NetworkPolicies between Pods
-- [ ] It automatically scans every image before it starts
-> Runtimes como gVisor o Kata Containers interponen un kernel de usuario o una micro-VM entre el contenedor y el kernel del host, de modo que un exploit del kernel desde el contenedor es mucho más difícil. Se eligen por Pod con `runtimeClassName`.
-
-### [2/Container Runtime/2]
 What does running the container runtime and containers in rootless mode achieve?
 - [ ] Containers can bind to any privileged port on the host
 - [x] An escape lands as an unprivileged user instead of root
@@ -449,14 +441,6 @@ Why may NetworkPolicies fail to protect traffic from Pods that use `hostNetwork:
 - [ ] Because NetworkPolicies only apply inside the `default` namespace
 - [ ] Because hostNetwork Pods can only use the UDP protocol
 > El comportamiento de las NetworkPolicies con Pods `hostNetwork` no está definido: en la mayoría de plugins su tráfico es indistinguible del tráfico del propio nodo, así que no se les aplican las reglas de Pod. Es otra razón para restringir `hostNetwork` con Pod Security.
-
-### [2/Container Networking/2]
-Which capability lets a container craft raw packets (for example for ARP spoofing), and is dropped by the Restricted profile?
-- [ ] `CAP_CHOWN`
-- [x] `CAP_NET_RAW`
-- [ ] `CAP_SETUID`
-- [ ] `CAP_FOWNER`
-> `NET_RAW` permite crear sockets raw para fabricar paquetes arbitrarios (ARP/DNS spoofing, escaneos). Muchos runtimes la incluyen por defecto; el perfil *restricted* obliga a eliminar todas las capabilities (`drop: [ALL]`), lo que también quita `NET_RAW`.
 
 ### [2/Container Networking/2]
 A cluster uses a CNI plugin that does not implement NetworkPolicy. What is the security consequence?
