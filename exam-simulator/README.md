@@ -23,6 +23,13 @@ aws s3 sync web/ s3://aws-static-web-popos/
 
 Queda disponible en `http://<website_endpoint>/simulador-k8s.html` (el endpoint sale de `terraform output website_endpoint`).
 
+## Guías de estudio
+
+Dos guías en español sencillo, con diagramas, trampas típicas y tarjetas de repaso. Igual que el simulador, son archivos únicos que funcionan sin conexión:
+
+- `web/estudiar-kcna.html`: **Estudiar Kubernetes**, todo el temario del KCNA (arquitectura, objetos, Pods, contenedores, red, seguridad, administración, entrega, depuración y cloud native).
+- `web/estudiar-kcsa.html`: **Estudiar seguridad en Kubernetes**, los seis dominios del KCSA (4C, recorrido de una petición, componentes, Pod Security, Secrets y auditoría, red, modelo de amenazas, cadena de suministro y cumplimiento).
+
 ## Editar o añadir preguntas
 
 Las preguntas viven en `exam-simulator/banks/kcna/*.md` y `exam-simulator/banks/kcsa/*.md`, con este formato:

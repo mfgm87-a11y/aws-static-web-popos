@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estudiar Kubernetes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,600..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column (~760px) with a sticky chip nav; diagrams scroll sideways on phones inside their own frame. */
+:root {
+  --bg: #F2F4F9;
+  --surface: #FFFFFF;
+  --ink: #141B2D;
+  --muted: #586379;
+  --line: #D5DBE7;
+  --accent: #2D4BC8;
+  --accent-soft: #E5EAFB;
+  --warn: #9A5208;
+  --warn-soft: #FBEEDD;
+  --ok: #1C7047;
+  --ok-soft: #E1F2E8;
+  --bad: #A8202F;
+  --bad-soft: #FAE4E7;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1320; --surface: #161D2C; --ink: #E5E9F2; --muted: #9AA4B9; --line: #2A3347;
+    --accent: #8CA2FF; --accent-soft: #1D2649; --warn: #F2AA55; --warn-soft: #34261A;
+    --ok: #63CC93; --ok-soft: #142D24; --bad: #F27D8A; --bad-soft: #3A1B22;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1320; --surface: #161D2C; --ink: #E5E9F2; --muted: #9AA4B9; --line: #2A3347;
+  --accent: #8CA2FF; --accent-soft: #1D2649; --warn: #F2AA55; --warn-soft: #34261A;
+  --ok: #63CC93; --ok-soft: #142D24; --bad: #F27D8A; --bad-soft: #3A1B22;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--f-body);
+  padding-inline: 18px;
+  padding-block: 0 64px;
+}
+.wrap { max-width: 780px; margin: 0 auto; }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code, .mono { font-family: var(--f-mono); font-size: 0.88em; }
+code { background: var(--accent-soft); color: var(--ink); padding: 0.08em 0.36em; border-radius: 4px; overflow-wrap: anywhere; }
+p { margin: 0; max-width: 66ch; }
+strong { font-weight: 600; }
+
+/* Header */
+header.top { padding-block: 44px 28px; display: grid; gap: 14px; }
+.eyebrow { font: 600 12px/1.3 var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+h1 {
+  font: 800 clamp(38px, 8vw, 60px)/1 var(--f-display);
+  font-stretch: 115%;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+.lede { font-size: 18px; color: var(--ink); }
+.howto { font-size: 15px; color: var(--muted); }
+
+/* Nav */
+nav.chips {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  margin-inline: -18px;
+  padding: 10px 18px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav.chips::-webkit-scrollbar { display: none; }
+nav.chips a {
+  flex: none;
+  text-decoration: none;
+  color: var(--ink);
+  font: 500 13px/1 var(--f-body);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+nav.chips a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Sections */
+section { padding-block: 48px 8px; display: grid; gap: 18px; scroll-margin-top: 64px; }
+section > * { min-width: 0; }
+.sec-head { display: grid; gap: 6px; }
+.tag { font: 600 11.5px/1.3 var(--f-mono); letter-spacing: 0.04em; color: var(--muted); }
+.tag b { color: var(--accent); font-weight: 500; }
+h2 {
+  font: 700 clamp(25px, 4.6vw, 32px)/1.12 var(--f-display);
+  font-stretch: 108%;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+h3 { font: 700 18px/1.3 var(--f-display); font-stretch: 104%; margin: 10px 0 0; }
+ul.plain { margin: 0; padding-left: 1.15em; display: grid; gap: 8px; max-width: 68ch; }
+ul.plain li::marker { color: var(--accent); }
+
+/* Exam facts */
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 2px; }
+.fact b { font: 700 22px/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.fact span { font-size: 12.5px; color: var(--muted); }
+
+/* Tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+td.num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+td.name { font-family: var(--f-mono); font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+tr.group td { background: var(--accent-soft); font: 600 11px/1.3 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); padding-block: 7px; }
+td.say { color: var(--muted); }
+
+/* Diagnosis */
+.diag { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+.score { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { font: 600 13px/1 var(--f-body); padding: 7px 11px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.mid { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.misses { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.misses li { display: grid; grid-template-columns: 2.2em 1fr; gap: 10px; align-items: baseline; }
+.misses .n { font: 700 20px/1 var(--f-display); color: var(--bad); font-variant-numeric: tabular-nums; }
+.misses small { color: var(--muted); font-size: 13.5px; }
+
+/* Callouts */
+.callout { border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.callout .lab { font: 600 11px/1.2 var(--f-body); letter-spacing: 0.1em; text-transform: uppercase; }
+.callout.trap { background: var(--warn-soft); }
+.callout.trap .lab { color: var(--warn); }
+.callout.answer { background: var(--ok-soft); }
+.callout.answer .lab { color: var(--ok); }
+
+/* Diagrams */
+figure.fig { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+figure.fig .scroll { overflow-x: auto; padding: 14px 10px 4px; }
+figure.fig svg { display: block; width: 100%; min-width: 600px; height: auto; color: var(--muted); }
+figure.fig figcaption { padding: 10px 16px 14px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); }
+.scroll-hint { display: none; font-size: 12px; color: var(--muted); padding: 0 16px 8px; }
+@media (max-width: 640px) { .scroll-hint { display: block; } }
+
+svg .b { fill: var(--surface); stroke: var(--line); stroke-width: 1.3; }
+svg .b-acc { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .zone { fill: var(--bg); stroke: var(--line); stroke-width: 1.2; stroke-dasharray: 5 4; }
+svg .chip { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1.2; }
+svg .t { fill: var(--ink); font: 600 13px var(--f-body); }
+svg .tm { fill: var(--ink); font: 500 12.5px var(--f-mono); }
+svg .tc { fill: var(--ok); font: 500 11px var(--f-mono); }
+svg .ts { fill: var(--muted); font: 400 11px var(--f-body); }
+svg .tl { fill: var(--muted); font: 600 10.5px var(--f-body); letter-spacing: 0.08em; }
+svg .acc { fill: var(--accent); }
+svg .ln { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+svg .ln-acc { stroke: var(--accent); stroke-width: 1.7; fill: none; }
+svg .dash { stroke-dasharray: 5 4; }
+svg .mk { fill: var(--muted); }
+svg .mk-acc { fill: var(--accent); }
+
+/* Sequence */
+ol.seq { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+ol.seq li { display: grid; grid-template-columns: 2.4em minmax(0, 11em) minmax(0, 1fr); gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: start; }
+ol.seq li:last-child { border-bottom: 0; }
+ol.seq .step { font: 700 20px/1.2 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+ol.seq .who { font: 500 13px/1.4 var(--f-mono); color: var(--ink); }
+ol.seq .who small { display: block; font: 400 12px/1.35 var(--f-body); color: var(--muted); }
+ol.seq .what { font-size: 15px; }
+.state { display: inline-block; margin-top: 6px; font: 500 12px/1 var(--f-mono); padding: 5px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 560px) {
+  ol.seq li { grid-template-columns: 2em minmax(0, 1fr); }
+  ol.seq .what { grid-column: 2; }
+}
+
+/* Definition grid */
+.defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 10px; }
+.def { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; }
+.def h4 { margin: 0; font: 500 14px/1.3 var(--f-mono); color: var(--accent); }
+.def p { font-size: 14.5px; line-height: 1.5; }
+
+/* Request flow */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 500 13px/1 var(--f-body); }
+.flow span { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.flow i { font-style: normal; color: var(--muted); }
+
+/* Rules */
+ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+ol.rules li { counter-increment: r; display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 15px; }
+ol.rules li:last-child { border-bottom: 0; }
+ol.rules li::before { content: counter(r); font: 700 16px/1.5 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* Flashcards */
+.cards { display: grid; gap: 8px; }
+details.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.card summary { cursor: pointer; list-style: none; padding: 14px 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: baseline; font-weight: 500; }
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary .q { font: 500 12px/1 var(--f-mono); color: var(--muted); }
+details.card summary .chev { color: var(--muted); font-size: 13px; transition: transform 0.15s ease; }
+details.card[open] summary .chev { transform: rotate(90deg); }
+details.card .body { padding: 0 16px 16px; display: grid; gap: 6px; font-size: 15px; }
+details.card .body .ans { color: var(--ok); font-weight: 600; }
+details.card .body .yours { color: var(--bad); font-size: 13.5px; }
+
+footer { padding-block: 48px 0; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 48px; display: grid; gap: 6px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">KCNA · Kubernetes and Cloud Native Associate</div>
+  <h1>Estudiar Kubernetes</h1>
+  <p class="lede">Lo que necesitas para pasar el KCNA sin videos de tres horas. Primero la lógica de cómo funciona el cluster por dentro, después los nombres. Si entiendes la lógica, muchas preguntas se responden solas.</p>
+  <p class="howto">Si tienes una hora: lee <a href="#idea">La idea</a>, <a href="#arquitectura">Arquitectura</a>, <a href="#cronjob">CronJob</a>, <a href="#objetos">Objetos</a> y <a href="#trampas">Trampas</a>. Eso cubre el tema que más pesa en el examen. Para el temario completo suma <a href="#pod">Pod</a>, <a href="#contenedores">Contenedores</a>, <a href="#administrar">Administrar</a> y <a href="#depurar">Depurar</a>.</p>
+</header>
+
+<nav class="chips" aria-label="Secciones">
+  <a href="#examen">Examen</a>
+  <a href="#idea">La idea</a>
+  <a href="#arquitectura">Arquitectura</a>
+  <a href="#cronjob">CronJob</a>
+  <a href="#objetos">Objetos</a>
+  <a href="#pod">Pod</a>
+  <a href="#contenedores">Contenedores</a>
+  <a href="#red">Red</a>
+  <a href="#seguridad">Seguridad</a>
+  <a href="#operar">Operar</a>
+  <a href="#administrar">Administrar</a>
+  <a href="#entrega">Entrega</a>
+  <a href="#depurar">Depurar</a>
+  <a href="#cloudnative">Cloud native</a>
+  <a href="#trampas">Trampas</a>
+  <a href="#repaso">Repaso</a>
+</nav>
+
+<!-- EXAMEN -->
+<section id="examen">
+  <div class="sec-head">
+    <div class="tag">Antes de empezar</div>
+    <h2>Cómo es el examen y dónde estás</h2>
+  </div>
+  <div class="facts">
+    <div class="fact"><b>60</b><span>preguntas</span></div>
+    <div class="fact"><b>90 min</b><span>de tiempo</span></div>
+    <div class="fact"><b>75%</b><span>para aprobar</span></div>
+    <div class="fact"><b>1</b><span>reintento incluido</span></div>
+  </div>
+  <p>Opción múltiple, en línea y con supervisor por cámara. Estos son los cuatro dominios del temario vigente y cuántas preguntas te tocan, más o menos, de cada uno:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Dominio</th><th>Peso</th><th>≈ Preguntas</th><th>Qué entra</th></tr></thead>
+      <tbody>
+        <tr><td>Fundamentos de Kubernetes</td><td class="num">44%</td><td class="num">26</td><td>Conceptos base, administración, scheduling, contenedores</td></tr>
+        <tr><td>Orquestación de contenedores</td><td class="num">28%</td><td class="num">17</td><td>Red, seguridad, troubleshooting, almacenamiento</td></tr>
+        <tr><td>Entrega de aplicaciones</td><td class="num">16%</td><td class="num">10</td><td>GitOps, CI/CD, Helm, debugging</td></tr>
+        <tr><td>Arquitectura cloud native</td><td class="num">12%</td><td class="num">7</td><td>Observabilidad, ecosistema CNCF, comunidad</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="howto">El temario cambió en noviembre de 2025: observabilidad pasó a ser parte de Arquitectura. Algunos simuladores viejos todavía muestran cinco dominios.</p>
+
+  <div class="diag">
+    <h3 style="margin:0">Tu simulador hasta ahora</h3>
+    <div class="score">
+      <span class="pill ok">3 bien</span>
+      <span class="pill mid">1 a medias</span>
+      <span class="pill bad">6 mal</span>
+      <span class="pill mid">1 sin responder (CronJob)</span>
+    </div>
+    <ul class="misses">
+      <li><span class="n">4</span><div>Cómo funciona Kubernetes por dentro<br><small>Pod, Deployment, <code>kubectl create</code>, CronJob. Ver Arquitectura, CronJob y Objetos.</small></div></li>
+      <li><span class="n">2</span><div>Red y seguridad<br><small>cert-manager, Envoy. Ver Red y Seguridad.</small></div></li>
+      <li><span class="n">2</span><div>Principios cloud native<br><small>Características, costos. Ver Cloud native.</small></div></li>
+    </ul>
+    <p>Acertaste Helm, IaC y la ruta de logs: la parte de herramientas y Linux la tienes. El hueco está en Fundamentos, que es casi la mitad del examen. La buena noticia es que es un hueco de lógica, no de memoria, y se cierra rápido.</p>
+  </div>
+</section>
+
+<!-- IDEA -->
+<section id="idea">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44%</div>
+    <h2>La idea que explica todo lo demás</h2>
+  </div>
+  <p>Kubernetes no recibe órdenes paso a paso. Tú le dices cómo quieres que se vean las cosas, el <strong>estado deseado</strong>, y él se encarga de que la realidad coincida. Si algo se desvía, lo corrige solo.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 700 240" role="img" aria-label="Bucle de control: declaras 3 réplicas, se guarda como estado deseado, el controller lo compara con el estado real de 2 pods y crea el que falta, y vuelve a observar.">
+        <defs>
+          <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+          <marker id="m1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker>
+        </defs>
+        <rect class="b" x="10" y="30" width="130" height="70" rx="8"/>
+        <text class="t" x="75" y="58" text-anchor="middle">Tú declaras</text>
+        <text class="tm acc" x="75" y="81" text-anchor="middle">replicas: 3</text>
+
+        <line class="ln" x1="140" y1="65" x2="186" y2="65" marker-end="url(#m1)"/>
+        <text class="ts" x="164" y="56" text-anchor="middle">apply</text>
+
+        <rect class="b" x="190" y="30" width="130" height="70" rx="8"/>
+        <text class="t" x="255" y="58" text-anchor="middle">Estado deseado</text>
+        <text class="ts" x="255" y="80" text-anchor="middle">guardado en etcd</text>
+
+        <line class="ln" x1="320" y1="65" x2="366" y2="65" marker-end="url(#m1)"/>
+        <text class="ts" x="344" y="56" text-anchor="middle">lee</text>
+
+        <rect class="b-acc" x="370" y="30" width="130" height="70" rx="8"/>
+        <text class="t" x="435" y="58" text-anchor="middle">Controller</text>
+        <text class="ts" x="435" y="80" text-anchor="middle">compara</text>
+
+        <line class="ln-acc" x1="500" y1="65" x2="546" y2="65" marker-end="url(#m1a)"/>
+        <text class="ts acc" x="524" y="56" text-anchor="middle">≠ real</text>
+
+        <rect class="b" x="550" y="30" width="140" height="70" rx="8"/>
+        <text class="t" x="620" y="58" text-anchor="middle">Actúa</text>
+        <text class="ts" x="620" y="80" text-anchor="middle">crea el pod que falta</text>
+
+        <rect class="b" x="400" y="168" width="260" height="60" rx="8"/>
+        <text class="t" x="530" y="194" text-anchor="middle">Estado real (el cluster)</text>
+        <text class="ts" x="530" y="214" text-anchor="middle">hoy corren 2 pods</text>
+
+        <line class="ln-acc" x1="620" y1="100" x2="620" y2="164" marker-end="url(#m1a)"/>
+        <text class="ts" x="628" y="137">crea 1</text>
+        <line class="ln" x1="450" y1="168" x2="450" y2="104" marker-end="url(#m1)"/>
+        <text class="ts" x="442" y="137" text-anchor="end">observa</text>
+
+        <text class="t" x="10" y="186">Esto se repite sin parar.</text>
+        <text class="ts" x="10" y="206">Se llama bucle de control</text>
+        <text class="ts" x="10" y="222">(reconciliation loop).</text>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Un controller nunca deja de vigilar: observa el estado real, lo compara con el deseado y corrige la diferencia.</figcaption>
+  </figure>
+
+  <ul class="plain">
+    <li><strong>Declarativo</strong> es describir el resultado (el YAML). <strong>Imperativo</strong> es dar los pasos uno por uno. Kubernetes es declarativo.</li>
+    <li>Casi todo en Kubernetes es un controller haciendo este bucle: el Deployment, el Job, el autoescalado.</li>
+    <li>Por eso se dice que Kubernetes se "autorrecupera". No es magia: es un bucle que corrige diferencias todo el tiempo.</li>
+  </ul>
+</section>
+
+<!-- ARQUITECTURA -->
+<section id="arquitectura">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44%</div>
+    <h2>Quién hace qué dentro del cluster</h2>
+  </div>
+  <p>Un cluster tiene dos partes: el <strong>control plane</strong>, que decide, y los <strong>nodos worker</strong>, que ejecutan. La regla que más preguntas resuelve: <strong>todos los componentes hablan solo con el API server</strong>. Nadie habla directo con nadie más.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 720 490" role="img" aria-label="Arquitectura de Kubernetes: kubectl le habla al kube-apiserver. En el control plane, scheduler, controller-manager y cloud-controller-manager vigilan al API server, y solo el API server lee y escribe en etcd. En cada nodo worker, el kubelet vigila al API server y le pide al runtime containerd, por CRI, que arranque los pods; kube-proxy programa las reglas de tráfico.">
+        <defs>
+          <marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+          <marker id="m2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker>
+        </defs>
+
+        <rect class="b" x="290" y="10" width="140" height="42" rx="8"/>
+        <text class="tm" x="360" y="36" text-anchor="middle">kubectl (tú)</text>
+        <line class="ln-acc" x1="360" y1="52" x2="360" y2="106" marker-end="url(#m2a)"/>
+        <text class="ts" x="368" y="84">pides cosas</text>
+
+        <rect class="zone" x="20" y="66" width="680" height="186" rx="12"/>
+        <text class="tl" x="36" y="90">CONTROL PLANE · EL CEREBRO</text>
+
+        <rect class="b" x="40" y="110" width="160" height="56" rx="8"/>
+        <text class="tm" x="120" y="134" text-anchor="middle">kube-scheduler</text>
+        <text class="ts" x="120" y="153" text-anchor="middle">elige el nodo de cada pod</text>
+
+        <rect class="b-acc" x="260" y="110" width="200" height="56" rx="8"/>
+        <text class="tm acc" x="360" y="134" text-anchor="middle">kube-apiserver</text>
+        <text class="ts" x="360" y="153" text-anchor="middle">todo pasa por aquí</text>
+
+        <rect class="b" x="520" y="110" width="160" height="56" rx="8"/>
+        <text class="tm" x="600" y="134" text-anchor="middle">etcd</text>
+        <text class="ts" x="600" y="153" text-anchor="middle">la memoria del cluster</text>
+
+        <line class="ln" x1="204" y1="140" x2="256" y2="140" marker-start="url(#m2)" marker-end="url(#m2)"/>
+        <text class="ts" x="230" y="131" text-anchor="middle">vigila</text>
+        <line class="ln-acc" x1="464" y1="140" x2="516" y2="140" marker-start="url(#m2a)" marker-end="url(#m2a)"/>
+        <text class="ts acc" x="490" y="131" text-anchor="middle">solo él</text>
+
+        <rect class="b" x="40" y="186" width="200" height="50" rx="8"/>
+        <text class="tm" x="140" y="207" text-anchor="middle">kube-controller-manager</text>
+        <text class="ts" x="140" y="225" text-anchor="middle">corrige diferencias</text>
+
+        <rect class="b" x="480" y="186" width="200" height="50" rx="8"/>
+        <text class="tm" x="580" y="207" text-anchor="middle">cloud-controller-manager</text>
+        <text class="ts" x="580" y="225" text-anchor="middle">habla con la nube (AWS, GCP)</text>
+
+        <line class="ln dash" x1="240" y1="200" x2="286" y2="169" marker-end="url(#m2)"/>
+        <line class="ln dash" x1="480" y1="200" x2="434" y2="169" marker-end="url(#m2)"/>
+
+        <line class="ln-acc" x1="330" y1="166" x2="265" y2="332" marker-end="url(#m2a)"/>
+        <line class="ln-acc" x1="390" y1="166" x2="455" y2="332" marker-end="url(#m2a)"/>
+        <text class="ts" x="360" y="278" text-anchor="middle">cada kubelet vigila</text>
+        <text class="ts" x="360" y="293" text-anchor="middle">los pods de su nodo</text>
+
+        <rect class="zone" x="20" y="300" width="330" height="176" rx="12"/>
+        <text class="tl" x="36" y="322">NODO 1 · WORKER</text>
+        <rect class="b" x="40" y="336" width="140" height="50" rx="8"/>
+        <text class="tm" x="110" y="357" text-anchor="middle">kube-proxy</text>
+        <text class="ts" x="110" y="375" text-anchor="middle">reglas de tráfico</text>
+        <rect class="b-acc" x="200" y="336" width="130" height="50" rx="8"/>
+        <text class="tm" x="265" y="357" text-anchor="middle">kubelet</text>
+        <text class="ts" x="265" y="375" text-anchor="middle">el capataz del nodo</text>
+        <line class="ln" x1="265" y1="386" x2="265" y2="406" marker-end="url(#m2)"/>
+        <text class="ts acc" x="273" y="400">CRI</text>
+        <rect class="b" x="200" y="410" width="130" height="50" rx="8"/>
+        <text class="tm" x="265" y="431" text-anchor="middle">containerd</text>
+        <text class="ts" x="265" y="449" text-anchor="middle">runtime</text>
+        <line class="ln" x1="200" y1="435" x2="184" y2="435" marker-end="url(#m2)"/>
+        <rect class="chip" x="48" y="420" width="60" height="30" rx="6"/>
+        <text class="tc" x="78" y="439" text-anchor="middle">pod</text>
+        <rect class="chip" x="114" y="420" width="60" height="30" rx="6"/>
+        <text class="tc" x="144" y="439" text-anchor="middle">pod</text>
+
+        <rect class="zone" x="370" y="300" width="330" height="176" rx="12"/>
+        <text class="tl" x="386" y="322">NODO 2 · WORKER</text>
+        <rect class="b-acc" x="390" y="336" width="130" height="50" rx="8"/>
+        <text class="tm" x="455" y="357" text-anchor="middle">kubelet</text>
+        <text class="ts" x="455" y="375" text-anchor="middle">el capataz del nodo</text>
+        <rect class="b" x="540" y="336" width="140" height="50" rx="8"/>
+        <text class="tm" x="610" y="357" text-anchor="middle">kube-proxy</text>
+        <text class="ts" x="610" y="375" text-anchor="middle">reglas de tráfico</text>
+        <line class="ln" x1="455" y1="386" x2="455" y2="406" marker-end="url(#m2)"/>
+        <text class="ts acc" x="463" y="400">CRI</text>
+        <rect class="b" x="390" y="410" width="130" height="50" rx="8"/>
+        <text class="tm" x="455" y="431" text-anchor="middle">containerd</text>
+        <text class="ts" x="455" y="449" text-anchor="middle">runtime</text>
+        <line class="ln" x1="520" y1="435" x2="536" y2="435" marker-end="url(#m2)"/>
+        <rect class="chip" x="546" y="420" width="60" height="30" rx="6"/>
+        <text class="tc" x="576" y="439" text-anchor="middle">pod</text>
+        <rect class="chip" x="612" y="420" width="60" height="30" rx="6"/>
+        <text class="tc" x="642" y="439" text-anchor="middle">pod</text>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Todas las flechas llegan al API server o salen de él. Las punteadas son componentes que lo vigilan. Solo el API server toca etcd.</figcaption>
+  </figure>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Componente</th><th>Qué hace</th><th>Frase para el examen</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="3">Control plane</td></tr>
+        <tr><td class="name">kube-apiserver</td><td>Puerta de entrada. Recibe, valida y guarda cada petición.</td><td class="say">Todo pasa por el API server.</td></tr>
+        <tr><td class="name">etcd</td><td>Base de datos clave-valor con todo el estado del cluster.</td><td class="say">Solo el API server habla con etcd. Se corre en número impar (3 o 5) para tener quórum.</td></tr>
+        <tr><td class="name">kube-scheduler</td><td>Mira los pods sin nodo y elige dónde ponerlos: filtra los nodos que sirven y les da puntaje.</td><td class="say">Decide dónde. No decide cuándo y no arranca nada.</td></tr>
+        <tr><td class="name">kube-controller-manager</td><td>Corre los controllers: Deployment, ReplicaSet, Job, CronJob, Node.</td><td class="say">Corrige la diferencia entre deseado y real.</td></tr>
+        <tr><td class="name">cloud-controller-manager</td><td>Conecta con la nube: balanceadores, discos, máquinas.</td><td class="say">Solo existe si corres en una nube.</td></tr>
+        <tr class="group"><td colspan="3">En cada nodo</td></tr>
+        <tr><td class="name">kubelet</td><td>Recibe los pods asignados a su nodo y se asegura de que corran y estén sanos.</td><td class="say">El agente del nodo. Le habla al runtime por CRI.</td></tr>
+        <tr><td class="name">kube-proxy</td><td>Programa reglas de red (iptables por defecto, o nftables; el modo IPVS está obsoleto desde v1.35) para que el tráfico a un Service llegue a algún pod.</td><td class="say">Enruta. No cifra.</td></tr>
+        <tr><td class="name">containerd / CRI-O</td><td>El runtime: descarga imágenes y corre los contenedores.</td><td class="say">Kubernetes ya no usa Docker como runtime, pero las imágenes de Docker siguen sirviendo porque son OCI.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p>El kube-scheduler no tiene nada que ver con horarios. Aquí "scheduling" es asignar un pod a un nodo. Lo que corre cosas a una hora fija es el CronJob.</p>
+  </div>
+</section>
+
+<!-- CRONJOB -->
+<section id="cronjob">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44% · pregunta 03 del simulador</div>
+    <h2>Qué pasa cuando corre un CronJob</h2>
+  </div>
+  <p>Este recorrido es el cluster entero trabajando junto. Fíjate en dos cosas: cada paso lo da un componente distinto, y ninguno le habla directo al siguiente. Todos escriben y leen en el API server.</p>
+
+  <ol class="seq">
+    <li><span class="step">1</span><div class="who">CronJob controller<small>dentro del controller-manager</small></div><div class="what">Llega la hora. Crea un objeto <strong>Job</strong>.</div></li>
+    <li><span class="step">2</span><div class="who">Job controller<small>dentro del controller-manager</small></div><div class="what">Ve el Job nuevo y crea un <strong>Pod</strong>.<br><span class="state">Pod: Pending, sin nodo</span></div></li>
+    <li><span class="step">3</span><div class="who">kube-scheduler<small>control plane</small></div><div class="what">Ve un pod sin nodo, evalúa los nodos y anota en el API server en cuál va. No arranca nada.</div></li>
+    <li><span class="step">4</span><div class="who">kubelet<small>del nodo elegido</small></div><div class="what">Ve que le asignaron un pod y le pide al runtime que lo arranque.</div></li>
+    <li><span class="step">5</span><div class="who">containerd<small>runtime del nodo</small></div><div class="what">Descarga la imagen si no la tiene y corre el contenedor.<br><span class="state">Pod: Running</span></div></li>
+    <li><span class="step">6</span><div class="who">Fin<small>la tarea termina bien</small></div><div class="what">El contenedor sale sin error. El pod queda <strong>Succeeded</strong> y el Job queda <strong>Complete</strong>.</div></li>
+  </ol>
+
+  <div class="callout answer">
+    <div class="lab">Respuesta: D</div>
+    <p>El CronJob crea un Job, y el Job crea el Pod. Los objetos grandes delegan en cadena, igual que el Deployment, que crea un ReplicaSet que crea los Pods.</p>
+  </div>
+  <ul class="plain">
+    <li><strong>A está mal:</strong> el kubelet no mira CronJobs. Solo mira los pods asignados a su nodo.</li>
+    <li><strong>B está mal:</strong> el scheduler no maneja horas. Su "scheduling" es escoger nodo.</li>
+    <li><strong>C está mal:</strong> se salta el Job. El CronJob nunca crea pods directamente.</li>
+  </ul>
+</section>
+
+<!-- OBJETOS -->
+<section id="objetos">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44%</div>
+    <h2>Los objetos y quién crea a quién</h2>
+  </div>
+  <p>El <strong>Pod</strong> es la unidad mínima de Kubernetes: uno o más contenedores que comparten IP y discos, y que viven y mueren juntos. Casi nunca lo creas a mano. Lo crea un controller que lo cuida por ti.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 660 292" role="img" aria-label="Cadena de controladores: Deployment crea ReplicaSet que crea pods; CronJob crea Job que crea un pod; StatefulSet crea directamente pods con nombre fijo db-0, db-1, db-2; DaemonSet crea un pod en cada nodo.">
+        <defs>
+          <marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+        </defs>
+        <rect class="b-acc" x="10" y="17" width="160" height="46" rx="8"/>
+        <text class="tm" x="90" y="37" text-anchor="middle">Deployment</text>
+        <text class="ts" x="90" y="54" text-anchor="middle">app sin estado</text>
+        <line class="ln" x1="170" y1="40" x2="226" y2="40" marker-end="url(#m3)"/>
+        <text class="ts" x="198" y="33" text-anchor="middle">crea</text>
+        <rect class="b" x="230" y="17" width="140" height="46" rx="8"/>
+        <text class="tm" x="300" y="37" text-anchor="middle">ReplicaSet</text>
+        <text class="ts" x="300" y="54" text-anchor="middle">mantiene N copias</text>
+        <line class="ln" x1="370" y1="40" x2="426" y2="40" marker-end="url(#m3)"/>
+        <text class="ts" x="398" y="33" text-anchor="middle">crea</text>
+        <rect class="chip" x="430" y="25" width="60" height="30" rx="6"/><text class="tc" x="460" y="44" text-anchor="middle">pod</text>
+        <rect class="chip" x="496" y="25" width="60" height="30" rx="6"/><text class="tc" x="526" y="44" text-anchor="middle">pod</text>
+        <rect class="chip" x="562" y="25" width="60" height="30" rx="6"/><text class="tc" x="592" y="44" text-anchor="middle">pod</text>
+
+        <rect class="b-acc" x="10" y="87" width="160" height="46" rx="8"/>
+        <text class="tm" x="90" y="107" text-anchor="middle">CronJob</text>
+        <text class="ts" x="90" y="124" text-anchor="middle">a una hora fija</text>
+        <line class="ln" x1="170" y1="110" x2="226" y2="110" marker-end="url(#m3)"/>
+        <text class="ts" x="198" y="103" text-anchor="middle">crea</text>
+        <rect class="b" x="230" y="87" width="140" height="46" rx="8"/>
+        <text class="tm" x="300" y="107" text-anchor="middle">Job</text>
+        <text class="ts" x="300" y="124" text-anchor="middle">corre hasta terminar</text>
+        <line class="ln" x1="370" y1="110" x2="426" y2="110" marker-end="url(#m3)"/>
+        <text class="ts" x="398" y="103" text-anchor="middle">crea</text>
+        <rect class="chip" x="430" y="95" width="60" height="30" rx="6"/><text class="tc" x="460" y="114" text-anchor="middle">pod</text>
+
+        <rect class="b-acc" x="10" y="157" width="160" height="46" rx="8"/>
+        <text class="tm" x="90" y="177" text-anchor="middle">StatefulSet</text>
+        <text class="ts" x="90" y="194" text-anchor="middle">app con estado (BD)</text>
+        <line class="ln" x1="170" y1="180" x2="426" y2="180" marker-end="url(#m3)"/>
+        <text class="ts" x="298" y="173" text-anchor="middle">crea directo, en orden</text>
+        <rect class="chip" x="430" y="165" width="60" height="30" rx="6"/><text class="tc" x="460" y="184" text-anchor="middle">db-0</text>
+        <rect class="chip" x="496" y="165" width="60" height="30" rx="6"/><text class="tc" x="526" y="184" text-anchor="middle">db-1</text>
+        <rect class="chip" x="562" y="165" width="60" height="30" rx="6"/><text class="tc" x="592" y="184" text-anchor="middle">db-2</text>
+
+        <rect class="b-acc" x="10" y="227" width="160" height="46" rx="8"/>
+        <text class="tm" x="90" y="247" text-anchor="middle">DaemonSet</text>
+        <text class="ts" x="90" y="264" text-anchor="middle">uno por nodo</text>
+        <line class="ln" x1="170" y1="250" x2="426" y2="250" marker-end="url(#m3)"/>
+        <text class="ts" x="298" y="243" text-anchor="middle">crea directo, uno en cada nodo</text>
+        <rect class="chip" x="430" y="235" width="60" height="30" rx="6"/><text class="tc" x="460" y="254" text-anchor="middle">nodo 1</text>
+        <rect class="chip" x="496" y="235" width="60" height="30" rx="6"/><text class="tc" x="526" y="254" text-anchor="middle">nodo 2</text>
+        <rect class="chip" x="562" y="235" width="60" height="30" rx="6"/><text class="tc" x="592" y="254" text-anchor="middle">nodo 3</text>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Los objetos de la izquierda no corren nada: crean y vigilan a los de la derecha. Los pods del StatefulSet tienen nombre fijo y disco propio.</figcaption>
+  </figure>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Si necesitas…</th><th>Usas</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td>App sin estado, copias intercambiables</td><td class="name">Deployment</td><td>API web, frontend</td></tr>
+        <tr><td>App con estado: cada copia con nombre fijo y su disco</td><td class="name">StatefulSet</td><td>Base de datos, Kafka</td></tr>
+        <tr><td>Un pod en cada nodo</td><td class="name">DaemonSet</td><td>Recolector de logs, agente de monitoreo</td></tr>
+        <tr><td>Tarea que corre y termina</td><td class="name">Job</td><td>Migración de datos</td></tr>
+        <tr><td>Tarea que se repite a una hora</td><td class="name">CronJob</td><td>Reporte cada noche</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Otros objetos que salen siempre</h3>
+  <div class="defs">
+    <div class="def"><h4>Service</h4><p>Dirección fija (IP y nombre) para un grupo de pods que cambian todo el tiempo. Ver <a href="#red">Red</a>.</p></div>
+    <div class="def"><h4>Ingress</h4><p>Entrada HTTP/HTTPS desde afuera del cluster, por dominio y ruta. Necesita un ingress controller instalado.</p></div>
+    <div class="def"><h4>ConfigMap</h4><p>Configuración separada del código: URLs, parámetros. El pod la lee como variables de entorno o como archivo.</p></div>
+    <div class="def"><h4>Secret</h4><p>Igual que ConfigMap, pero para contraseñas y llaves. Van en base64, y base64 no es cifrado: por defecto se guardan sin cifrar en etcd.</p></div>
+    <div class="def"><h4>Namespace</h4><p>Carpetas lógicas dentro del cluster. Vienen por defecto: <code>default</code>, <code>kube-system</code>, <code>kube-public</code>, <code>kube-node-lease</code>.</p></div>
+    <div class="def"><h4>Labels y selectors</h4><p>Etiquetas clave=valor (<code>app=web</code>). Así un Service o un Deployment encuentra "sus" pods.</p></div>
+    <div class="def"><h4>Annotations</h4><p>Notas para herramientas (ej. qué emisor usa cert-manager). No sirven para seleccionar objetos.</p></div>
+    <div class="def"><h4>CRD</h4><p>Custom Resource Definition: te deja crear tipos de objeto nuevos. Así funciona el <code>Certificate</code> de cert-manager.</p></div>
+    <div class="def"><h4>Operator</h4><p>Un controller propio que usa CRDs para manejar una app compleja (instalar, escalar, hacer backups) como lo haría una persona experta.</p></div>
+  </div>
+
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p>"Container" no es un objeto de Kubernetes. No existe <code>kind: Container</code>. La unidad desplegable más pequeña es el Pod.</p>
+  </div>
+</section>
+
+<!-- POD -->
+<section id="pod">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44%</div>
+    <h2>El Pod por dentro: fases, probes y reinicios</h2>
+  </div>
+  <p>Un Pod pasa por pocas fases y el examen pregunta mucho por ellas. La clave: <strong>la fase es del Pod</strong>, pero <strong>los reinicios son de cada contenedor</strong>, y los hace el kubelet según la <code>restartPolicy</code>.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Fase</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Pending</td><td>Aceptado, pero todavía no corre: espera nodo (scheduler) o está descargando la imagen.</td></tr>
+        <tr><td class="name">Running</td><td>Ya tiene nodo y al menos un contenedor está corriendo, arrancando o reiniciando.</td></tr>
+        <tr><td class="name">Succeeded</td><td>Todos los contenedores terminaron bien (código 0) y no se van a reiniciar. Típico de un Job.</td></tr>
+        <tr><td class="name">Failed</td><td>Todos terminaron y al menos uno falló (código distinto de 0).</td></tr>
+        <tr><td class="name">Unknown</td><td>No se sabe el estado, casi siempre porque se perdió el contacto con el nodo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p><code>CrashLoopBackOff</code>, <code>ImagePullBackOff</code> u <code>OOMKilled</code> no son fases. Son estados o motivos de un contenedor; mientras tanto, el Pod sigue en Pending o Running.</p>
+  </div>
+
+  <h3>Las tres probes</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Probe</th><th>Pregunta que hace</th><th>Si falla…</th></tr></thead>
+      <tbody>
+        <tr><td class="name">liveness</td><td>¿Sigue vivo o se colgó?</td><td>El kubelet <strong>reinicia</strong> el contenedor.</td></tr>
+        <tr><td class="name">readiness</td><td>¿Ya puede recibir tráfico?</td><td>Lo saca de los endpoints del Service. <strong>No</strong> lo reinicia.</td></tr>
+        <tr><td class="name">startup</td><td>¿Ya terminó de arrancar?</td><td>Las otras dos esperan hasta que pase. Sirve para apps lentas al arrancar.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="howto">Se configuran con <code>httpGet</code>, <code>tcpSocket</code>, <code>exec</code> o <code>grpc</code>. Una liveness mal configurada (por ejemplo, con la ruta equivocada) reinicia una y otra vez una app que está sana.</p>
+
+  <h3>restartPolicy y contenedores especiales</h3>
+  <ul class="plain">
+    <li><strong>restartPolicy</strong> va en el Pod: <code>Always</code> (por defecto, y la única válida en Deployments), <code>OnFailure</code> o <code>Never</code> (las que usan los Jobs).</li>
+    <li><strong>Init containers</strong>: corren uno por uno y cada uno debe terminar bien antes de que arranque la app. Sirven para preparar cosas o esperar dependencias.</li>
+    <li><strong>Sidecars nativos</strong> (estables desde v1.33): un init container con <code>restartPolicy: Always</code>. Arranca antes que la app y la acompaña toda su vida; típico para proxies o recolectores de logs.</li>
+    <li><strong>Apagado</strong>: al borrar un Pod, el kubelet manda SIGTERM, espera el periodo de gracia (30 s por defecto) y después manda SIGKILL.</li>
+  </ul>
+</section>
+
+<!-- CONTENEDORES -->
+<section id="contenedores">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44%</div>
+    <h2>Contenedores e imágenes</h2>
+  </div>
+  <p>Un contenedor no es una máquina virtual: es un <strong>proceso aislado</strong> que comparte el kernel del host. El aislamiento lo dan dos funciones del kernel de Linux: los <strong>namespaces</strong> (lo que el proceso puede ver) y los <strong>cgroups</strong> (cuánto puede consumir).</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th></th><th>Contenedor</th><th>Máquina virtual</th></tr></thead>
+      <tbody>
+        <tr><td>Kernel</td><td>Comparte el del host</td><td>Trae el suyo</td></tr>
+        <tr><td>Arranque</td><td>Muy rápido, segundos o menos</td><td>Más lento, suele tardar minutos</td></tr>
+        <tr><td>Aislamiento</td><td>Más liviano</td><td>Más fuerte</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>La imagen</h3>
+  <ul class="plain">
+    <li>Una imagen son <strong>capas de solo lectura</strong> más un manifiesto y una configuración. Al arrancar, el runtime pone encima una capa escribible que se pierde al reiniciar. Lo que debe durar va en volúmenes.</li>
+    <li>Referencia: <code>registro/repositorio:tag</code>. Si no pones registro, se asume Docker Hub. El <strong>tag</strong> se puede mover a otra imagen; el <strong>digest</strong> (<code>@sha256:…</code>) apunta siempre al mismo contenido.</li>
+    <li>Sin tag (o con <code>:latest</code>) la política de descarga por defecto es <code>Always</code>; con cualquier otro tag es <code>IfNotPresent</code>.</li>
+    <li>Registro privado: un Secret de tipo <code>dockerconfigjson</code> que se referencia en <code>imagePullSecrets</code>.</li>
+  </ul>
+
+  <h3>El Dockerfile en cuatro ideas</h3>
+  <div class="defs">
+    <div class="def"><h4>ENTRYPOINT y CMD</h4><p>ENTRYPOINT es el ejecutable; CMD, los argumentos por defecto. En Kubernetes, <code>command</code> reemplaza al ENTRYPOINT y <code>args</code> al CMD.</p></div>
+    <div class="def"><h4>RUN</h4><p>Se ejecuta al construir la imagen, no al arrancar el contenedor.</p></div>
+    <div class="def"><h4>Multi-stage</h4><p>Compilas en una etapa con todas las herramientas y copias solo el resultado a una imagen mínima (distroless o scratch). Queda más pequeña y más segura.</p></div>
+    <div class="def"><h4>Secretos</h4><p>Nunca en <code>ENV</code> ni en <code>COPY</code>: quedan guardados en las capas aunque los borres en un paso posterior.</p></div>
+  </div>
+
+  <h3>Quién corre los contenedores</h3>
+  <div class="flow" aria-label="Cadena que ejecuta un contenedor">
+    <span>kubelet</span><i>→ CRI →</i><span>containerd o CRI-O</span><i>→</i><span>runc (OCI)</span><i>→</i><span>proceso aislado</span>
+  </div>
+  <ul class="plain">
+    <li><strong>OCI</strong> define los estándares de imagen, de runtime y de distribución. Por eso una imagen hecha con Docker corre en containerd.</li>
+    <li>Kubernetes quitó el dockershim en v1.24: Docker Engine ya no es un runtime directo, pero sus imágenes siguen sirviendo.</li>
+    <li><strong>RuntimeClass</strong> deja elegir un runtime con más aislamiento, como gVisor o Kata Containers.</li>
+  </ul>
+</section>
+
+<!-- RED -->
+<section id="red">
+  <div class="sec-head">
+    <div class="tag"><b>Orquestación</b> · 28%</div>
+    <h2>Cómo llega el tráfico a tu app</h2>
+  </div>
+  <p>Los pods nacen y mueren cambiando de IP. Por eso nunca se les habla directo: se les habla a través de un <strong>Service</strong>, que tiene IP y nombre fijos y reparte el tráfico entre los pods que tengan la etiqueta correcta.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 680 228" role="img" aria-label="Camino del tráfico: el usuario llega al Ingress por dominio y ruta, el Ingress lo manda al Service, y el Service reparte entre los pods. CoreDNS resuelve el nombre del Service, kube-proxy programa las reglas y el plugin CNI le da IP a cada pod.">
+        <defs>
+          <marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+          <marker id="m4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker>
+        </defs>
+        <rect class="b" x="10" y="30" width="100" height="60" rx="8"/>
+        <text class="t" x="60" y="56" text-anchor="middle">Usuario</text>
+        <text class="ts" x="60" y="74" text-anchor="middle">navegador o app</text>
+        <line class="ln-acc" x1="110" y1="60" x2="156" y2="60" marker-end="url(#m4a)"/>
+        <text class="ts acc" x="133" y="51" text-anchor="middle">https</text>
+
+        <rect class="b" x="160" y="30" width="140" height="60" rx="8"/>
+        <text class="tm" x="230" y="56" text-anchor="middle">Ingress</text>
+        <text class="ts" x="230" y="74" text-anchor="middle">dominio y ruta</text>
+        <line class="ln-acc" x1="300" y1="60" x2="346" y2="60" marker-end="url(#m4a)"/>
+        <text class="ts acc" x="323" y="51" text-anchor="middle">ruta</text>
+
+        <rect class="b-acc" x="350" y="30" width="140" height="60" rx="8"/>
+        <text class="tm" x="420" y="56" text-anchor="middle">Service</text>
+        <text class="ts" x="420" y="74" text-anchor="middle">IP fija (ClusterIP)</text>
+
+        <line class="ln-acc" x1="490" y1="60" x2="546" y2="34" marker-end="url(#m4a)"/>
+        <line class="ln-acc" x1="490" y1="60" x2="546" y2="62" marker-end="url(#m4a)"/>
+        <line class="ln-acc" x1="490" y1="60" x2="546" y2="90" marker-end="url(#m4a)"/>
+        <text class="ts acc" x="512" y="20" text-anchor="middle">reparte</text>
+
+        <rect class="chip" x="550" y="22" width="120" height="24" rx="6"/><text class="tc" x="610" y="38" text-anchor="middle">pod 10.1.0.4</text>
+        <rect class="chip" x="550" y="50" width="120" height="24" rx="6"/><text class="tc" x="610" y="66" text-anchor="middle">pod 10.1.0.7</text>
+        <rect class="chip" x="550" y="78" width="120" height="24" rx="6"/><text class="tc" x="610" y="94" text-anchor="middle">pod 10.1.1.2</text>
+
+        <rect class="b" x="160" y="158" width="140" height="52" rx="8"/>
+        <text class="tm" x="230" y="179" text-anchor="middle">CoreDNS</text>
+        <text class="ts" x="230" y="198" text-anchor="middle">nombre → IP del Service</text>
+        <line class="ln dash" x1="270" y1="158" x2="378" y2="94" marker-end="url(#m4)"/>
+
+        <rect class="b" x="350" y="158" width="140" height="52" rx="8"/>
+        <text class="tm" x="420" y="179" text-anchor="middle">kube-proxy</text>
+        <text class="ts" x="420" y="198" text-anchor="middle">programa las reglas</text>
+        <line class="ln dash" x1="420" y1="158" x2="420" y2="94" marker-end="url(#m4)"/>
+
+        <rect class="b" x="540" y="158" width="130" height="52" rx="8"/>
+        <text class="tm" x="605" y="179" text-anchor="middle">CNI</text>
+        <text class="ts" x="605" y="198" text-anchor="middle">da IP a cada pod</text>
+        <line class="ln dash" x1="605" y1="158" x2="605" y2="106" marker-end="url(#m4)"/>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Línea sólida: el camino de una petición. Punteada: las piezas que hacen posible ese camino. El CNI lo implementan plugins como Calico, Cilium o Flannel.</figcaption>
+  </figure>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Tipo de Service</th><th>Para qué</th></tr></thead>
+      <tbody>
+        <tr><td class="name">ClusterIP</td><td>El tipo por defecto. Solo se alcanza desde dentro del cluster.</td></tr>
+        <tr><td class="name">NodePort</td><td>Abre un puerto (rango 30000–32767) en cada nodo para entrar desde afuera.</td></tr>
+        <tr><td class="name">LoadBalancer</td><td>Le pide a la nube un balanceador con IP pública.</td></tr>
+        <tr><td class="name">ExternalName</td><td>Un alias DNS hacia un servicio que está fuera del cluster.</td></tr>
+        <tr><td class="name">Headless</td><td><code>clusterIP: None</code>. Sin IP fija: devuelve la IP de cada pod. Lo usa el StatefulSet.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="defs">
+    <div class="def"><h4>CoreDNS</h4><p>El DNS del cluster. Nombre completo de un Service: <code>mi-svc.mi-namespace.svc.cluster.local</code></p></div>
+    <div class="def"><h4>CNI</h4><p>Un estándar, no una herramienta. Define cómo los plugins de red (Calico, Cilium, Flannel) le dan IP y conectividad a los pods.</p></div>
+    <div class="def"><h4>NetworkPolicy</h4><p>Firewall entre pods. Solo funciona si el plugin CNI la soporta.</p></div>
+    <div class="def"><h4>Gateway API</h4><p>La evolución de Ingress: más completa y con roles separados. Si la ves como opción para "exponer tráfico", es válida.</p></div>
+    <div class="def"><h4>Service mesh</h4><p>Istio o Linkerd. Ponen un proxy junto a cada pod (Envoy en Istio; en su modo ambient, un proxy por nodo): cifrado mTLS, reintentos y métricas sin tocar el código.</p></div>
+    <div class="def"><h4>Envoy</h4><p>Proxy de capa 7 de la CNCF. Sirve de puerta de entrada (edge) y de sidecar entre servicios.</p></div>
+  </div>
+
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p>Por defecto, en Kubernetes todos los pods pueden hablar con todos. Si una pregunta habla de restringir tráfico entre pods, la respuesta es NetworkPolicy. Si habla de cifrar tráfico entre servicios, es mTLS con un service mesh. Nunca kube-proxy.</p>
+  </div>
+</section>
+
+<!-- SEGURIDAD -->
+<section id="seguridad">
+  <div class="sec-head">
+    <div class="tag"><b>Orquestación</b> · 28%</div>
+    <h2>Seguridad básica</h2>
+  </div>
+  <p>KCNA pregunta seguridad a nivel de conceptos. El KCSA va a profundizar en todo esto, así que lo que aprendas aquí te sirve dos veces. Empieza por el recorrido de cualquier petición al API server:</p>
+  <div class="flow" aria-label="Recorrido de una petición">
+    <span>Petición</span><i>→</i><span>Autenticación: ¿quién eres?</span><i>→</i><span>Autorización (RBAC): ¿puedes?</span><i>→</i><span>Admission: ¿cumple las reglas?</span><i>→</i><span>Se guarda en etcd</span>
+  </div>
+  <div class="defs">
+    <div class="def"><h4>Las 4C</h4><p>Cloud → Cluster → Container → Code. Capas de seguridad; cada una protege a la de adentro.</p></div>
+    <div class="def"><h4>RBAC</h4><p><strong>Role</strong> (permisos en un namespace) o <strong>ClusterRole</strong> (en todo el cluster). El <strong>RoleBinding</strong> o <strong>ClusterRoleBinding</strong> se lo asigna a alguien. Permisos = verbos (get, list, create, delete) sobre recursos.</p></div>
+    <div class="def"><h4>ServiceAccount</h4><p>La identidad de un pod frente al API server. Las personas son users; los pods usan service accounts.</p></div>
+    <div class="def"><h4>Mínimo privilegio</h4><p>Dar solo los permisos necesarios. Si una opción da permisos de más "por si acaso", está mal.</p></div>
+    <div class="def"><h4>Secrets</h4><p>Base64 no es cifrado. Para cifrarlos dentro de etcd hay que activar encryption at rest.</p></div>
+    <div class="def"><h4>Pod Security Standards</h4><p>Tres niveles: Privileged, Baseline, Restricted. Los aplica el Pod Security Admission, que reemplazó a PodSecurityPolicy.</p></div>
+    <div class="def"><h4>Admission controllers</h4><p>Revisan o modifican peticiones antes de guardarlas. Para políticas propias: OPA Gatekeeper o Kyverno.</p></div>
+    <div class="def"><h4>cert-manager</h4><p>Certificados TLS automáticos para apps. Cadena: Issuer → Certificate → Secret → Ingress. Los renueva solo.</p></div>
+  </div>
+</section>
+
+<!-- OPERAR -->
+<section id="operar">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> + <b>Orquestación</b></div>
+    <h2>Recursos, escalado, discos y fallas</h2>
+  </div>
+
+  <h3>Recursos y scheduling</h3>
+  <ul class="plain">
+    <li><strong>requests</strong>: lo que el pod reserva. El scheduler lo usa para escoger un nodo con espacio.</li>
+    <li><strong>limits</strong>: el máximo. Si pasa el límite de memoria, lo matan (<code>OOMKilled</code>). Si pasa el de CPU, lo frenan, pero no lo matan.</li>
+    <li><strong>QoS</strong>: Guaranteed (requests = limits), Burstable (tiene algo), BestEffort (no tiene nada; es el primero en morir si falta memoria).</li>
+    <li><strong>Taints y tolerations</strong>: el taint va en el nodo y repele pods; la toleration va en el pod y le deja entrar.</li>
+    <li><strong>nodeSelector y affinity</strong>: el pod pide ir a ciertos nodos (ej. los que tienen GPU).</li>
+    <li><strong>PriorityClass</strong>: los pods importantes se programan primero y, si no caben, el scheduler puede desalojar (<em>preempt</em>) pods de menor prioridad.</li>
+    <li><strong>Repartir réplicas</strong>: pod anti-affinity o topology spread constraints, para que un nodo o una zona caída no tumbe todas las copias.</li>
+  </ul>
+
+  <h3>Escalado</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Herramienta</th><th>Qué escala</th><th>Detalle</th></tr></thead>
+      <tbody>
+        <tr><td class="name">HPA</td><td>Más o menos pods</td><td>Según métricas como CPU. Necesita metrics-server.</td></tr>
+        <tr><td class="name">VPA</td><td>Pods más grandes o más chicos</td><td>Ajusta los requests de CPU y memoria.</td></tr>
+        <tr><td class="name">Cluster Autoscaler</td><td>Más o menos nodos</td><td>Se activa cuando hay pods en Pending por falta de espacio. Karpenter es una alternativa.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Almacenamiento</h3>
+  <ul class="plain">
+    <li><strong>Volume</strong>: disco del pod. Un <code>emptyDir</code> se borra cuando muere el pod.</li>
+    <li><strong>PersistentVolume (PV)</strong>: el disco real. <strong>PersistentVolumeClaim (PVC)</strong>: la solicitud del pod ("necesito 10 GB").</li>
+    <li><strong>StorageClass</strong>: crea el PV automáticamente cuando llega un PVC. Esto se llama aprovisionamiento dinámico.</li>
+    <li><strong>CSI</strong>: el estándar para conectar proveedores de almacenamiento.</li>
+    <li><strong>Modos de acceso</strong>: ReadWriteOnce (un nodo escribe), ReadOnlyMany, ReadWriteMany (varios nodos escriben), ReadWriteOncePod.</li>
+  </ul>
+
+  <h3>Cuando algo falla</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Ves esto</th><th>Causa típica</th><th>Qué miras</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Pending</td><td>Ningún nodo tiene espacio, un taint sin toleration o un PVC sin disco.</td><td><code>kubectl describe pod</code>, sección Events</td></tr>
+        <tr><td class="name">ImagePullBackOff</td><td>Nombre o tag de imagen mal escrito, o registry privado sin credenciales.</td><td><code>kubectl describe pod</code></td></tr>
+        <tr><td class="name">CrashLoopBackOff</td><td>La app arranca y se cae una y otra vez.</td><td><code>kubectl logs --previous</code></td></tr>
+        <tr><td class="name">OOMKilled</td><td>Pasó su límite de memoria.</td><td><code>kubectl describe pod</code></td></tr>
+        <tr><td>Corre pero no responde</td><td>El selector del Service no coincide con las labels de los pods.</td><td><code>kubectl get endpointslices</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>kubectl básico</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Comando</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td class="name">kubectl get pods -A</td><td>Lista pods de todos los namespaces</td></tr>
+        <tr><td class="name">kubectl describe pod web</td><td>Todo el detalle, incluidos los eventos</td></tr>
+        <tr><td class="name">kubectl logs web</td><td>Lo que imprime la app</td></tr>
+        <tr><td class="name">kubectl exec -it web -- sh</td><td>Entrar al contenedor</td></tr>
+        <tr><td class="name">kubectl apply -f app.yaml</td><td>Aplicar un manifiesto (declarativo)</td></tr>
+        <tr><td class="name">kubectl create deployment web --image=nginx --replicas=2</td><td>Crear un Deployment</td></tr>
+        <tr><td class="name">kubectl run test --image=nginx</td><td>Crear solo un Pod</td></tr>
+        <tr><td class="name">kubectl scale deployment web --replicas=5</td><td>Cambiar el número de copias</td></tr>
+        <tr><td class="name">kubectl expose deployment web --port=80</td><td>Crear un Service para el Deployment</td></tr>
+        <tr><td class="name">kubectl rollout undo deployment web</td><td>Volver a la versión anterior</td></tr>
+        <tr><td class="name">kubectl get events</td><td>Qué ha pasado en el cluster</td></tr>
+        <tr><td class="name">kubectl explain pod.spec</td><td>Documentación de un campo, sin salir de la terminal</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="howto">Nombres cortos: <code>po</code>, <code>deploy</code>, <code>svc</code>, <code>ns</code>, <code>cm</code>, <code>pv</code>, <code>pvc</code>. La configuración de kubectl vive en <code>~/.kube/config</code>.</p>
+</section>
+
+<!-- ADMINISTRAR -->
+<section id="administrar">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos</b> · 44%</div>
+    <h2>Administrar el cluster</h2>
+  </div>
+  <p>Desde noviembre de 2025 el temario pide administración. No es para hacerla de memoria en una terminal: es saber <strong>qué herramienta o comando resuelve cada situación</strong>.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Situación</th><th>Qué usas</th></tr></thead>
+      <tbody>
+        <tr><td>Crear un cluster en máquinas propias</td><td><code>kubeadm init</code> y <code>kubeadm join</code></td></tr>
+        <tr><td>Un cluster local para pruebas o CI</td><td>kind o minikube</td></tr>
+        <tr><td>Cambiar de cluster</td><td><code>kubectl config use-context</code></td></tr>
+        <tr><td>Cambiar el namespace por defecto</td><td><code>kubectl config set-context --current --namespace=dev</code></td></tr>
+        <tr><td>Sacar un nodo para mantenimiento</td><td><code>kubectl drain</code>, mantenimiento, <code>kubectl uncordon</code></td></tr>
+        <tr><td>Que no lleguen pods nuevos a un nodo</td><td><code>kubectl cordon</code> (los que ya corren se quedan)</td></tr>
+        <tr><td>Backup del estado del cluster</td><td><code>etcdctl snapshot save</code></td></tr>
+        <tr><td>Saber si tienes un permiso</td><td><code>kubectl auth can-i delete pods -n prod</code></td></tr>
+        <tr><td>Ver todos los tipos de recurso</td><td><code>kubectl api-resources</code></td></tr>
+        <tr><td>Generar un YAML sin crear nada</td><td><code>--dry-run=client -o yaml</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Versiones y actualizaciones</h3>
+  <ul class="plain">
+    <li>Sale una versión menor unas <strong>tres veces al año</strong>, y cada una recibe parches durante unos 14 meses.</li>
+    <li>Se actualiza <strong>primero el control plane y después los nodos</strong>, de a una versión menor (1.36 → 1.37), sin saltar.</li>
+    <li>Regla de versiones: el kubelet puede ir hasta <strong>tres versiones menores detrás</strong> del API server, pero <strong>nunca adelante</strong>.</li>
+    <li>APIs: <strong>alpha</strong> (apagada por defecto, puede desaparecer), <strong>beta</strong> (todavía puede cambiar; las nuevas vienen apagadas desde v1.24) y <strong>estable</strong> (<code>v1</code>, para producción).</li>
+  </ul>
+
+  <h3>Límites por namespace</h3>
+  <div class="defs">
+    <div class="def"><h4>ResourceQuota</h4><p>Tope para todo el namespace: CPU y memoria totales, número de pods, PVCs, ConfigMaps… Si hay cuota de CPU, cada pod debe declarar sus requests.</p></div>
+    <div class="def"><h4>LimitRange</h4><p>Valores por defecto y mínimos o máximos para cada contenedor. Rellena los requests que falten.</p></div>
+    <div class="def"><h4>PodDisruptionBudget</h4><p>Cuántas réplicas pueden caer a la vez en interrupciones voluntarias, como un <code>drain</code>. No protege si el nodo se cae solo.</p></div>
+  </div>
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p><code>cordon</code> no mueve nada: solo evita pods nuevos. <code>drain</code> hace el cordon y además desaloja los pods. Y <code>kubectl scale</code> fija las réplicas, mientras que <code>kubectl autoscale</code> crea un HPA.</p>
+  </div>
+</section>
+
+<!-- ENTREGA -->
+<section id="entrega">
+  <div class="sec-head">
+    <div class="tag"><b>Entrega de aplicaciones</b> · 16%</div>
+    <h2>Cómo llega el código a producción</h2>
+  </div>
+  <div class="defs">
+    <div class="def"><h4>CI / CD</h4><p>CI: integrar y probar cada cambio automáticamente. CD: entregar y desplegar automáticamente.</p></div>
+    <div class="def"><h4>GitOps</h4><p>Git es la única fuente de verdad. Un agente dentro del cluster (Argo CD o Flux) jala los cambios del repo y reconcilia. Es un modelo pull: nadie hace <code>kubectl apply</code> a mano.</p></div>
+    <div class="def"><h4>Principios GitOps</h4><p>Declarativo, versionado e inmutable, jalado automáticamente, reconciliado continuamente.</p></div>
+    <div class="def"><h4>Helm</h4><p>Gestor de paquetes de Kubernetes. Chart (el paquete), values.yaml (tu configuración), release (una instalación), <code>helm rollback</code>.</p></div>
+    <div class="def"><h4>Kustomize</h4><p>Capas sobre YAML base, sin plantillas. Viene dentro de kubectl: <code>kubectl apply -k</code>.</p></div>
+    <div class="def"><h4>IaC</h4><p>Infraestructura como código: Terraform u OpenTofu, Pulumi, Crossplane.</p></div>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Estrategia</th><th>Cómo funciona</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Rolling update</td><td>Por defecto en el Deployment. Reemplaza pods de a poco, sin caída.</td></tr>
+        <tr><td class="name">Recreate</td><td>Mata todos los pods viejos y luego crea los nuevos. Hay caída.</td></tr>
+        <tr><td class="name">Blue/green</td><td>Dos ambientes completos; cambias todo el tráfico de golpe al nuevo.</td></tr>
+        <tr><td class="name">Canary</td><td>Un porcentaje pequeño del tráfico va a la versión nueva; si va bien, subes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- DEPURAR -->
+<section id="depurar">
+  <div class="sec-head">
+    <div class="tag"><b>Entrega de aplicaciones</b> · 16%</div>
+    <h2>Cómo depurar sin perderte</h2>
+  </div>
+  <p>Depurar en Kubernetes es seguir siempre el mismo orden: <strong>qué dice el objeto</strong>, <strong>qué dice la app</strong> y, solo al final, <strong>entrar a mirar</strong>.</p>
+  <ol class="seq">
+    <li><span class="step">1</span><div class="who">kubectl get<small>el estado</small></div><div class="what">¿Pending, CrashLoopBackOff, READY <code>1/2</code>? El estado ya te dice dónde buscar.</div></li>
+    <li><span class="step">2</span><div class="who">kubectl describe<small>los Events</small></div><div class="what">Scheduling fallido, imagen que no baja, probe que falla, OOMKilled, y el motivo y código de salida del último reinicio.</div></li>
+    <li><span class="step">3</span><div class="who">kubectl logs<small>la app</small></div><div class="what">Lo que imprimió la app. Con <code>--previous</code> ves la ejecución anterior a un reinicio; con <code>-c</code>, otro contenedor del pod.</div></li>
+    <li><span class="step">4</span><div class="who">kubectl exec o debug<small>entrar</small></div><div class="what"><code>exec</code> si la imagen tiene shell. Si es distroless, <code>kubectl debug</code> agrega un <strong>contenedor efímero</strong> con herramientas, sin reiniciar el pod.</div></li>
+  </ol>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Código de salida</th><th>Qué suele significar</th></tr></thead>
+      <tbody>
+        <tr><td class="num">0</td><td>Terminó bien.</td></tr>
+        <tr><td class="num">1</td><td>Error de la aplicación.</td></tr>
+        <tr><td class="num">127</td><td>Comando no encontrado: el shell no halló el binario.</td></tr>
+        <tr><td class="num">137</td><td>128 + 9: lo mataron con SIGKILL, casi siempre por OOM.</td></tr>
+        <tr><td class="num">143</td><td>128 + 15: recibió SIGTERM, un apagado normal.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="defs">
+    <div class="def"><h4>port-forward</h4><p><code>kubectl port-forward svc/web 8080:80</code> abre un túnel temporal desde tu máquina. No expone nada al público.</p></div>
+    <div class="def"><h4>Pod temporal</h4><p><code>kubectl run tmp --rm -it --image=busybox -- sh</code> para probar DNS o conectividad desde dentro del cluster. Se borra al salir.</p></div>
+    <div class="def"><h4>Depurar un nodo</h4><p><code>kubectl debug node/&lt;nodo&gt; -it --image=busybox</code> crea un pod en ese nodo con su sistema de archivos en <code>/host</code>. Sin SSH.</p></div>
+    <div class="def"><h4>Rollout</h4><p><code>kubectl rollout status</code> sigue un despliegue y <code>kubectl rollout undo</code> vuelve atrás. Con Helm: <code>helm history</code> y <code>helm rollback</code>.</p></div>
+  </div>
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p>Si la app responde dentro del pod pero no a través del Service, casi nunca es la app: revisa que el selector del Service coincida con las labels, que haya endpoints, que el <code>targetPort</code> sea el correcto y que la app escuche en <code>0.0.0.0</code> y no solo en <code>127.0.0.1</code>.</p>
+  </div>
+</section>
+
+<!-- CLOUD NATIVE -->
+<section id="cloudnative">
+  <div class="sec-head">
+    <div class="tag"><b>Arquitectura cloud native</b> · 12%</div>
+    <h2>Principios, observabilidad y comunidad</h2>
+  </div>
+  <p>Cloud native es una forma de diseñar, no una herramienta. La CNCF lo define como sistemas desacoplados, resilientes, manejables y observables que, con automatización, permiten hacer cambios frecuentes y predecibles con poco esfuerzo.</p>
+  <ul class="plain">
+    <li><strong>Características</strong>: resiliencia, agilidad, operabilidad, observabilidad, disponibilidad. Son cualidades. Una opción que mezcla un nombre de herramienta se descarta.</li>
+    <li><strong>Microservicios vs monolito</strong>: muchos servicios pequeños que se despliegan por separado, contra una sola aplicación grande.</li>
+    <li><strong>Serverless</strong>: no administras servidores y puede escalar a cero. En Kubernetes: Knative.</li>
+    <li><strong>FinOps</strong>: visibilidad, optimización y pronóstico de costos, de forma automatizada. Herramienta CNCF: OpenCost.</li>
+    <li><strong>SLI, SLO, SLA</strong>: SLI es la medida (% de peticiones exitosas). SLO es la meta interna (99,9%). SLA es el compromiso con el cliente, con consecuencias si no se cumple.</li>
+  </ul>
+
+  <h3>Observabilidad</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Señal</th><th>Responde</th><th>Herramientas</th></tr></thead>
+      <tbody>
+        <tr><td>Logs</td><td>¿Qué pasó, en detalle?</td><td>Fluentd, Fluent Bit</td></tr>
+        <tr><td>Métricas</td><td>¿Cómo van los números en el tiempo?</td><td>Prometheus (modelo pull, consultas en PromQL), Grafana para dashboards</td></tr>
+        <tr><td>Trazas</td><td>¿Qué recorrido hizo una petición entre servicios y dónde se demoró?</td><td>Jaeger</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>OpenTelemetry</strong> es el estándar para recolectar las tres señales sin amarrarte a un proveedor.</p>
+
+  <h3>Estándares abiertos</h3>
+  <div class="defs">
+    <div class="def"><h4>OCI</h4><p>Formato estándar de imágenes y de runtimes. Por eso una imagen hecha con Docker corre en containerd.</p></div>
+    <div class="def"><h4>CRI</h4><p>Cómo el kubelet le habla al runtime de contenedores.</p></div>
+    <div class="def"><h4>CNI</h4><p>Cómo se conecta la red de los pods.</p></div>
+    <div class="def"><h4>CSI</h4><p>Cómo se conecta el almacenamiento.</p></div>
+  </div>
+
+  <h3>Comunidad</h3>
+  <ul class="plain">
+    <li>La <strong>CNCF</strong>, parte de la Linux Foundation, aloja Kubernetes y cientos de proyectos más.</li>
+    <li>Niveles de madurez de un proyecto: <strong>Sandbox → Incubating → Graduated</strong>. Los decide el TOC (Technical Oversight Committee).</li>
+    <li>Kubernetes se organiza en <strong>SIGs</strong> (Special Interest Groups) por tema: SIG Network, SIG Storage, SIG Security.</li>
+    <li>Los cambios grandes se proponen como <strong>KEP</strong> (Kubernetes Enhancement Proposal). Salen tres versiones al año.</li>
+  </ul>
+</section>
+
+<!-- TRAMPAS -->
+<section id="trampas">
+  <div class="sec-head">
+    <div class="tag">Para el día del examen</div>
+    <h2>Reglas que resuelven preguntas</h2>
+  </div>
+  <ol class="rules">
+    <li><div><strong>¿Herramienta o concepto?</strong> Si piden una característica o un recurso, descarta los nombres de herramientas (kubectl, containerd).</div></li>
+    <li><div><strong>Manual contra automatizado:</strong> casi siempre gana automatizado.</div></li>
+    <li><div><strong>La unidad mínima es el Pod</strong>, no el contenedor.</div></li>
+    <li><div><code>kubectl run</code> crea un Pod. <code>kubectl create deployment</code> crea un Deployment. Las copias siempre son <code>--replicas</code>.</div></li>
+    <li><div><strong>El scheduler decide el nodo</strong>, nunca la hora.</div></li>
+    <li><div><strong>Todos hablan con el API server</strong>, y solo él habla con etcd.</div></li>
+    <li><div><strong>kube-proxy enruta, no cifra.</strong> Cifrado entre servicios = mTLS del service mesh.</div></li>
+    <li><div><strong>Secret es base64</strong>, que no es cifrado.</div></li>
+    <li><div><strong>Por defecto todos los pods se hablan.</strong> Para restringir: NetworkPolicy.</div></li>
+    <li><div><code>/var/log</code> son logs. <code>/etc</code> es configuración.</div></li>
+    <li><div><strong>Sin estado → Deployment. Con estado → StatefulSet. En cada nodo → DaemonSet. Tarea → Job o CronJob.</strong></div></li>
+    <li><div>Si una opción suena bien pero tiene una palabra que la mata ("manual", "directamente", "siempre", "solo"), léela otra vez.</div></li>
+  </ol>
+</section>
+
+<!-- REPASO -->
+<section id="repaso">
+  <div class="sec-head">
+    <div class="tag">Tus preguntas falladas</div>
+    <h2>Repaso: responde antes de abrir</h2>
+  </div>
+  <p>Intenta responder cada una de memoria y después abre la tarjeta para revisar.</p>
+  <div class="cards">
+    <details class="card"><summary><span class="q">83</span><span>¿Cuál es la unidad desplegable más pequeña en Kubernetes?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Pod</span><span class="yours">Marcaste: Container</span><p>El contenedor es del runtime, no un objeto de Kubernetes. Kubernetes programa y despliega pods.</p></div></details>
+    <details class="card"><summary><span class="q">41</span><span>¿Cuáles son las características de una app cloud native? (2)</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Las dos listas sin nombres de herramientas</span><span class="yours">Marcaste solo una de las dos</span><p>Resiliencia, agilidad, operabilidad, observabilidad, disponibilidad. Las opciones con containerd o Kubernetes se descartan porque son herramientas.</p></div></details>
+    <details class="card"><summary><span class="q">126</span><span>¿Comando para un Deployment de nginx con 2 réplicas?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans"><code>kubectl create deploy nginx --image=nginx --replicas=2</code></span><span class="yours">Marcaste: <code>--count=2</code></span><p><code>--count</code> no existe. <code>kubectl run</code> solo crea pods.</p></div></details>
+    <details class="card"><summary><span class="q">243</span><span>¿Cómo entrega cert-manager certificados TLS a una app?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Maneja recursos Certificate y Secrets que usa el Ingress</span><span class="yours">Marcaste: actualiza kube-proxy para cifrar</span><p>kube-proxy solo enruta. cert-manager guarda el certificado en un Secret y el Ingress lo usa.</p></div></details>
+    <details class="card"><summary><span class="q">193</span><span>¿Qué recurso maneja una app sin estado?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Deployment</span><span class="yours">Marcaste: kubectl</span><p>kubectl es la herramienta, no un recurso. StatefulSet es para apps con estado; DaemonSet, uno por nodo.</p></div></details>
+    <details class="card"><summary><span class="q">197</span><span>¿Qué proxy de borde y de servicio está hecho para apps cloud native?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Envoy</span><span class="yours">Marcaste: gRPC</span><p>gRPC es un protocolo de comunicación. Envoy es el proxy, el sidecar que usa Istio.</p></div></details>
+    <details class="card"><summary><span class="q">160</span><span>¿Buen hábito para la eficiencia de costos cloud native?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Optimización automatizada, con visibilidad y pronóstico</span><span class="yours">Marcaste: procesos manuales</span><p>Eso es FinOps. En cloud native lo manual llega tarde porque los recursos cambian todo el tiempo.</p></div></details>
+    <details class="card"><summary><span class="q">03</span><span>Cuando corre un CronJob, ¿qué pasa en el cluster?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">El CronJob controller crea un Job, y el Job controller crea el Pod</span><span class="yours">No la marcaste</span><p>Ni el kubelet ni el scheduler miran CronJobs. Ver el recorrido completo en <a href="#cronjob">CronJob</a>.</p></div></details>
+  </div>
+</section>
+
+<footer>
+  <p>Temario según la Linux Foundation, vigente desde noviembre de 2025: <a href="https://training.linuxfoundation.org/kcna-program-changes/">KCNA Program Changes</a>.</p>
+  <p>Revisada contra la documentación oficial de Kubernetes v1.37 (octubre de 2026).</p>
+  <p>Practica con tu <a href="https://claude.ai/artifact/C7YgUNnjKpdQ1EVm62vt2A">simulador KCNA y KCSA</a> y sigue con la guía de seguridad, <a href="https://claude.ai/artifact/6BDJYmPDHqW98mYKEh4CiT">Estudiar seguridad en Kubernetes</a>.</p>
+  <p>Antes de presentar, confirma en la página oficial que el temario no haya cambiado.</p>
+</footer>
+
+</div>
+</body>
+</html>

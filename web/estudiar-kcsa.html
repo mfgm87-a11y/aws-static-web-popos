@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estudiar seguridad en Kubernetes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,600..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column (~760px) with a sticky chip nav; diagrams scroll sideways on phones inside their own frame. */
+:root {
+  --bg: #F2F4F9;
+  --surface: #FFFFFF;
+  --ink: #141B2D;
+  --muted: #586379;
+  --line: #D5DBE7;
+  --accent: #2D4BC8;
+  --accent-soft: #E5EAFB;
+  --warn: #9A5208;
+  --warn-soft: #FBEEDD;
+  --ok: #1C7047;
+  --ok-soft: #E1F2E8;
+  --bad: #A8202F;
+  --bad-soft: #FAE4E7;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1320; --surface: #161D2C; --ink: #E5E9F2; --muted: #9AA4B9; --line: #2A3347;
+    --accent: #8CA2FF; --accent-soft: #1D2649; --warn: #F2AA55; --warn-soft: #34261A;
+    --ok: #63CC93; --ok-soft: #142D24; --bad: #F27D8A; --bad-soft: #3A1B22;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1320; --surface: #161D2C; --ink: #E5E9F2; --muted: #9AA4B9; --line: #2A3347;
+  --accent: #8CA2FF; --accent-soft: #1D2649; --warn: #F2AA55; --warn-soft: #34261A;
+  --ok: #63CC93; --ok-soft: #142D24; --bad: #F27D8A; --bad-soft: #3A1B22;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--f-body);
+  padding-inline: 18px;
+  padding-block: 0 64px;
+}
+.wrap { max-width: 780px; margin: 0 auto; }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code, .mono { font-family: var(--f-mono); font-size: 0.88em; }
+code { background: var(--accent-soft); color: var(--ink); padding: 0.08em 0.36em; border-radius: 4px; overflow-wrap: anywhere; }
+p { margin: 0; max-width: 66ch; }
+strong { font-weight: 600; }
+
+/* Header */
+header.top { padding-block: 44px 28px; display: grid; gap: 14px; }
+.eyebrow { font: 600 12px/1.3 var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+h1 {
+  font: 800 clamp(38px, 8vw, 60px)/1 var(--f-display);
+  font-stretch: 115%;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+.lede { font-size: 18px; color: var(--ink); }
+.howto { font-size: 15px; color: var(--muted); }
+
+/* Nav */
+nav.chips {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  margin-inline: -18px;
+  padding: 10px 18px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav.chips::-webkit-scrollbar { display: none; }
+nav.chips a {
+  flex: none;
+  text-decoration: none;
+  color: var(--ink);
+  font: 500 13px/1 var(--f-body);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+nav.chips a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Sections */
+section { padding-block: 48px 8px; display: grid; gap: 18px; scroll-margin-top: 64px; }
+section > * { min-width: 0; }
+.sec-head { display: grid; gap: 6px; }
+.tag { font: 600 11.5px/1.3 var(--f-mono); letter-spacing: 0.04em; color: var(--muted); }
+.tag b { color: var(--accent); font-weight: 500; }
+h2 {
+  font: 700 clamp(25px, 4.6vw, 32px)/1.12 var(--f-display);
+  font-stretch: 108%;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+h3 { font: 700 18px/1.3 var(--f-display); font-stretch: 104%; margin: 10px 0 0; }
+ul.plain { margin: 0; padding-left: 1.15em; display: grid; gap: 8px; max-width: 68ch; }
+ul.plain li::marker { color: var(--accent); }
+
+/* Exam facts */
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 2px; }
+.fact b { font: 700 22px/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.fact span { font-size: 12.5px; color: var(--muted); }
+
+/* Tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+td.num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+td.name { font-family: var(--f-mono); font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+tr.group td { background: var(--accent-soft); font: 600 11px/1.3 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); padding-block: 7px; }
+td.say { color: var(--muted); }
+
+/* Diagnosis */
+.diag { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+.score { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { font: 600 13px/1 var(--f-body); padding: 7px 11px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.mid { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.misses { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.misses li { display: grid; grid-template-columns: 2.2em 1fr; gap: 10px; align-items: baseline; }
+.misses .n { font: 700 20px/1 var(--f-display); color: var(--bad); font-variant-numeric: tabular-nums; }
+.misses small { color: var(--muted); font-size: 13.5px; }
+
+/* Callouts */
+.callout { border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.callout .lab { font: 600 11px/1.2 var(--f-body); letter-spacing: 0.1em; text-transform: uppercase; }
+.callout.trap { background: var(--warn-soft); }
+.callout.trap .lab { color: var(--warn); }
+.callout.answer { background: var(--ok-soft); }
+.callout.answer .lab { color: var(--ok); }
+
+/* Diagrams */
+figure.fig { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+figure.fig .scroll { overflow-x: auto; padding: 14px 10px 4px; }
+figure.fig svg { display: block; width: 100%; min-width: 600px; height: auto; color: var(--muted); }
+figure.fig figcaption { padding: 10px 16px 14px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); }
+.scroll-hint { display: none; font-size: 12px; color: var(--muted); padding: 0 16px 8px; }
+@media (max-width: 640px) { .scroll-hint { display: block; } }
+
+svg .b { fill: var(--surface); stroke: var(--line); stroke-width: 1.3; }
+svg .b-acc { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .zone { fill: var(--bg); stroke: var(--line); stroke-width: 1.2; stroke-dasharray: 5 4; }
+svg .chip { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1.2; }
+svg .t { fill: var(--ink); font: 600 13px var(--f-body); }
+svg .tm { fill: var(--ink); font: 500 12.5px var(--f-mono); }
+svg .tc { fill: var(--ok); font: 500 11px var(--f-mono); }
+svg .ts { fill: var(--muted); font: 400 11px var(--f-body); }
+svg .tl { fill: var(--muted); font: 600 10.5px var(--f-body); letter-spacing: 0.08em; }
+svg .acc { fill: var(--accent); }
+svg .ln { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+svg .ln-acc { stroke: var(--accent); stroke-width: 1.7; fill: none; }
+svg .dash { stroke-dasharray: 5 4; }
+svg .mk { fill: var(--muted); }
+svg .mk-acc { fill: var(--accent); }
+
+/* Sequence */
+ol.seq { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+ol.seq li { display: grid; grid-template-columns: 2.4em minmax(0, 11em) minmax(0, 1fr); gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: start; }
+ol.seq li:last-child { border-bottom: 0; }
+ol.seq .step { font: 700 20px/1.2 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+ol.seq .who { font: 500 13px/1.4 var(--f-mono); color: var(--ink); }
+ol.seq .who small { display: block; font: 400 12px/1.35 var(--f-body); color: var(--muted); }
+ol.seq .what { font-size: 15px; }
+.state { display: inline-block; margin-top: 6px; font: 500 12px/1 var(--f-mono); padding: 5px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 560px) {
+  ol.seq li { grid-template-columns: 2em minmax(0, 1fr); }
+  ol.seq .what { grid-column: 2; }
+}
+
+/* Definition grid */
+.defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 10px; }
+.def { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; }
+.def h4 { margin: 0; font: 500 14px/1.3 var(--f-mono); color: var(--accent); }
+.def p { font-size: 14.5px; line-height: 1.5; }
+
+/* Request flow */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 500 13px/1 var(--f-body); }
+.flow span { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.flow i { font-style: normal; color: var(--muted); }
+
+/* Rules */
+ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+ol.rules li { counter-increment: r; display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 15px; }
+ol.rules li:last-child { border-bottom: 0; }
+ol.rules li::before { content: counter(r); font: 700 16px/1.5 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* Flashcards */
+.cards { display: grid; gap: 8px; }
+details.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.card summary { cursor: pointer; list-style: none; padding: 14px 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: baseline; font-weight: 500; }
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary .q { font: 500 12px/1 var(--f-mono); color: var(--muted); }
+details.card summary .chev { color: var(--muted); font-size: 13px; transition: transform 0.15s ease; }
+details.card[open] summary .chev { transform: rotate(90deg); }
+details.card .body { padding: 0 16px 16px; display: grid; gap: 6px; font-size: 15px; }
+details.card .body .ans { color: var(--ok); font-weight: 600; }
+details.card .body .yours { color: var(--bad); font-size: 13.5px; }
+
+footer { padding-block: 48px 0; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 48px; display: grid; gap: 6px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">KCSA · Kubernetes and Cloud Native Security Associate</div>
+  <h1>Estudiar seguridad en Kubernetes</h1>
+  <p class="lede">La guía hermana de Estudiar Kubernetes, para el examen de seguridad. La misma idea: primero entender por dónde puede entrar un atacante y qué lo detiene, después los nombres. Si entiendes el recorrido de una petición y las capas de defensa, muchas preguntas se responden solas.</p>
+  <p class="howto">Si tienes una hora: lee <a href="#idea">La idea</a>, <a href="#peticion">La petición</a>, <a href="#pods">Pods</a>, <a href="#secretos">Secretos</a> y <a href="#trampas">Trampas</a>. Eso cubre los dos dominios que más pesan, con 22 % cada uno.</p>
+</header>
+
+<nav class="chips" aria-label="Secciones">
+  <a href="#examen">Examen</a>
+  <a href="#idea">La idea</a>
+  <a href="#peticion">La petición</a>
+  <a href="#componentes">Componentes</a>
+  <a href="#pods">Pods</a>
+  <a href="#secretos">Secretos</a>
+  <a href="#red">Red</a>
+  <a href="#amenazas">Amenazas</a>
+  <a href="#plataforma">Plataforma</a>
+  <a href="#cumplimiento">Cumplimiento</a>
+  <a href="#trampas">Trampas</a>
+  <a href="#repaso">Repaso</a>
+</nav>
+
+<!-- EXAMEN -->
+<section id="examen">
+  <div class="sec-head">
+    <div class="tag">Antes de empezar</div>
+    <h2>Cómo es el examen</h2>
+  </div>
+  <div class="facts">
+    <div class="fact"><b>60</b><span>preguntas</span></div>
+    <div class="fact"><b>90 min</b><span>de tiempo</span></div>
+    <div class="fact"><b>75%</b><span>para aprobar</span></div>
+    <div class="fact"><b>6</b><span>dominios</span></div>
+  </div>
+  <p>Opción múltiple, en línea y con supervisor por cámara, igual que el KCNA. La diferencia es la profundidad: el KCNA pregunta qué es RBAC; el KCSA pregunta qué verbo de RBAC deja escalar privilegios.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Dominio</th><th>Peso</th><th>≈ Preguntas</th><th>Qué entra</th></tr></thead>
+      <tbody>
+        <tr><td>Panorama de la seguridad cloud native</td><td class="num">14%</td><td class="num">8</td><td>Las 4C, nube, controles, aislamiento, imágenes, código</td></tr>
+        <tr><td>Seguridad de los componentes del cluster</td><td class="num">22%</td><td class="num">13</td><td>API server, etcd, kubelet, runtime, red, cliente, almacenamiento</td></tr>
+        <tr><td>Fundamentos de seguridad de Kubernetes</td><td class="num">22%</td><td class="num">13</td><td>Pod Security, autenticación, autorización, Secrets, auditoría, NetworkPolicy</td></tr>
+        <tr><td>Modelo de amenazas</td><td class="num">16%</td><td class="num">10</td><td>Fronteras de confianza, persistencia, DoS, escalada, datos sensibles</td></tr>
+        <tr><td>Seguridad de la plataforma</td><td class="num">16%</td><td class="num">10</td><td>Cadena de suministro, registros, admisión, service mesh, PKI</td></tr>
+        <tr><td>Cumplimiento y marcos</td><td class="num">10%</td><td class="num">6</td><td>CIS, NIST, STRIDE, MITRE ATT&amp;CK, herramientas</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="howto">Mucho de lo que estudiaste para el KCNA sirve aquí, sobre todo la <a href="https://claude.ai/artifact/TBMZYTpXPUPBH9JvarH4dH">arquitectura</a>. Esta guía se enfoca en lo que el KCSA agrega.</p>
+</section>
+
+<!-- IDEA -->
+<section id="idea">
+  <div class="sec-head">
+    <div class="tag"><b>Panorama</b> · 14%</div>
+    <h2>La idea: capas y mínimo privilegio</h2>
+  </div>
+  <p>Ningún control basta por sí solo. La seguridad cloud native apila capas independientes (<strong>defensa en profundidad</strong>) para que, si una falla, las otras sigan conteniendo el daño. El modelo más preguntado son las <strong>4C</strong>: cada capa se apoya en la de afuera.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 700 270" role="img" aria-label="Las 4C de la seguridad cloud native, de afuera hacia adentro: Cloud (IAM, red, discos, metadatos), Cluster (API server, RBAC, NetworkPolicy, etcd), Container (imagen mínima, no root, seccomp) y Code (dependencias sin CVEs, TLS, sin secretos en el código).">
+        <rect class="zone" x="10" y="10" width="680" height="250" rx="14"/>
+        <text class="tl" x="28" y="36">CLOUD · NUBE O DATACENTER</text>
+        <text class="ts" x="672" y="36" text-anchor="end">IAM, red, cifrado de discos, metadatos</text>
+
+        <rect class="zone" x="40" y="54" width="620" height="192" rx="12"/>
+        <text class="tl" x="58" y="80">CLUSTER</text>
+        <text class="ts" x="642" y="80" text-anchor="end">API server, RBAC, NetworkPolicy, etcd</text>
+
+        <rect class="zone" x="70" y="98" width="560" height="134" rx="10"/>
+        <text class="tl" x="88" y="124">CONTAINER</text>
+        <text class="ts" x="612" y="124" text-anchor="end">imagen mínima, no root, seccomp</text>
+
+        <rect class="b-acc" x="100" y="142" width="500" height="76" rx="8"/>
+        <text class="t" x="350" y="172" text-anchor="middle">Code · tu aplicación</text>
+        <text class="ts" x="350" y="196" text-anchor="middle">dependencias sin CVEs, TLS, sin secretos en el código</text>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Si la capa de afuera cae (por ejemplo, alguien controla la cuenta de nube), los controles de adentro se pueden saltar. Por eso se protegen las cuatro.</figcaption>
+  </figure>
+
+  <div class="defs">
+    <div class="def"><h4>Mínimo privilegio</h4><p>Cada persona y cada carga recibe solo los permisos que necesita. Si una opción da permisos de más "por si acaso", está mal.</p></div>
+    <div class="def"><h4>Zero trust</h4><p>Nunca confíes, siempre verifica: estar dentro de la red no da confianza. Cada llamada se autentica y se autoriza, por ejemplo con mTLS.</p></div>
+    <div class="def"><h4>Separación de funciones</h4><p>Ninguna identidad sola puede hacer todos los pasos críticos. Quien escribe las políticas no es quien despliega.</p></div>
+    <div class="def"><h4>Responsabilidad compartida</h4><p>En un servicio gestionado, el proveedor protege el control plane. Tus cargas, tu RBAC, tus imágenes y tus Secrets siguen siendo tuyos.</p></div>
+  </div>
+
+  <h3>Las fases del ciclo de vida</h3>
+  <p>La documentación oficial y el whitepaper de seguridad de la CNCF también ordenan los controles por fases:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Fase</th><th>Controles típicos</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Develop</td><td>Código seguro, revisión, análisis estático (SAST) y de dependencias (SCA)</td></tr>
+        <tr><td class="name">Distribute</td><td>Escaneo de imágenes, firma, SBOM, procedencia, registro privado</td></tr>
+        <tr><td class="name">Deploy</td><td>Políticas de admisión: Pod Security, verificar firmas, registros permitidos</td></tr>
+        <tr><td class="name">Runtime</td><td>Acceso, red, almacenamiento, detección (Falco), auditoría</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Tipos de control</h3>
+  <ul class="plain">
+    <li><strong>Preventivo</strong>: impide que pase. Ejemplo: la admisión rechaza un pod privilegiado.</li>
+    <li><strong>Detectivo</strong>: avisa que pasó. Ejemplo: Falco alerta de una shell dentro de un contenedor.</li>
+    <li><strong>Correctivo</strong>: arregla después. Ejemplo: restaurar etcd desde un backup.</li>
+    <li><strong>Compensatorio</strong>: reemplaza a un control que no puedes aplicar. Ejemplo: una app que debe correr como root va en nodos dedicados, con NetworkPolicy estricta y más monitoreo.</li>
+  </ul>
+</section>
+
+<!-- PETICION -->
+<section id="peticion">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos de seguridad</b> · 22%</div>
+    <h2>El recorrido de una petición al API server</h2>
+  </div>
+  <p>Todo pasa por el API server, y toda petición cruza tres puertas, siempre en este orden. Si entiendes qué revisa cada puerta, resuelves media sección del examen.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 720 170" role="img" aria-label="Recorrido de una petición: cliente (kubectl, un pod o un kubelet), autenticación (¿quién eres?, con certificados, OIDC o tokens; si falla, 401), autorización (¿puedes hacerlo?, con Node, RBAC o Webhook; si falla, 403), admisión (¿cumple las reglas?, con PSA, webhooks o políticas CEL) y por último etcd, donde se guarda cifrado si hay cifrado en reposo.">
+        <defs>
+          <marker id="pet-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker>
+        </defs>
+        <rect class="b" x="10" y="20" width="122" height="64" rx="8"/>
+        <text class="t" x="71" y="47" text-anchor="middle">Cliente</text>
+        <text class="ts" x="71" y="67" text-anchor="middle">¿quién llama?</text>
+        <text class="ts" x="71" y="110" text-anchor="middle">kubectl, un pod</text>
+        <text class="ts" x="71" y="126" text-anchor="middle">o un kubelet</text>
+
+        <line class="ln-acc" x1="132" y1="52" x2="148" y2="52" marker-end="url(#pet-m)"/>
+        <rect class="b-acc" x="152" y="20" width="122" height="64" rx="8"/>
+        <text class="t" x="213" y="47" text-anchor="middle">Autenticación</text>
+        <text class="ts" x="213" y="67" text-anchor="middle">¿quién eres?</text>
+        <text class="ts" x="213" y="110" text-anchor="middle">certificados X.509</text>
+        <text class="ts" x="213" y="126" text-anchor="middle">OIDC, tokens de SA</text>
+        <text class="ts acc" x="213" y="150" text-anchor="middle">si falla: 401</text>
+
+        <line class="ln-acc" x1="274" y1="52" x2="290" y2="52" marker-end="url(#pet-m)"/>
+        <rect class="b-acc" x="294" y="20" width="122" height="64" rx="8"/>
+        <text class="t" x="355" y="47" text-anchor="middle">Autorización</text>
+        <text class="ts" x="355" y="67" text-anchor="middle">¿puedes hacerlo?</text>
+        <text class="ts" x="355" y="110" text-anchor="middle">Node y RBAC</text>
+        <text class="ts" x="355" y="126" text-anchor="middle">o Webhook</text>
+        <text class="ts acc" x="355" y="150" text-anchor="middle">si falla: 403</text>
+
+        <line class="ln-acc" x1="416" y1="52" x2="432" y2="52" marker-end="url(#pet-m)"/>
+        <rect class="b-acc" x="436" y="20" width="122" height="64" rx="8"/>
+        <text class="t" x="497" y="47" text-anchor="middle">Admisión</text>
+        <text class="ts" x="497" y="67" text-anchor="middle">¿cumple reglas?</text>
+        <text class="ts" x="497" y="110" text-anchor="middle">muta, valida esquema</text>
+        <text class="ts" x="497" y="126" text-anchor="middle">y luego valida</text>
+        <text class="ts acc" x="497" y="150" text-anchor="middle">si falla: rechazo</text>
+
+        <line class="ln-acc" x1="558" y1="52" x2="574" y2="52" marker-end="url(#pet-m)"/>
+        <rect class="b" x="578" y="20" width="122" height="64" rx="8"/>
+        <text class="t" x="639" y="47" text-anchor="middle">etcd</text>
+        <text class="ts" x="639" y="67" text-anchor="middle">se guarda</text>
+        <text class="ts" x="639" y="110" text-anchor="middle">solo el API server</text>
+        <text class="ts" x="639" y="126" text-anchor="middle">habla con etcd</text>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Un 401 es problema de identidad; un 403 es de permisos. Quien escribe directo en etcd se salta las tres puertas.</figcaption>
+  </figure>
+
+  <h3>Puerta 1: autenticación</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Método</th><th>Cómo funciona</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Certificado X.509</td><td>El CN del certificado es el usuario y cada O es un grupo. <strong>No se pueden revocar: uno filtrado sirve hasta que vence.</strong></td></tr>
+        <tr><td class="name">OIDC</td><td>Un proveedor de identidad (Entra ID, Okta, Keycloak) entrega tokens de corta duración. <strong>Lo correcto para personas.</strong></td></tr>
+        <tr><td class="name">ServiceAccount</td><td>Identidad de los pods: <code>system:serviceaccount:&lt;ns&gt;:&lt;nombre&gt;</code>. Tokens cortos de la API TokenRequest. <strong>Un ServiceAccount por app, no el <code>default</code>.</strong></td></tr>
+        <tr><td class="name">Bootstrap token</td><td>Token corto para que un nodo nuevo pida su certificado (TLS bootstrapping). <strong>Solo para unir nodos.</strong></td></tr>
+        <tr><td class="name">Anónimo</td><td>Si está activo, quien no se identifica pasa como <code>system:anonymous</code>. <strong>Nunca darle permisos.</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="howto">Kubernetes no tiene un objeto <code>User</code>: las personas vienen de afuera (certificados u OIDC). Los ServiceAccounts sí son objetos.</p>
+
+  <h3>Puerta 2: autorización</h3>
+  <ul class="plain">
+    <li>La configuración estándar es <code>--authorization-mode=Node,RBAC</code>. <code>AlwaysAllow</code> en cualquier posición deja pasar todo.</li>
+    <li><strong>RBAC solo suma</strong>: no hay reglas de denegar. Si cualquier binding lo permite, está permitido.</li>
+    <li>Un <strong>RoleBinding</strong> que usa un ClusterRole da esos permisos <strong>solo en su namespace</strong>.</li>
+    <li>El autorizador <strong>Node</strong> y la admisión <strong>NodeRestriction</strong> limitan a cada kubelet a lo de su propio nodo.</li>
+    <li>El grupo <code>system:masters</code> se salta RBAC por completo y no se le pueden quitar permisos borrando bindings.</li>
+  </ul>
+
+  <h3>Permisos que parecen inocentes y no lo son</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Permiso</th><th>Por qué es peligroso</th></tr></thead>
+      <tbody>
+        <tr><td><code>create pods</code></td><td>Puede montar cualquier Secret y usar cualquier ServiceAccount del namespace.</td></tr>
+        <tr><td><code>list / watch secrets</code></td><td>La respuesta trae el contenido completo: es lo mismo que leerlos.</td></tr>
+        <tr><td><code>escalate</code></td><td>Crear o editar roles con más permisos que los propios.</td></tr>
+        <tr><td><code>bind</code></td><td>Asignar roles que uno mismo no tiene.</td></tr>
+        <tr><td><code>impersonate</code></td><td>Actuar como otro usuario o grupo, incluso uno privilegiado.</td></tr>
+        <tr><td><code>create serviceaccounts/token</code></td><td>Sacar tokens de cualquier ServiceAccount del namespace.</td></tr>
+        <tr><td><code>get nodes/proxy</code></td><td>Llega a la API del kubelet: permite <code>exec</code> en cualquier pod del nodo, sin auditoría ni admisión.</td></tr>
+        <tr><td><code>aprobar CSRs</code></td><td>Emitir certificados con cualquier identidad, incluso <code>system:masters</code>.</td></tr>
+        <tr><td><code>webhook configurations</code></td><td>Ver y modificar cada objeto que entra al cluster.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Puerta 3: admisión</h3>
+  <ul class="plain">
+    <li>Orden fijo: primero los <strong>mutantes</strong> (cambian el objeto), luego la validación del esquema y al final los <strong>validantes</strong>. Así la validación ve el objeto final.</li>
+    <li><code>failurePolicy: Fail</code>: si el webhook se cae, se rechaza (seguro, pero puede bloquear despliegues). <code>Ignore</code>: se admite sin revisar (disponible, pero un atacante que tumbe el webhook se salta la política).</li>
+    <li>Motores de políticas: <strong>OPA Gatekeeper</strong> (Rego), <strong>Kyverno</strong> (YAML) y <strong>ValidatingAdmissionPolicy</strong> (CEL, integrada y estable desde v1.30).</li>
+  </ul>
+</section>
+
+<!-- COMPONENTES -->
+<section id="componentes">
+  <div class="sec-head">
+    <div class="tag"><b>Componentes del cluster</b> · 22%</div>
+    <h2>Cada componente: qué se arriesga y cómo se protege</h2>
+  </div>
+  <p>Para cada pieza del cluster, el examen pregunta lo mismo: ¿qué ganaría un atacante si la controla? y ¿qué ajuste la protege?</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Componente</th><th>Riesgo y protección</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="2">Control plane</td></tr>
+        <tr><td><strong>kube-apiserver</strong></td><td><strong>Riesgo:</strong> Es la puerta a todo el cluster.<br><strong>Se protege con:</strong> Sin anónimo con permisos, <code>Node,RBAC</code>, endpoint privado, auditoría, API Priority and Fairness contra la saturación.</td></tr>
+        <tr><td><strong>etcd</strong></td><td><strong>Riesgo:</strong> Escribir ahí se salta autenticación, autorización y admisión. Tiene todos los Secrets.<br><strong>Se protege con:</strong> Solo el API server lo alcanza, TLS con certificados de cliente y una CA propia, cifrado en reposo, backups protegidos.</td></tr>
+        <tr><td><strong>controller-manager</strong></td><td><strong>Riesgo:</strong> Tiene permisos amplios y las claves para firmar certificados y tokens antiguos.<br><strong>Se protege con:</strong> <code>--use-service-account-credentials</code> (un ServiceAccount por controller), escuchar en 127.0.0.1, proteger la CA.</td></tr>
+        <tr><td><strong>kube-scheduler</strong></td><td><strong>Riesgo:</strong> Podría poner pods donde quiera o dejar de programarlos.<br><strong>Se protege con:</strong> Identidad mínima <code>system:kube-scheduler</code>, escuchar en 127.0.0.1.</td></tr>
+        <tr class="group"><td colspan="2">En cada nodo</td></tr>
+        <tr><td><strong>kubelet</strong></td><td><strong>Riesgo:</strong> Su API (10250) permite ejecutar comandos en los contenedores.<br><strong>Se protege con:</strong> <code>anonymous-auth=false</code>, autorización <code>Webhook</code>, puerto de solo lectura 10255 apagado, NodeRestriction.</td></tr>
+        <tr><td><strong>Runtime</strong></td><td><strong>Riesgo:</strong> Su socket (<code>containerd.sock</code>) equivale a ser root en el nodo.<br><strong>Se protege con:</strong> Nunca montarlo en un pod, mantener runc al día, RuntimeClass con sandbox para código no confiable.</td></tr>
+        <tr><td><strong>kube-proxy</strong></td><td><strong>Riesgo:</strong> Podría redirigir el tráfico de los Services. Corre privilegiado.<br><strong>Se protege con:</strong> Proteger su DaemonSet con RBAC. Ojo: no cifra nada.</td></tr>
+        <tr class="group"><td colspan="2">Alrededor</td></tr>
+        <tr><td><strong>Red (CNI)</strong></td><td><strong>Riesgo:</strong> Red plana: cualquier pod llega a cualquier otro.<br><strong>Se protege con:</strong> NetworkPolicy con un CNI que la soporte, cifrado WireGuard o IPsec.</td></tr>
+        <tr><td><strong>Cliente (kubeconfig)</strong></td><td><strong>Riesgo:</strong> Credenciales robadas desde un portátil.<br><strong>Se protege con:</strong> Identidades personales, tokens cortos (OIDC o plugins <code>exec</code>), nunca <code>insecure-skip-tls-verify</code>.</td></tr>
+        <tr><td><strong>Almacenamiento</strong></td><td><strong>Riesgo:</strong> Un PV <code>hostPath</code> abre el disco del nodo; un volumen <code>Retain</code> guarda datos del inquilino anterior.<br><strong>Se protege con:</strong> Solo admins crean PVs, cifrado del disco o del driver CSI, borrar volúmenes antes de reutilizarlos.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="defs">
+    <div class="def"><h4>Puertos para recordar</h4><p><code>6443</code> API server · <code>2379</code> y <code>2380</code> etcd (clientes y pares) · <code>10250</code> API del kubelet · <code>10255</code> kubelet de solo lectura, sin autenticación, que debe estar apagado.</p></div>
+    <div class="def"><h4>Kubelet sin configurar</h4><p>Con los valores por defecto del binario, la API del kubelet acepta anónimos y su autorización es <code>AlwaysAllow</code>. kubeadm ya lo deja en <code>Webhook</code>.</p></div>
+  </div>
+</section>
+
+<!-- PODS -->
+<section id="pods">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos de seguridad</b> · 22%</div>
+    <h2>Endurecer los Pods</h2>
+  </div>
+  <p>Kubernetes trae tres niveles de seguridad para pods, los <strong>Pod Security Standards</strong>, y un controlador integrado que los aplica por namespace, el <strong>Pod Security Admission</strong>. Reemplazó a PodSecurityPolicy, que se eliminó en v1.25.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Nivel</th><th>Qué exige</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Privileged</td><td>Nada. Para cargas de sistema de confianza (CNI, agentes de almacenamiento).</td></tr>
+        <tr><td class="name">Baseline</td><td>Prohíbe lo obviamente peligroso: <code>privileged</code>, <code>hostNetwork</code>, <code>hostPID</code>, <code>hostIPC</code>, volúmenes <code>hostPath</code>, <code>hostPort</code>, capabilities fuera de una lista segura y seccomp <code>Unconfined</code>.</td></tr>
+        <tr><td class="name">Restricted</td><td>Todo Baseline y además: <code>runAsNonRoot: true</code>, <code>allowPrivilegeEscalation: false</code>, <code>drop: [ALL]</code> (solo se puede devolver <code>NET_BIND_SERVICE</code>), seccomp <code>RuntimeDefault</code> o <code>Localhost</code> y solo ciertos tipos de volumen.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Cómo se aplica</h3>
+  <ul class="plain">
+    <li>Con labels en el namespace: <code>pod-security.kubernetes.io/&lt;modo&gt;=&lt;nivel&gt;</code>.</li>
+    <li>Tres modos: <strong>enforce</strong> (rechaza), <strong>audit</strong> (deja pasar y anota el evento de auditoría) y <strong>warn</strong> (deja pasar y avisa al usuario). Se pueden combinar, por ejemplo <code>enforce=baseline</code> y <code>warn=restricted</code>.</li>
+    <li><strong>enforce</strong> revisa Pods, no Deployments: el Deployment se crea, pero su ReplicaSet no logra crear los pods y el error sale en sus eventos.</li>
+    <li>Un namespace sin labels queda en <strong>privileged</strong>, salvo que el admin ponga valores por defecto en la configuración del plugin.</li>
+    <li>Para probar sin romper nada: <code>kubectl label --dry-run=server --overwrite ns prod pod-security.kubernetes.io/enforce=restricted</code> muestra qué pods fallarían.</li>
+    <li>Quien puede editar el objeto Namespace puede bajar su nivel: ese permiso es sensible.</li>
+  </ul>
+
+  <h3>El securityContext que más se pregunta</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Ajuste</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><code>runAsNonRoot: true</code></td><td>El kubelet no arranca el contenedor si iba a correr como UID 0.</td></tr>
+        <tr><td><code>allowPrivilegeEscalation: false</code></td><td>Activa <code>no_new_privs</code>: los binarios setuid como <code>sudo</code> no sirven para escalar.</td></tr>
+        <tr><td><code>capabilities: drop [ALL]</code></td><td>Quita los poderes especiales de root, como <code>NET_RAW</code> (paquetes falsos) o <code>SYS_ADMIN</code> (casi todo).</td></tr>
+        <tr><td><code>readOnlyRootFilesystem</code></td><td>Nadie puede cambiar binarios ni dejar herramientas en el contenedor.</td></tr>
+        <tr><td><code>seccompProfile</code></td><td><code>RuntimeDefault</code> filtra llamadas al sistema peligrosas.</td></tr>
+        <tr><td><code>hostUsers: false</code></td><td>Usa user namespaces (estables desde v1.36): root dentro del contenedor no es root en el nodo.</td></tr>
+        <tr><td><code>automountServiceAccountToken: false</code></td><td>No monta el token si la app no usa la API.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Aislar más fuerte</h3>
+  <ul class="plain">
+    <li>Un namespace <strong>no es</strong> una frontera fuerte: los pods comparten nodos, kernel y red.</li>
+    <li>Para código no confiable: nodos dedicados (taints, tolerations y afinidad) y un runtime con sandbox vía <strong>RuntimeClass</strong>. <strong>gVisor</strong> pone un kernel en espacio de usuario; <strong>Kata Containers</strong>, una micro-VM por pod.</li>
+    <li>De menor a mayor aislamiento: namespace, cluster virtual (como vcluster), cluster separado.</li>
+    <li>seccomp filtra llamadas al sistema; AppArmor usa perfiles por ruta; SELinux usa etiquetas.</li>
+  </ul>
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p><code>privileged: true</code> más <code>hostPID: true</code> es la receta clásica de escape: desde el pod, <code>nsenter --target 1 --mount --uts --ipc --net --pid -- bash</code> da una shell root en el nodo. Baseline prohíbe las dos.</p>
+  </div>
+</section>
+
+<!-- SECRETOS -->
+<section id="secretos">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos de seguridad</b> · 22%</div>
+    <h2>Secretos y auditoría</h2>
+  </div>
+  <p>Un Secret <strong>no es secreto por defecto</strong>: los valores van en base64 (que se decodifica con un comando) y se guardan <strong>sin cifrar en etcd</strong>. Protegerlo es trabajo tuyo.</p>
+  <ul class="plain">
+    <li>Quien puede <strong>crear pods</strong> en un namespace puede leer sus Secrets: monta uno e imprime su contenido.</li>
+    <li>Mejor montarlos como archivo que como variable de entorno: las variables se filtran a logs y a procesos hijos.</li>
+    <li><code>immutable: true</code> evita cambios accidentales y le quita carga al API server.</li>
+    <li>Para Git: <strong>Sealed Secrets</strong> o <strong>SOPS</strong> los guardan cifrados. Para no guardarlos en el cluster: <strong>External Secrets Operator</strong> o el <strong>Secrets Store CSI Driver</strong> con Vault o el gestor de la nube.</li>
+  </ul>
+
+  <h3>Cifrado en reposo</h3>
+  <ol class="seq">
+    <li><span class="step">1</span><div class="who">API server<small>--encryption-provider-config</small></div><div class="what">Lee un archivo <code>EncryptionConfiguration</code> que dice qué recursos cifrar (normalmente Secrets) y con qué proveedores.</div></li>
+    <li><span class="step">2</span><div class="who">El primer proveedor<small>de la lista</small></div><div class="what">Cifra todo lo que se escribe. Al leer se prueban todos. <code>identity</code> significa "sin cifrar".</div></li>
+    <li><span class="step">3</span><div class="who">KMS v2<small>estable desde v1.29</small></div><div class="what">Cifrado de sobre: una clave de datos cifra el Secret y una clave maestra, que nunca sale del KMS externo, cifra esa clave.</div></li>
+    <li><span class="step">4</span><div class="who">Secrets viejos<small>siguen en claro</small></div><div class="what">Solo se cifra al escribir. Hay que reescribirlos: <code>kubectl get secrets -A -o json | kubectl replace -f -</code>.</div></li>
+  </ol>
+
+  <h3>Auditoría</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Nivel</th><th>Qué guarda</th></tr></thead>
+      <tbody>
+        <tr><td class="name">None</td><td>Nada.</td></tr>
+        <tr><td class="name">Metadata</td><td>Quién, qué verbo, qué recurso, cuándo y desde dónde. Sin cuerpos. El nivel para Secrets y TokenReviews.</td></tr>
+        <tr><td class="name">Request</td><td>Metadatos y el cuerpo de la petición.</td></tr>
+        <tr><td class="name">RequestResponse</td><td>Metadatos, petición y respuesta.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="plain">
+    <li>Se activa con <code>--audit-policy-file</code> y un destino: archivo (<code>--audit-log-path</code>) o webhook. <strong>Sin política no se registra nada.</strong></li>
+    <li>Las reglas se leen en orden y gana la <strong>primera</strong> que coincide: las específicas van arriba.</li>
+    <li>Etapas: RequestReceived, ResponseStarted, ResponseComplete y Panic.</li>
+    <li>Envía los logs fuera del cluster (a un SIEM): un atacante dentro podría borrarlos.</li>
+  </ul>
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p>Los Events de Kubernetes no son auditoría: son notas operativas que duran poco (una hora por defecto) y no registran quién hizo cada petición.</p>
+  </div>
+</section>
+
+<!-- RED -->
+<section id="red">
+  <div class="sec-head">
+    <div class="tag"><b>Fundamentos de seguridad</b> · 22%</div>
+    <h2>Red: segmentar y cifrar</h2>
+  </div>
+  <p>Por defecto <strong>todos los pods se hablan con todos</strong>, sin importar el namespace. Las NetworkPolicies cierran eso, siempre que el plugin CNI las aplique (Calico, Cilium y Antrea sí; Flannel solo no).</p>
+  <ul class="plain">
+    <li>Una NetworkPolicy vive en un namespace y elige pods de ese namespace con <code>podSelector</code> (<code>{}</code> = todos).</li>
+    <li>Son <strong>aditivas</strong>: lo permitido es la suma de todas las políticas. No hay reglas de "denegar" ni prioridades.</li>
+    <li>Patrón base: <strong>denegar todo por defecto</strong> y abrir solo lo necesario.</li>
+    <li>Si niegas todo el egress, abre el <strong>puerto 53</strong> (UDP y TCP) hacia CoreDNS, o nada resolverá nombres.</li>
+    <li>Funcionan en capas 3 y 4 (IPs, puertos, protocolos). Para reglas por ruta HTTP hace falta un service mesh o políticas L7 del CNI.</li>
+    <li>Los pods con <code>hostNetwork: true</code> quedan casi siempre fuera del alcance de las NetworkPolicies.</li>
+  </ul>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Escribes en <code>from</code></th><th>Significa</th></tr></thead>
+      <tbody>
+        <tr><td><code>namespaceSelector</code> y <code>podSelector</code> en el <strong>mismo</strong> elemento</td><td><strong>Y</strong>: esos pods dentro de esos namespaces.</td></tr>
+        <tr><td>Dos elementos, cada uno con su guion</td><td><strong>O</strong>: todos los pods de esos namespaces, o esos pods del propio namespace.</td></tr>
+        <tr><td><code>ipBlock</code> con <code>except</code></td><td>Rangos de IP, por ejemplo para bloquear <code>169.254.169.254/32</code>, los metadatos de la nube.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Cifrar el tráfico</h3>
+  <div class="defs">
+    <div class="def"><h4>mTLS con service mesh</h4><p>Istio o Linkerd cifran y además verifican la identidad de cada servicio (SPIFFE). En Istio, <code>STRICT</code> exige mTLS y <code>PERMISSIVE</code> acepta también texto plano mientras migras.</p></div>
+    <div class="def"><h4>Cifrado del CNI</h4><p>Cilium o Calico cifran todo el tráfico entre nodos con WireGuard o IPsec, sin tocar las apps.</p></div>
+    <div class="def"><h4>kube-proxy</h4><p>Solo traduce la IP del Service a IPs de pods. No cifra en ningún modo.</p></div>
+  </div>
+</section>
+
+<!-- AMENAZAS -->
+<section id="amenazas">
+  <div class="sec-head">
+    <div class="tag"><b>Modelo de amenazas</b> · 16%</div>
+    <h2>Piensa como atacante</h2>
+  </div>
+  <p>Modelar amenazas es mirar el cluster como un mapa de <strong>fronteras de confianza</strong> y preguntarse qué pasa si alguien cruza cada una. Las que más se preguntan:</p>
+  <div class="flow" aria-label="Fronteras de confianza">
+    <span>Internet → Ingress</span><i>·</i><span>Usuario → API server</span><i>·</i><span>Contenedor → nodo</span><i>·</i><span>Nodo → control plane</span><i>·</i><span>Namespace → namespace</span><i>·</i><span>Cluster → cuenta de nube</span>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Lo que busca</th><th>Ejemplo y qué lo frena</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Persistencia</strong></td><td>Un CronJob o DaemonSet malicioso, un Pod estático en el nodo, un webhook mutante que inyecta un contenedor, un token antiguo guardado en un Secret.<br><strong>Lo frena:</strong> RBAC mínimo, Pod Security, vigilar el audit log.</td></tr>
+        <tr><td><strong>Denegación de servicio</strong></td><td>Agotar CPU, memoria, PIDs (fork bomb) o disco; crear miles de objetos; inundar el API server; llenar etcd.<br><strong>Lo frena:</strong> ResourceQuota (también <code>count/…</code>), LimitRange, <code>podPidsLimit</code>, <code>ephemeral-storage</code>, API Priority and Fairness.</td></tr>
+        <tr><td><strong>Código malicioso</strong></td><td>Una app con RCE, una imagen con un minero escondido, una shell que aparece en producción.<br><strong>Lo frena:</strong> No root, sistema de archivos de solo lectura, <code>drop: [ALL]</code>, seccomp, imágenes firmadas, Falco.</td></tr>
+        <tr><td><strong>Atacante en la red</strong></td><td>ARP spoofing con <code>NET_RAW</code>, escaneo de servicios, espiar tráfico, DNS falso.<br><strong>Lo frena:</strong> <code>drop: [ALL]</code>, NetworkPolicy por defecto en deny, mTLS con verificación de identidad.</td></tr>
+        <tr><td><strong>Datos sensibles</strong></td><td>El token en <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>, secretos en logs o en capas de imagen, etcd y sus backups.<br><strong>Lo frena:</strong> Token solo si hace falta, cifrado en reposo, gestor externo, auditoría en Metadata.</td></tr>
+        <tr><td><strong>Escalada de privilegios</strong></td><td>Pod privilegiado con <code>hostPID</code>, <code>hostPath: /</code>, el socket del runtime, verbos RBAC peligrosos, los metadatos de la nube.<br><strong>Lo frena:</strong> Pod Security Restricted, RBAC mínimo, bloquear <code>169.254.169.254</code>, workload identity.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout trap">
+    <div class="lab">Trampa</div>
+    <p>Un pod comprometido puede pedirle credenciales de la nube al servicio de metadatos (<code>169.254.169.254</code>) y saltar del cluster a la cuenta. La respuesta es bloquear ese acceso con egress e IMDSv2 y dar a cada app su propia identidad (IRSA, Workload Identity).</p>
+  </div>
+</section>
+
+<!-- PLATAFORMA -->
+<section id="plataforma">
+  <div class="sec-head">
+    <div class="tag"><b>Seguridad de la plataforma</b> · 16%</div>
+    <h2>Cadena de suministro, admisión y PKI</h2>
+  </div>
+  <p>La pregunta de fondo es: <strong>¿cómo sé que lo que corre en mi cluster es lo que construí?</strong> Se responde con controles en cada paso, desde el código hasta el runtime.</p>
+
+  <figure class="fig">
+    <div class="scroll">
+      <svg viewBox="0 0 720 150" role="img" aria-label="Cadena de suministro segura: código (SAST y SCA), build en CI (procedencia SLSA e in-toto), firma y SBOM (cosign, SPDX o CycloneDX), registro (Harbor, escaneo), admisión que verifica la firma antes de correr, y runtime vigilado con Falco o Tetragon.">
+        <defs>
+          <marker id="sup-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker>
+        </defs>
+        <rect class="b" x="10" y="30" width="100" height="70" rx="8"/>
+        <text class="t" x="60" y="60" text-anchor="middle">Código</text>
+        <text class="ts" x="60" y="80" text-anchor="middle">SAST y SCA</text>
+        <line class="ln-acc" x1="110" y1="65" x2="126" y2="65" marker-end="url(#sup-m)"/>
+        <rect class="b" x="130" y="30" width="100" height="70" rx="8"/>
+        <text class="t" x="180" y="60" text-anchor="middle">Build en CI</text>
+        <text class="ts" x="180" y="80" text-anchor="middle">SLSA, in-toto</text>
+        <line class="ln-acc" x1="230" y1="65" x2="246" y2="65" marker-end="url(#sup-m)"/>
+        <rect class="b-acc" x="250" y="30" width="100" height="70" rx="8"/>
+        <text class="t" x="300" y="60" text-anchor="middle">Firma y SBOM</text>
+        <text class="ts" x="300" y="80" text-anchor="middle">cosign, SPDX</text>
+        <line class="ln-acc" x1="350" y1="65" x2="366" y2="65" marker-end="url(#sup-m)"/>
+        <rect class="b" x="370" y="30" width="100" height="70" rx="8"/>
+        <text class="t" x="420" y="60" text-anchor="middle">Registro</text>
+        <text class="ts" x="420" y="80" text-anchor="middle">Harbor, escaneo</text>
+        <line class="ln-acc" x1="470" y1="65" x2="486" y2="65" marker-end="url(#sup-m)"/>
+        <rect class="b-acc" x="490" y="30" width="100" height="70" rx="8"/>
+        <text class="t" x="540" y="60" text-anchor="middle">Admisión</text>
+        <text class="ts" x="540" y="80" text-anchor="middle">verifica firma</text>
+        <line class="ln-acc" x1="590" y1="65" x2="606" y2="65" marker-end="url(#sup-m)"/>
+        <rect class="b" x="610" y="30" width="100" height="70" rx="8"/>
+        <text class="t" x="660" y="60" text-anchor="middle">Runtime</text>
+        <text class="ts" x="660" y="80" text-anchor="middle">Falco, Tetragon</text>
+        <text class="ts" x="360" y="130" text-anchor="middle">Una imagen sin firma válida ni siquiera llega a correr: la frena la admisión.</text>
+      </svg>
+    </div>
+    <div class="scroll-hint">Desliza el diagrama hacia los lados.</div>
+    <figcaption>Cada flecha es un lugar donde un atacante podría colar algo. Cada caja agrega una prueba de que no lo hizo.</figcaption>
+  </figure>
+
+  <div class="defs">
+    <div class="def"><h4>SBOM</h4><p>La lista de ingredientes de un software: paquetes, versiones, licencias. Formatos: <strong>SPDX</strong> y <strong>CycloneDX</strong>. Con <strong>VEX</strong>, el proveedor dice si una CVE le afecta de verdad.</p></div>
+    <div class="def"><h4>Sigstore</h4><p><strong>cosign</strong> firma y verifica imágenes; <strong>Fulcio</strong> emite certificados de minutos ligados a una identidad OIDC; <strong>Rekor</strong> es el registro público de firmas.</p></div>
+    <div class="def"><h4>SLSA</h4><p>Niveles de confianza sobre cómo se construyó un artefacto. Subir de nivel hace la procedencia más difícil de falsificar.</p></div>
+    <div class="def"><h4>in-toto</h4><p>Verifica que cada paso de la cadena lo hizo quien debía, en orden y sin manipulación. Graduado en la CNCF.</p></div>
+    <div class="def"><h4>Registro</h4><p>Harbor (graduado en la CNCF): RBAC, escaneo, firmas y replicación. Tags inmutables, imágenes por digest y credenciales de solo lectura.</p></div>
+    <div class="def"><h4>Escaneo</h4><p>Trivy o Grype buscan CVEs en la imagen. Hay que volver a escanear lo guardado: aparecen CVEs nuevos después del build.</p></div>
+  </div>
+
+  <h3>Observabilidad de seguridad</h3>
+  <ul class="plain">
+    <li><strong>Falco</strong> (graduado en la CNCF) mira las llamadas al sistema y alerta cosas como una shell dentro de un contenedor. Detecta, no bloquea.</li>
+    <li><strong>Tetragon</strong> (de Cilium) observa con eBPF y puede bloquear en el kernel. <strong>Hubble</strong> muestra los flujos de red.</li>
+    <li>El <strong>audit log</strong> responde quién hizo qué en la API. Lo que pasa dentro de los contenedores lo ven Falco o Tetragon.</li>
+  </ul>
+
+  <h3>Service mesh</h3>
+  <ul class="plain">
+    <li>Las identidades son <strong>SPIFFE IDs</strong> (<code>spiffe://cluster.local/ns/&lt;ns&gt;/sa/&lt;sa&gt;</code>) dentro de certificados; <strong>SPIRE</strong> las emite fuera del mesh.</li>
+    <li>En Istio: <strong>PeerAuthentication</strong> decide si se exige mTLS y <strong>AuthorizationPolicy</strong> decide quién puede llamar qué ruta. istiod firma y rota los certificados.</li>
+    <li>Las políticas del mesh complementan a las NetworkPolicies, no las reemplazan.</li>
+  </ul>
+
+  <h3>PKI del cluster</h3>
+  <ul class="plain">
+    <li>kubeadm guarda las CAs y certificados en <code>/etc/kubernetes/pki</code>. Si roban la clave de la CA, pueden fabricar cualquier identidad.</li>
+    <li>etcd usa una <strong>CA separada</strong>, para que otros certificados del cluster no sirvan contra etcd. La <strong>front-proxy CA</strong> es para los API servers agregados.</li>
+    <li>Kubernetes <strong>no revoca</strong> certificados de cliente: ante una filtración grave, se rota la CA. Por eso se usan certificados de vida corta.</li>
+    <li>La API de <strong>CSR</strong> pide certificados que se firman tras ser aprobados. Con <code>serverTLSBootstrap</code>, el kubelet obtiene así su certificado de servicio.</li>
+    <li><strong>cert-manager</strong> emite y renueva certificados TLS (por ejemplo de Let's Encrypt) y los guarda en Secrets.</li>
+    <li><strong>Konnectivity</strong> lleva el tráfico del control plane hacia los nodos por un túnel que abren los propios nodos.</li>
+  </ul>
+</section>
+
+<!-- CUMPLIMIENTO -->
+<section id="cumplimiento">
+  <div class="sec-head">
+    <div class="tag"><b>Cumplimiento y marcos</b> · 10%</div>
+    <h2>Marcos, normas y herramientas</h2>
+  </div>
+  <p>Aquí el examen pregunta sobre todo <strong>para qué sirve cada cosa</strong>. Con asociar nombre y propósito basta.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Nombre</th><th>Para qué es</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="2">Kubernetes y contenedores</td></tr>
+        <tr><td><strong>CIS Kubernetes Benchmark</strong></td><td>Revisiones concretas de configuración. Level 1 es lo básico; Level 2, más estricto. Se automatiza con <strong>kube-bench</strong>.</td></tr>
+        <tr><td><strong>NSA/CISA Hardening Guide</strong></td><td>Guía de endurecimiento de Kubernetes. <strong>Kubescape</strong> revisa un cluster contra ella y contra MITRE.</td></tr>
+        <tr><td><strong>NIST SP 800-190</strong></td><td>Guía de seguridad para contenedores.</td></tr>
+        <tr class="group"><td colspan="2">Generales</td></tr>
+        <tr><td><strong>NIST SP 800-53</strong></td><td>Catálogo general de controles (la base de FedRAMP).</td></tr>
+        <tr><td><strong>NIST SP 800-218</strong></td><td>SSDF: prácticas de desarrollo seguro.</td></tr>
+        <tr><td><strong>NIST CSF 2.0</strong></td><td>Seis funciones: Govern, Identify, Protect, Detect, Respond, Recover.</td></tr>
+        <tr><td><strong>ISO/IEC 27001</strong></td><td>Sistema de gestión de seguridad de la información, certificable.</td></tr>
+        <tr><td><strong>SOC 2</strong></td><td>Informe de auditoría de los controles (Trust Services Criteria).</td></tr>
+        <tr class="group"><td colspan="2">Por tipo de dato</td></tr>
+        <tr><td><strong>PCI DSS</strong></td><td>Datos de tarjetas de pago.</td></tr>
+        <tr><td><strong>GDPR</strong></td><td>Datos personales de personas en la Unión Europea.</td></tr>
+        <tr><td><strong>HIPAA</strong></td><td>Información de salud en EE. UU.</td></tr>
+        <tr><td><strong>FedRAMP</strong></td><td>Servicios de nube para el gobierno federal de EE. UU.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Modelar amenazas</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>STRIDE</th><th>Amenaza</th><th>Se protege con</th></tr></thead>
+      <tbody>
+        <tr><td class="name">S</td><td>Spoofing: hacerse pasar por otro</td><td>Autenticación fuerte: mTLS, OIDC</td></tr>
+        <tr><td class="name">T</td><td>Tampering: modificar datos o imágenes</td><td>Integridad: firmas, digests, RBAC</td></tr>
+        <tr><td class="name">R</td><td>Repudiation: negar lo que hiciste</td><td>Audit log con identidades personales</td></tr>
+        <tr><td class="name">I</td><td>Information disclosure: filtrar datos</td><td>Cifrado y control de acceso</td></tr>
+        <tr><td class="name">D</td><td>Denial of service: tumbar el servicio</td><td>Cuotas, límites, APF</td></tr>
+        <tr><td class="name">E</td><td>Elevation of privilege: ganar permisos</td><td>Pod Security, RBAC mínimo, sandbox</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="plain">
+    <li><strong>MITRE ATT&amp;CK</strong>: catálogo de tácticas (el <em>por qué</em> del atacante) y técnicas (el <em>cómo</em>). Microsoft publicó la <strong>Threat Matrix for Kubernetes</strong> con esa estructura.</li>
+    <li><strong>DREAD</strong> puntúa amenazas para priorizarlas; <strong>PASTA</strong> es un proceso de siete etapas centrado en el riesgo de negocio.</li>
+    <li>Cadena de suministro: la <strong>Orden Ejecutiva 14028</strong> (EE. UU., 2021) empujó los SBOM; los elementos mínimos de un SBOM según la NTIA incluyen las relaciones de dependencia; <strong>OpenSSF Scorecard</strong> evalúa las prácticas de proyectos open source.</li>
+  </ul>
+
+  <h3>Herramientas</h3>
+  <div class="defs">
+    <div class="def"><h4>Antes de desplegar</h4><p>Trivy (imágenes, IaC, SBOM), Checkov o KICS (Terraform y YAML), firmas con cosign.</p></div>
+    <div class="def"><h4>Al desplegar</h4><p>Políticas como código: Kyverno, Gatekeeper, ValidatingAdmissionPolicy. En modo auditoría reportan lo que ya existe sin bloquear.</p></div>
+    <div class="def"><h4>En el cluster</h4><p>kube-bench (CIS), Kubescape (NSA/CISA y MITRE), Falco y Tetragon en runtime.</p></div>
+  </div>
+</section>
+
+<!-- TRAMPAS -->
+<section id="trampas">
+  <div class="sec-head">
+    <div class="tag">Para el día del examen</div>
+    <h2>Reglas que resuelven preguntas</h2>
+  </div>
+  <ol class="rules">
+    <li><div><strong>401 es identidad, 403 es permiso.</strong> Autenticación primero, autorización después, admisión al final.</div></li>
+    <li><div><strong>RBAC solo suma.</strong> No existe "deny" en RBAC ni en NetworkPolicy estándar: se niega no concediendo.</div></li>
+    <li><div><strong>Crear pods = leer Secrets</strong> del namespace. Y <code>list</code> sobre Secrets también es leerlos.</div></li>
+    <li><div><strong>escalate, bind, impersonate</strong> y <code>nodes/proxy</code> son vías de escalada.</div></li>
+    <li><div><strong>Base64 no es cifrado.</strong> Los Secrets van sin cifrar a etcd hasta que configuras cifrado en reposo en el API server.</div></li>
+    <li><div><strong>Quien toca etcd se salta todo.</strong> Solo el API server habla con etcd.</div></li>
+    <li><div><strong>Baseline prohíbe lo de host</strong> (hostNetwork, hostPID, hostPath, privileged). <strong>Restricted</strong> agrega no root, sin escalada, <code>drop: [ALL]</code> y seccomp.</div></li>
+    <li><div><strong>El namespace no aísla.</strong> Para código no confiable: nodos dedicados, sandbox (gVisor o Kata) o cluster aparte.</div></li>
+    <li><div><strong>Sin política no hay auditoría.</strong> Y los Secrets se auditan a nivel Metadata.</div></li>
+    <li><div><strong>Primero gana en tres lugares:</strong> el primer proveedor de la EncryptionConfiguration cifra, la primera regla de auditoría que coincide manda y los webhooks mutantes van antes que los validantes.</div></li>
+    <li><div><strong>Detectar no es prevenir.</strong> Falco detecta; la admisión previene; un backup corrige.</div></li>
+    <li><div><strong>kube-proxy no cifra.</strong> Cifrado entre servicios: mTLS del mesh o WireGuard/IPsec del CNI.</div></li>
+    <li><div><strong>Los certificados de cliente no se revocan.</strong> Para personas, OIDC con tokens cortos.</div></li>
+    <li><div>Si una opción da permisos "por si acaso", usa <code>cluster-admin</code> o comodines <code>*</code>, casi seguro es la incorrecta.</div></li>
+  </ol>
+</section>
+
+<!-- REPASO -->
+<section id="repaso">
+  <div class="sec-head">
+    <div class="tag">Preguntas típicas</div>
+    <h2>Repaso: responde antes de abrir</h2>
+  </div>
+  <p>Intenta responder cada una de memoria y después abre la tarjeta para revisar.</p>
+  <div class="cards">
+    <details class="card"><summary><span class="q">S1</span><span>¿Qué nivel de Pod Security exige <code>runAsNonRoot: true</code>?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Restricted</span><p>Baseline solo prohíbe lo de host y los privilegios; no root, sin escalada, <code>drop: [ALL]</code> y seccomp explícito son de Restricted.</p></div></details>
+    <details class="card"><summary><span class="q">S2</span><span>Con <code>enforce=restricted</code>, creas un Deployment que no cumple. ¿Qué pasa?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">El Deployment se crea, pero sus pods son rechazados</span><p>enforce revisa Pods. El error aparece en los eventos del ReplicaSet.</p></div></details>
+    <details class="card"><summary><span class="q">S3</span><span>¿Qué verbo de RBAC deja crear un RoleBinding a un rol que no tienes?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">bind</span><p><code>escalate</code> es para crear o editar roles con más permisos; <code>impersonate</code>, para actuar como otro.</p></div></details>
+    <details class="card"><summary><span class="q">S4</span><span>¿Dónde se configura el cifrado de Secrets en reposo?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">En el API server, con <code>--encryption-provider-config</code></span><p>etcd solo guarda el resultado cifrado. Con KMS v2, la clave maestra queda fuera del cluster.</p></div></details>
+    <details class="card"><summary><span class="q">S5</span><span>¿Qué nivel de auditoría usas para Secrets?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Metadata</span><p>Request o RequestResponse escribirían el valor del secreto en el log.</p></div></details>
+    <details class="card"><summary><span class="q">S6</span><span>¿Qué hace el puerto 10255 del kubelet y qué hay que hacer con él?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Es de solo lectura y sin autenticación: se apaga (<code>readOnlyPort: 0</code>)</span><p>La API completa del kubelet está en 10250 y debe exigir autenticación y autorización Webhook.</p></div></details>
+    <details class="card"><summary><span class="q">S7</span><span>Tras un default deny de egress, los pods no resuelven nombres. ¿Por qué?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Falta permitir el puerto 53 hacia CoreDNS</span><p>UDP y TCP. El deny bloquea también el DNS.</p></div></details>
+    <details class="card"><summary><span class="q">S8</span><span>¿Qué combinación de un pod permite escapar al nodo con <code>nsenter</code>?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans"><code>privileged: true</code> y <code>hostPID: true</code></span><p>Entra en los namespaces del proceso 1 del nodo. Baseline prohíbe ambas.</p></div></details>
+    <details class="card"><summary><span class="q">S9</span><span>Falco alerta una shell en un contenedor. ¿Qué tipo de control es?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Detectivo</span><p>Avisa, no bloquea. Rechazar un pod privilegiado en la admisión sería preventivo.</p></div></details>
+    <details class="card"><summary><span class="q">S10</span><span>¿Qué componente de Sigstore emite certificados de corta duración para firmar?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">Fulcio</span><p>cosign firma y verifica; Rekor es el registro de transparencia.</p></div></details>
+    <details class="card"><summary><span class="q">S11</span><span>Un usuario niega haber borrado un Deployment y no hay logs. ¿Qué letra de STRIDE es?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">R, Repudiation</span><p>Se previene con el audit log y con identidades personales, no compartidas.</p></div></details>
+    <details class="card"><summary><span class="q">S12</span><span>¿Qué herramienta revisa un cluster contra el CIS Kubernetes Benchmark?</span><span class="chev" aria-hidden="true">▸</span></summary><div class="body"><span class="ans">kube-bench</span><p>Kubescape revisa contra NSA/CISA y MITRE; Trivy escanea imágenes e IaC.</p></div></details>
+  </div>
+</section>
+
+<footer>
+  <p>Temario oficial del KCSA de la CNCF (seis dominios: 14 / 22 / 22 / 16 / 16 / 10). Datos revisados contra la documentación de Kubernetes v1.37 y de los proyectos de la CNCF (octubre de 2026).</p>
+  <p>Practica con tu <a href="https://claude.ai/artifact/C7YgUNnjKpdQ1EVm62vt2A">simulador KCNA y KCSA</a> y repasa la base en <a href="https://claude.ai/artifact/TBMZYTpXPUPBH9JvarH4dH">Estudiar Kubernetes</a>.</p>
+  <p>Antes de presentar, confirma en la página oficial que el temario no haya cambiado.</p>
+</footer>
+
+</div>
+</body>
+</html>
