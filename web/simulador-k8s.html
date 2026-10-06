@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Simulador KCNA y KCSA</title>
-<meta name="description" content="Simulador de los exámenes KCNA y KCSA: preguntas en inglés, explicaciones en español, modo práctica y modo examen con o sin tiempo.">
+<meta name="description" content="KCNA and KCSA exam simulator: questions in English, explanations in Spanish, practice and exam modes, timed or untimed.">
 <meta name="theme-color" content="#f3f5fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -288,96 +288,96 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     <header class="mast">
       <svg class="helm" id="helm" viewBox="0 0 48 48" aria-hidden="true"></svg>
       <div>
-        <p class="eyebrow">Preparación CNCF · preguntas en inglés, explicaciones en español</p>
-        <h1 id="appTitle">Simulador KCNA y KCSA</h1>
+        <p class="eyebrow">CNCF exam prep · questions in English, explanations in Spanish</p>
+        <h1 id="appTitle">KCNA &amp; KCSA Exam Simulator</h1>
       </div>
     </header>
 
     <div class="resume" id="resume" hidden>
-      <div class="resume-text"><strong>Tienes una sesión sin terminar</strong><span id="resumeInfo"></span></div>
+      <div class="resume-text"><strong>You have an unfinished session</strong><span id="resumeInfo"></span></div>
       <div class="resume-actions">
-        <button class="btn primary" id="resumeBtn" type="button">Continuar</button>
-        <button class="btn" id="discardBtn" type="button">Descartar</button>
+        <button class="btn primary" id="resumeBtn" type="button">Resume</button>
+        <button class="btn" id="discardBtn" type="button">Discard</button>
       </div>
     </div>
 
     <section class="block" aria-labelledby="hExam">
-      <h2 class="label" id="hExam">Examen</h2>
+      <h2 class="label" id="hExam">Exam</h2>
       <div class="exams" id="examPicker" role="radiogroup" aria-labelledby="hExam"></div>
     </section>
 
     <section class="block" aria-labelledby="hMode">
-      <h2 class="label" id="hMode">Modo</h2>
+      <h2 class="label" id="hMode">Mode</h2>
       <div class="modes" id="modePicker" role="radiogroup" aria-labelledby="hMode">
         <button class="mode" type="button" role="radio" data-mode="practice" aria-checked="true">
-          <span class="mode-name">Simulador</span>
-          <span class="mode-desc">Respondes y ves al instante si acertaste, con la explicación.</span>
+          <span class="mode-name">Practice</span>
+          <span class="mode-desc">See right away whether you got it right, with the explanation.</span>
         </button>
         <button class="mode" type="button" role="radio" data-mode="exam" aria-checked="false">
-          <span class="mode-name">Examen</span>
-          <span class="mode-desc">Como el real: sin pistas, puedes marcar y revisar, nota al final.</span>
+          <span class="mode-name">Exam</span>
+          <span class="mode-desc">Like the real one: no hints, flag and review, score at the end.</span>
         </button>
       </div>
       <label class="toggle" for="timedInput">
         <input type="checkbox" id="timedInput">
         <span class="toggle-ui" aria-hidden="true"></span>
-        <span class="toggle-text"><b>Con tiempo</b><small id="timeHint"></small></span>
+        <span class="toggle-text"><b>Timed</b><small id="timeHint"></small></span>
       </label>
       <p class="info" id="examInfo" hidden></p>
     </section>
 
     <section class="block" id="practiceOpts" aria-labelledby="hOpts">
-      <h2 class="label" id="hOpts">Qué practicar</h2>
+      <h2 class="label" id="hOpts">What to practice</h2>
       <div class="field">
-        <span class="field-label" id="lCount">Número de preguntas</span>
+        <span class="field-label" id="lCount">Number of questions</span>
         <div class="chips" id="countChips" role="radiogroup" aria-labelledby="lCount"></div>
       </div>
       <div class="field">
-        <label class="field-label" for="domainSelect">Dominio</label>
+        <label class="field-label" for="domainSelect">Domain</label>
         <select id="domainSelect"></select>
       </div>
       <div class="field">
-        <span class="field-label" id="lSource">Preguntas</span>
+        <span class="field-label" id="lSource">Questions</span>
         <div class="chips" id="sourceChips" role="radiogroup" aria-labelledby="lSource"></div>
       </div>
     </section>
 
     <section class="panel" aria-labelledby="hStats">
       <div class="panel-head">
-        <h2 class="h2" id="hStats">Tu progreso</h2>
-        <span class="badge" id="syncBadge">Guardado en este dispositivo</span>
+        <h2 class="h2" id="hStats">Your progress</h2>
+        <span class="badge" id="syncBadge">Saved on this device</span>
       </div>
       <div id="statsBody"></div>
     </section>
 
     <details class="panel syllabus" id="syllabus">
-      <summary id="sylTitle">Temario oficial y consejos</summary>
+      <summary id="sylTitle">Official curriculum and tips</summary>
       <div class="syl-body" id="sylBody"></div>
     </details>
 
-    <p class="foot">Preguntas originales escritas a partir del <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">currículo oficial de la CNCF</a> y la documentación de Kubernetes v1.37 (octubre de 2026). No son preguntas filtradas del examen real.</p>
+    <p class="foot">Original questions written from the <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">official CNCF curriculum</a> and the Kubernetes v1.37 documentation (October 2026). They are not leaked questions from the real exam.</p>
   </section>
 
   <section id="sessionView" hidden>
     <div class="topbar">
-      <button class="icon-btn" id="exitBtn" type="button" aria-label="Salir de la sesión"></button>
+      <button class="icon-btn" id="exitBtn" type="button" aria-label="Exit session"></button>
       <div class="tb-main">
         <div class="tb-row"><span class="tb-title" id="tbTitle"></span><span class="tb-timer" id="timer" role="timer"></span></div>
         <div class="track" aria-hidden="true"><span id="trackFill"></span></div>
       </div>
-      <button class="count-btn" id="navBtn" type="button" aria-label="Ver todas las preguntas"><span id="navCount"></span></button>
+      <button class="count-btn" id="navBtn" type="button" aria-label="Show all questions"><span id="navCount"></span></button>
     </div>
     <article id="qcard">
       <div class="qmeta"><span class="qnum" id="qNum"></span><span class="qdom" id="qDom"></span></div>
       <div class="qtext" id="qText"></div>
       <p class="hint" id="qHint" hidden></p>
-      <div class="opts" id="opts" role="group" aria-label="Opciones de respuesta"></div>
+      <div class="opts" id="opts" role="group" aria-label="Answer options"></div>
       <div class="feedback" id="feedback" aria-live="polite" hidden>
         <p class="verdict" id="verdict"></p>
-        <div class="explain" id="explain"></div>
+        <div class="explain" id="explain" lang="es"></div>
       </div>
     </article>
-    <p class="kbd-hint">Teclado: 1–5 o A–E elige · Enter confirma · ← → navega · F marca</p>
+    <p class="kbd-hint">Keyboard: 1–5 or A–E to choose · Enter to confirm · ← → to move · F to flag</p>
   </section>
 
   <section id="resultsView" hidden aria-labelledby="rEyebrow">
@@ -388,11 +388,11 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
       <p class="res-sub" id="rSub"></p>
     </header>
     <section class="panel" aria-labelledby="hRDom">
-      <div class="panel-head"><h2 class="h2" id="hRDom">Por dominio</h2><span class="note">La línea marca el 75 % para aprobar</span></div>
+      <div class="panel-head"><h2 class="h2" id="hRDom">By domain</h2><span class="note">The line marks the 75% pass mark</span></div>
       <div class="dbars" id="rDomains"></div>
     </section>
     <section class="panel" aria-labelledby="hReview">
-      <div class="panel-head"><h2 class="h2" id="hReview">Revisión</h2><div class="chips" id="rFilter" role="radiogroup" aria-label="Filtrar revisión"></div></div>
+      <div class="panel-head"><h2 class="h2" id="hReview">Review</h2><div class="chips" id="rFilter" role="radiogroup" aria-label="Filter review"></div></div>
       <ol class="review" id="rList"></ol>
     </section>
   </section>
@@ -401,21 +401,21 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
 <div class="bar" id="homeBar">
   <div class="bar-inner">
     <p class="bar-summary" id="startSummary"></p>
-    <button class="btn primary big" id="startBtn" type="button">Empezar</button>
+    <button class="btn primary big" id="startBtn" type="button">Start</button>
   </div>
 </div>
 <div class="bar" id="sessionBar" hidden>
   <div class="bar-inner trio">
-    <button class="btn" id="prevBtn" type="button">Anterior</button>
-    <button class="btn" id="midBtn" type="button">Marcar</button>
-    <button class="btn primary" id="mainBtn" type="button">Siguiente</button>
+    <button class="btn" id="prevBtn" type="button">Previous</button>
+    <button class="btn" id="midBtn" type="button">Flag</button>
+    <button class="btn primary" id="mainBtn" type="button">Next</button>
   </div>
 </div>
 <div class="bar" id="resultsBar" hidden>
   <div class="bar-inner trio">
-    <button class="btn" id="homeBtn" type="button">Inicio</button>
-    <button class="btn" id="retryWrongBtn" type="button">Repasar falladas</button>
-    <button class="btn primary" id="againBtn" type="button">Otro intento</button>
+    <button class="btn" id="homeBtn" type="button">Home</button>
+    <button class="btn" id="retryWrongBtn" type="button">Retry missed</button>
+    <button class="btn primary" id="againBtn" type="button">New attempt</button>
   </div>
 </div>
 
@@ -441,7 +441,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
   const BYID = new Map();
   for (const key of EXAM_KEYS) for (const q of EXAMS[key].bank) { q.x = key; BYID.set(q.i, q); }
 
-  const MODE_NAME = { practice: 'Simulador', exam: 'Examen' };
+  const MODE_NAME = { practice: 'Practice', exam: 'Exam' };
   const LETTERS = 'ABCDE';
   const COUNTS = [10, 20, 30, 60, 'all'];
   const motionOK = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -491,7 +491,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
   function dateLabel(ts) {
     try {
       const d = new Date(ts);
-      return d.toLocaleDateString('es', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleDateString('en', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
     } catch (e) { return ''; }
   }
   function shuffle(list) {
@@ -757,7 +757,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
         + '<span class="tick" aria-hidden="true">' + ICON.check + '</span>'
         + '<span class="code">' + esc(ex.code) + '</span>'
         + '<span class="name">' + esc(ex.name) + '</span>'
-        + '<span class="spec">' + ex.questions + ' preguntas · ' + ex.minutes + ' min · aprobar ≥ ' + ex.pass + ' %<br>' + ex.bank.length + ' en el banco · ' + ex.domains.length + ' dominios</span>'
+        + '<span class="spec">' + ex.questions + ' questions · ' + ex.minutes + ' min · pass ≥ ' + ex.pass + '%<br>' + ex.bank.length + ' in the bank · ' + ex.domains.length + ' domains</span>'
         + '</button>';
     }).join('');
   }
@@ -767,34 +767,34 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     for (const b of $('modePicker').querySelectorAll('.mode')) b.setAttribute('aria-checked', String(b.dataset.mode === settings.mode));
     $('timedInput').checked = !!settings.timed;
     $('timeHint').textContent = settings.mode === 'exam'
-      ? ex.minutes + ' minutos para ' + ex.questions + ' preguntas, como el examen real'
-      : 'Unos 90 segundos por pregunta, el ritmo del examen real';
+      ? ex.minutes + ' minutes for ' + ex.questions + ' questions, like the real exam'
+      : 'About 90 seconds per question, the pace of the real exam';
     const isExam = settings.mode === 'exam';
     $('practiceOpts').hidden = isExam;
     const info = $('examInfo');
     info.hidden = !isExam;
     if (isExam) {
       const quotas = apportion(ex.domains.map((d) => d.weight), ex.questions);
-      info.textContent = 'Reparto por dominio como el oficial: ' + quotas.join(' · ') + ' preguntas. Prioriza las que todavía no has visto.';
+      info.textContent = 'Questions per domain follow the official split: ' + quotas.join(' · ') + '. Questions you haven’t seen yet come first.';
     }
   }
 
   function renderPracticeOpts() {
     const ex = EXAMS[settings.exam];
     const sel = $('domainSelect');
-    sel.innerHTML = '<option value="all">Todos los dominios (reparto oficial)</option>'
-      + ex.domains.map((d, i) => '<option value="' + i + '">' + esc(d.name) + ' · ' + d.weight + ' %</option>').join('');
+    sel.innerHTML = '<option value="all">All domains (official split)</option>'
+      + ex.domains.map((d, i) => '<option value="' + i + '">' + esc(d.name) + ' · ' + d.weight + '%</option>').join('');
     sel.value = String(settings.domain);
     if (sel.value !== String(settings.domain)) { settings.domain = 'all'; sel.value = 'all'; }
     const base = Object.assign({}, settings, { source: 'all' });
     const totalAll = practicePool(base).length;
     const nNew = practicePool(Object.assign({}, base, { source: 'new' })).length;
     const nWrong = practicePool(Object.assign({}, base, { source: 'wrong' })).length;
-    $('sourceChips').innerHTML = [['all', 'Todas', totalAll], ['new', 'Nuevas', nNew], ['wrong', 'Falladas', nWrong]]
+    $('sourceChips').innerHTML = [['all', 'All', totalAll], ['new', 'New', nNew], ['wrong', 'Missed', nWrong]]
       .map(([v, label, n]) => '<button type="button" class="chip" role="radio" data-source="' + v + '" aria-checked="' + (settings.source === v) + '"' + (n ? '' : ' disabled') + '>' + label + ' <span class="num">(' + n + ')</span></button>').join('');
     const avail = practicePool(settings).length;
     $('countChips').innerHTML = COUNTS.map((c) => {
-      const label = c === 'all' ? 'Todas (' + avail + ')' : String(c);
+      const label = c === 'all' ? 'All (' + avail + ')' : String(c);
       return '<button type="button" class="chip num" role="radio" data-count="' + c + '" aria-checked="' + (settings.count === c) + '">' + label + '</button>';
     }).join('');
   }
@@ -811,8 +811,8 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     const plan = startPlan();
     $('startBtn').disabled = !plan.n;
     $('startSummary').innerHTML = plan.n
-      ? '<b>' + esc(ex.code) + ' · ' + MODE_NAME[settings.mode] + '</b><br>' + plan.n + ' preguntas · ' + (plan.sec ? durLabel(plan.sec) : 'sin tiempo')
-      : 'No hay preguntas con estos filtros';
+      ? '<b>' + esc(ex.code) + ' · ' + MODE_NAME[settings.mode] + '</b><br>' + plural(plan.n, 'question', 'questions') + ' · ' + (plan.sec ? durLabel(plan.sec) : 'untimed')
+      : 'No questions match these filters';
   }
 
   function renderResume() {
@@ -820,8 +820,8 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     if (!session) { box.hidden = true; return; }
     const ex = EXAMS[session.exam];
     const done = session.qids.filter((id) => (session.mode === 'practice' ? session.checked[id] : (session.ans[id] || []).length)).length;
-    let info = ex.code + ' · ' + MODE_NAME[session.mode] + ' · ' + done + ' de ' + session.qids.length + ' respondidas';
-    if (session.endsAt) info += ' · quedan ' + clock((session.endsAt - Date.now()) / 1000);
+    let info = ex.code + ' · ' + MODE_NAME[session.mode] + ' · ' + done + ' of ' + session.qids.length + ' answered';
+    if (session.endsAt) info += ' · ' + clock((session.endsAt - Date.now()) / 1000) + ' left';
     $('resumeInfo').textContent = info;
     box.hidden = false;
   }
@@ -861,81 +861,81 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
       const has = r.seen > 0;
       const pct = has ? Math.round((100 * r.right) / r.seen) : 0;
       let foot;
-      if (ctx === 'home') foot = has ? r.right + ' de ' + r.seen + ' bien en su último intento · ' + r.seen + '/' + r.total + ' vistas' : 'Sin practicar · ' + r.total + ' preguntas en el banco';
-      else foot = has ? r.right + ' de ' + r.seen + ' correctas' : 'Sin preguntas de este dominio en la sesión';
-      const flag = has && pct < ex.pass ? statusMini('warn', 'Refuerza') : '';
-      const link = ctx === 'home' ? '<button type="button" class="linkbtn" data-practice-domain="' + i + '">Practicar</button>' : '';
-      return '<div class="dbar"><div class="dbar-head"><span class="dbar-name">' + esc(dm.name) + '</span><span class="dbar-w">peso ' + dm.weight + ' %</span></div>'
-        + '<div class="dbar-row"><div class="dbar-track" role="img" aria-label="' + (has ? pct + ' % de aciertos' : 'Sin datos') + ', meta ' + ex.pass + ' %">'
+      if (ctx === 'home') foot = has ? r.right + ' of ' + r.seen + ' right on the last attempt · ' + r.seen + '/' + r.total + ' seen' : 'Not practiced yet · ' + r.total + ' questions in the bank';
+      else foot = has ? r.right + ' of ' + r.seen + ' correct' : 'No questions from this domain in this session';
+      const flag = has && pct < ex.pass ? statusMini('warn', 'Needs work') : '';
+      const link = ctx === 'home' ? '<button type="button" class="linkbtn" data-practice-domain="' + i + '">Practice</button>' : '';
+      return '<div class="dbar"><div class="dbar-head"><span class="dbar-name">' + esc(dm.name) + '</span><span class="dbar-w">weight ' + dm.weight + '%</span></div>'
+        + '<div class="dbar-row"><div class="dbar-track" role="img" aria-label="' + (has ? pct + '% correct' : 'No data') + ', target ' + ex.pass + '%">'
         + (has ? '<span class="dbar-fill" style="width:' + pct + '%"></span>' : '') + '<span class="goal" style="left:' + ex.pass + '%"></span></div>'
-        + '<span class="dbar-val num">' + (has ? pct + ' %' : '—') + '</span></div>'
+        + '<span class="dbar-val num">' + (has ? pct + '%' : '—') + '</span></div>'
         + '<div class="dbar-foot">' + flag + '<span>' + foot + '</span>' + link + '</div></div>';
     }).join('');
   }
 
   function readiness(est) {
-    if (est >= 85) return ['good', 'm-good', 'Listo para presentar: mantén el ritmo'];
-    if (est >= 75) return ['good', 'm-good', 'En zona de aprobado, con poco margen'];
-    if (est >= 60) return ['warn', 'm-warn', 'Cerca: refuerza tus dominios débiles'];
-    return ['bad', 'm-bad', 'Todavía lejos del 75 %: sigue practicando'];
+    if (est >= 85) return ['good', 'm-good', 'Ready to book the exam: keep it up'];
+    if (est >= 75) return ['good', 'm-good', 'In the passing zone, with little margin'];
+    if (est >= 60) return ['warn', 'm-warn', 'Close: work on your weakest domains'];
+    return ['bad', 'm-bad', 'Still far from 75%: keep practicing'];
   }
 
   function renderStats() {
     const key = settings.exam;
     const ex = EXAMS[key];
     const st = examStats(key);
-    $('hStats').textContent = 'Tu progreso en ' + ex.code;
+    $('hStats').textContent = 'Your ' + ex.code + ' progress';
     let html = '';
     if (st.est == null) {
-      html += '<div class="ready"><p class="ready-label">Dominio estimado</p><div class="ready-top"><span class="hero-num">—</span></div>'
-        + '<p class="note">Todavía no has respondido preguntas de ' + esc(ex.code) + '. Empieza con 20 preguntas en modo Simulador y aquí verás tu nivel por dominio, ponderado con el peso oficial de cada uno.</p></div>';
+      html += '<div class="ready"><p class="ready-label">Estimated mastery</p><div class="ready-top"><span class="hero-num">—</span></div>'
+        + '<p class="note">You haven’t answered any ' + esc(ex.code) + ' questions yet. Start with 20 questions in Practice mode and you’ll see your level per domain here, weighted by each domain’s official share.</p></div>';
     } else {
       const [kind, cls, label] = readiness(st.est);
       const partial = st.weightCovered < 100 || st.seen < 40;
-      html += '<div class="ready"><p class="ready-label">Dominio estimado (ponderado por el peso oficial)</p>'
+      html += '<div class="ready"><p class="ready-label">Estimated mastery (weighted by official domain share)</p>'
         + '<div class="ready-top"><span class="hero-num">' + st.est + '</span><span class="hero-unit">%</span></div>'
-        + '<div class="meter ' + cls + '" role="img" aria-label="' + st.est + ' %, meta ' + ex.pass + ' %"><span class="meter-fill" style="width:' + st.est + '%"></span><span class="goal" style="left:' + ex.pass + '%"></span></div>'
+        + '<div class="meter ' + cls + '" role="img" aria-label="' + st.est + '%, target ' + ex.pass + '%"><span class="meter-fill" style="width:' + st.est + '%"></span><span class="goal" style="left:' + ex.pass + '%"></span></div>'
         + statusHTML(kind, label)
-        + (partial ? '<p class="note">Cálculo provisional: llevas ' + st.seen + ' de ' + st.total + ' preguntas vistas' + (st.weightCovered < 100 ? ' y hay dominios sin practicar' : '') + '.</p>' : '')
+        + (partial ? '<p class="note">Provisional estimate: you’ve seen ' + st.seen + ' of ' + st.total + ' questions' + (st.weightCovered < 100 ? ' and some domains haven’t been practiced yet' : '') + '.</p>' : '')
         + '</div>';
     }
     html += '<ul class="kpis">'
-      + '<li class="kpi"><span class="kpi-label">Preguntas vistas</span><span class="kpi-value">' + st.seen + ' / ' + st.total + '</span></li>'
-      + '<li class="kpi"><span class="kpi-label">Aciertos totales</span><span class="kpi-value">' + (st.acc == null ? '—' : st.acc + ' %') + '</span></li>'
-      + '<li class="kpi"><span class="kpi-label">Simulacros de examen</span><span class="kpi-value">' + st.exams.length + '</span></li>'
-      + '<li class="kpi"><span class="kpi-label">Mejor simulacro</span><span class="kpi-value">' + (st.best == null ? '—' : st.best + ' %') + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Questions seen</span><span class="kpi-value">' + st.seen + ' / ' + st.total + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Overall accuracy</span><span class="kpi-value">' + (st.acc == null ? '—' : st.acc + '%') + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Exam simulations</span><span class="kpi-value">' + st.exams.length + '</span></li>'
+      + '<li class="kpi"><span class="kpi-label">Best exam score</span><span class="kpi-value">' + (st.best == null ? '—' : st.best + '%') + '</span></li>'
       + '</ul>';
     html += '<div class="dbars">' + domainBars(ex, st.doms, 'home') + '</div>';
-    html += '<div class="actions-row"><button type="button" class="btn" id="reviewWrongBtn"' + (st.wrong ? '' : ' disabled') + '>' + ICON.x + 'Repasar falladas (' + st.wrong + ')</button>'
-      + '<button type="button" class="btn" id="weakBtn">Practicar mi dominio más débil</button></div>';
+    html += '<div class="actions-row"><button type="button" class="btn" id="reviewWrongBtn"' + (st.wrong ? '' : ' disabled') + '>' + ICON.x + 'Review missed (' + st.wrong + ')</button>'
+      + '<button type="button" class="btn" id="weakBtn">Practice my weakest domain</button></div>';
     const hist = progress.history.filter((h) => h.exam === key).slice(0, 8);
-    html += '<h3 class="subhead">Últimos intentos</h3><ul class="hist">'
-      + (hist.length ? hist.map((h) => '<li><span class="hmode">' + MODE_NAME[h.mode] + (h.timed ? '' : ' · sin tiempo') + '</span>'
+    html += '<h3 class="subhead">Recent attempts</h3><ul class="hist">'
+      + (hist.length ? hist.map((h) => '<li><span class="hmode">' + MODE_NAME[h.mode] + (h.timed ? '' : ' · untimed') + '</span>'
         + '<span class="hdate muted num">' + dateLabel(h.ts) + ' · ' + h.correct + '/' + h.counted + ' · ' + durLabel(h.dur) + '</span>'
-        + '<span class="hscore num">' + statusMini(h.score >= ex.pass ? 'good' : 'bad', h.score + ' %') + '</span></li>').join('')
-        : '<li class="empty">Aún no hay intentos de ' + esc(ex.code) + '.</li>')
+        + '<span class="hscore num">' + statusMini(h.score >= ex.pass ? 'good' : 'bad', h.score + '%') + '</span></li>').join('')
+        : '<li class="empty">No ' + esc(ex.code) + ' attempts yet.</li>')
       + '</ul>';
-    html += '<p style="margin-top:14px"><button type="button" class="linkbtn quiet" id="resetBtn">Borrar mi progreso de ' + esc(ex.code) + '</button></p>';
+    html += '<p style="margin-top:14px"><button type="button" class="linkbtn quiet" id="resetBtn">Reset my ' + esc(ex.code) + ' progress</button></p>';
     $('statsBody').innerHTML = html;
   }
 
   const SYLLABUS_NOTE = {
-    kcna: 'Temario vigente desde noviembre de 2025 (44 / 28 / 16 / 12). Muchas guías en internet todavía muestran el anterior, que tenía cinco dominios (46 / 22 / 16 / 8 / 8).',
-    kcsa: 'Temario oficial de la CNCF en seis dominios (14 / 22 / 22 / 16 / 16 / 10). El banco también cubre en profundidad cadena de suministro, RBAC y seguridad en tiempo de ejecución, que aparecen en varios dominios.',
+    kcna: 'Curriculum in effect since November 2025 (44 / 28 / 16 / 12). Many online guides still show the previous one, which had five domains (46 / 22 / 16 / 8 / 8).',
+    kcsa: 'Official CNCF curriculum with six domains (14 / 22 / 22 / 16 / 16 / 10). The bank also covers supply chain, RBAC and runtime security in depth, since they show up across several domains.',
   };
-  const TIPS = '<h3 class="subhead">Cómo es el examen</h3><ul class="tips">'
-    + '<li>60 preguntas de opción múltiple en 90 minutos, en línea y con supervisión remota. Apruebas con 75 %, es decir, 45 correctas.</li>'
-    + '<li>Se presenta en inglés (el KCNA también en japonés), por eso aquí las preguntas están en inglés y las explicaciones en español.</li>'
-    + '<li>Tienes unos 90 segundos por pregunta. Si dudas, márcala y sigue; vuelve a ella al final.</li>'
-    + '<li>Lee con lupa NOT, EXCEPT, BEST, MOST o FIRST: cambian por completo la respuesta.</li>'
-    + '<li>Las respuestas incorrectas no restan, así que no dejes ninguna en blanco.</li>'
-    + '<li>Meta práctica antes de agendar: superar el 85 % en varios simulacros seguidos con tiempo.</li>'
+  const TIPS = '<h3 class="subhead">What the exam is like</h3><ul class="tips">'
+    + '<li>60 multiple-choice questions in 90 minutes, online and remotely proctored. You pass with 75%, that is, 45 correct answers.</li>'
+    + '<li>The exam is in English (the KCNA is also offered in Japanese), which is why the questions here are in English and the explanations in Spanish.</li>'
+    + '<li>You have about 90 seconds per question. If you’re unsure, flag it, move on and come back to it at the end.</li>'
+    + '<li>Read NOT, EXCEPT, BEST, MOST and FIRST carefully: they change the answer completely.</li>'
+    + '<li>Wrong answers aren’t penalized, so never leave a question blank.</li>'
+    + '<li>A practical goal before booking: score above 85% on several timed exam simulations in a row.</li>'
     + '</ul>';
   function renderSyllabus() {
     const ex = EXAMS[settings.exam];
-    $('sylTitle').textContent = 'Temario oficial de ' + ex.code + ' y consejos';
+    $('sylTitle').textContent = ex.code + ' official curriculum and tips';
     $('sylBody').innerHTML = '<p class="note">' + esc(SYLLABUS_NOTE[settings.exam] || '') + '</p>'
-      + ex.domains.map((d) => '<div class="sdom"><h3><span>' + esc(d.name) + '</span><span class="num">' + d.weight + ' %</span></h3><ul>'
+      + ex.domains.map((d) => '<div class="sdom"><h3><span>' + esc(d.name) + '</span><span class="num">' + d.weight + '%</span></h3><ul>'
         + (d.syllabus || d.topics).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>').join('')
       + TIPS;
   }
@@ -961,7 +961,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
   function launch(opts) {
     const begin = () => {
       const s = createSession(opts);
-      if (!s) { toast('No hay preguntas con esa combinación de filtros.'); return; }
+      if (!s) { toast('No questions match that combination of filters.'); return; }
       session = s;
       saveSession();
       result = null;
@@ -969,10 +969,10 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
       openSession();
     };
     if (session) {
-      openSheet('¿Empezar una sesión nueva?', '<p>Tienes una sesión sin terminar. Si empiezas otra, se descarta sin guardar su resultado.</p>', [
-        { label: 'Descartar y empezar', kind: 'primary', run: () => { discardSession(); begin(); } },
-        { label: 'Continuar la que tengo', run: openSession },
-        { label: 'Cancelar' },
+      openSheet('Start a new session?', '<p>You have an unfinished session. If you start another one, it will be discarded without saving its result.</p>', [
+        { label: 'Discard and start', kind: 'primary', run: () => { discardSession(); begin(); } },
+        { label: 'Resume the current one', run: openSession },
+        { label: 'Cancel' },
       ]);
     } else begin();
   }
@@ -1011,24 +1011,24 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     const last = s.cur === total - 1;
 
     $('exitBtn').innerHTML = ICON.close;
-    $('tbTitle').textContent = ex.code + ' · ' + MODE_NAME[s.mode] + (s.timed ? '' : ' · sin tiempo');
+    $('tbTitle').textContent = ex.code + ' · ' + MODE_NAME[s.mode] + (s.timed ? '' : ' · untimed');
     $('trackFill').style.width = ((100 * answeredCount(s)) / total).toFixed(1) + '%';
     $('navCount').textContent = s.cur + 1 + '/' + total;
-    $('qNum').textContent = 'Pregunta ' + (s.cur + 1) + ' de ' + total;
+    $('qNum').textContent = 'Question ' + (s.cur + 1) + ' of ' + total;
     $('qDom').textContent = ex.domains[q.d].name + ' · ' + q.t;
     $('qText').innerHTML = rich(q.q);
     const hint = $('qHint');
     hint.hidden = !multi;
-    if (multi) hint.innerHTML = ICON.multi + 'Elige ' + q.a.length + ' respuestas';
+    if (multi) hint.innerHTML = ICON.multi + 'Choose ' + q.a.length + ' answers';
     optsEl.classList.toggle('multi', multi);
-    optsEl.setAttribute('aria-label', multi ? 'Opciones: elige ' + q.a.length : 'Opciones: elige una');
+    optsEl.setAttribute('aria-label', multi ? 'Options: choose ' + q.a.length : 'Options: choose one');
     optsEl.innerHTML = s.perm[id].map((k, pos) => {
       const picked = sel.includes(k);
       let cls = 'opt';
       let tag = '';
       if (done) {
-        if (q.a.includes(k)) { cls += ' is-correct'; tag = '<span class="tag tag-ok">' + ICON.check + (picked ? 'Correcta · tu respuesta' : 'Correcta') + '</span>'; }
-        else if (picked) { cls += ' is-wrong'; tag = '<span class="tag tag-bad">' + ICON.x + 'Tu respuesta</span>'; }
+        if (q.a.includes(k)) { cls += ' is-correct'; tag = '<span class="tag tag-ok">' + ICON.check + (picked ? 'Correct · your answer' : 'Correct') + '</span>'; }
+        else if (picked) { cls += ' is-wrong'; tag = '<span class="tag tag-bad">' + ICON.x + 'Your answer</span>'; }
         else cls += ' is-dim';
       }
       return '<button type="button" class="' + cls + '" data-k="' + k + '" aria-pressed="' + picked + '"' + (done ? ' disabled' : '') + '>'
@@ -1038,8 +1038,8 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
 
     if (done) {
       const ok = isCorrect(q, sel);
-      const letters = s.perm[id].map((k, pos) => (q.a.includes(k) ? LETTERS[pos] : '')).filter(Boolean).join(' y ');
-      $('verdict').innerHTML = statusIcon(ok ? 'good' : 'bad') + '<span>' + (ok ? 'Correcto' : 'Incorrecto · la respuesta es ' + letters) + '</span>';
+      const letters = s.perm[id].map((k, pos) => (q.a.includes(k) ? LETTERS[pos] : '')).filter(Boolean).join(' and ');
+      $('verdict').innerHTML = statusIcon(ok ? 'good' : 'bad') + '<span>' + (ok ? 'Correct' : 'Incorrect · ' + (multi ? 'the answers are ' : 'the answer is ') + letters) + '</span>';
       $('explain').innerHTML = rich(q.e);
       feedback.hidden = false;
     } else feedback.hidden = true;
@@ -1047,19 +1047,19 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     prevBtn.disabled = s.cur === 0;
     if (practice && !done) {
       midBtn.removeAttribute('aria-pressed');
-      midBtn.textContent = 'Saltar';
+      midBtn.textContent = 'Skip';
       midBtn.disabled = last;
     } else {
       const flagged = !!s.flags[id];
       midBtn.setAttribute('aria-pressed', String(flagged));
-      midBtn.innerHTML = ICON.flag + '<span>' + (flagged ? 'Marcada' : 'Marcar') + '</span>';
+      midBtn.innerHTML = ICON.flag + '<span>' + (flagged ? 'Flagged' : 'Flag') + '</span>';
       midBtn.disabled = false;
     }
     if (practice) {
-      if (!done) { mainBtn.textContent = 'Comprobar'; mainBtn.disabled = sel.length !== q.a.length; }
-      else { mainBtn.textContent = last ? 'Ver resultados' : 'Siguiente'; mainBtn.disabled = false; }
+      if (!done) { mainBtn.textContent = 'Check'; mainBtn.disabled = sel.length !== q.a.length; }
+      else { mainBtn.textContent = last ? 'See results' : 'Next'; mainBtn.disabled = false; }
     } else {
-      mainBtn.textContent = last ? 'Revisar y terminar' : 'Siguiente';
+      mainBtn.textContent = last ? 'Review & submit' : 'Next';
       mainBtn.disabled = false;
     }
     if (focusKey != null) {
@@ -1132,20 +1132,20 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
       const q = BYID.get(id);
       const sel = s.ans[id] || [];
       let cls = '';
-      let state = 'sin responder';
+      let state = 'unanswered';
       if (s.mode === 'practice') {
-        if (s.checked[id]) { const ok = isCorrect(q, sel); cls = ok ? 'ok' : 'bad'; state = ok ? 'correcta' : 'incorrecta'; }
-      } else if (sel.length) { cls = 'answered'; state = 'respondida'; }
-      if (s.flags[id]) { cls += ' flagged'; state += ', marcada'; }
+        if (s.checked[id]) { const ok = isCorrect(q, sel); cls = ok ? 'ok' : 'bad'; state = ok ? 'correct' : 'incorrect'; }
+      } else if (sel.length) { cls = 'answered'; state = 'answered'; }
+      if (s.flags[id]) { cls += ' flagged'; state += ', flagged'; }
       if (i === s.cur) cls += ' current';
-      return '<button type="button" class="num ' + cls.trim() + '" data-go="' + i + '" aria-label="Pregunta ' + (i + 1) + ', ' + state + '">' + (i + 1) + '</button>';
+      return '<button type="button" class="num ' + cls.trim() + '" data-go="' + i + '" aria-label="Question ' + (i + 1) + ', ' + state + '">' + (i + 1) + '</button>';
     }).join('') + '</div>';
   }
   function navLegend(s) {
     return '<p class="legend">' + (s.mode === 'practice'
-      ? '<span><i class="ok"></i>Correcta</span><span><i class="bad"></i>Incorrecta</span><span><i></i>Sin responder</span>'
-      : '<span><i class="answered"></i>Respondida</span><span><i></i>Sin responder</span>')
-      + '<span><i class="flag"></i>Marcada</span></p>';
+      ? '<span><i class="ok"></i>Correct</span><span><i class="bad"></i>Incorrect</span><span><i></i>Unanswered</span>'
+      : '<span><i class="answered"></i>Answered</span><span><i></i>Unanswered</span>')
+      + '<span><i class="flag"></i>Flagged</span></p>';
   }
   function bindGrid(body) {
     const handler = (e) => {
@@ -1161,9 +1161,9 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     const s = session;
     const done = answeredCount(s);
     const flagged = Object.keys(s.flags).length;
-    openSheet('Preguntas', '<p>' + done + ' de ' + s.qids.length + (s.mode === 'practice' ? ' comprobadas' : ' respondidas') + ' · ' + plural(flagged, 'marcada', 'marcadas') + '. Toca un número para ir a esa pregunta.</p>' + navGrid(s) + navLegend(s), [
-      { label: s.mode === 'exam' ? 'Terminar y calificar' : 'Terminar práctica', kind: 'primary', run: s.mode === 'exam' ? openFinishSheet : () => finishSession('done') },
-      { label: 'Seguir respondiendo' },
+    openSheet('Questions', '<p>' + done + ' of ' + s.qids.length + (s.mode === 'practice' ? ' checked' : ' answered') + ' · ' + flagged + ' flagged. Tap a number to go to that question.</p>' + navGrid(s) + navLegend(s), [
+      { label: s.mode === 'exam' ? 'Submit exam' : 'End practice', kind: 'primary', run: s.mode === 'exam' ? openFinishSheet : () => finishSession('done') },
+      { label: 'Keep going' },
     ], bindGrid);
   }
   function openFinishSheet() {
@@ -1171,22 +1171,22 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     const answered = answeredCount(s);
     const blank = s.qids.length - answered;
     const flagged = Object.keys(s.flags).length;
-    openSheet('¿Terminar el examen?', '<ul class="summary-list">'
-      + '<li><span>Respondidas</span><b class="num">' + answered + ' / ' + s.qids.length + '</b></li>'
-      + '<li><span>Sin responder</span><b class="num">' + blank + '</b></li>'
-      + '<li><span>Marcadas para revisar</span><b class="num">' + flagged + '</b></li></ul>'
-      + (blank ? '<p style="margin-top:12px">Las preguntas sin responder cuentan como incorrectas. Toca un número para ir a ella.</p>' : '<p style="margin-top:12px">Toca un número si quieres revisar alguna antes de calificar.</p>')
+    openSheet('Submit the exam?', '<ul class="summary-list">'
+      + '<li><span>Answered</span><b class="num">' + answered + ' / ' + s.qids.length + '</b></li>'
+      + '<li><span>Unanswered</span><b class="num">' + blank + '</b></li>'
+      + '<li><span>Flagged for review</span><b class="num">' + flagged + '</b></li></ul>'
+      + (blank ? '<p style="margin-top:12px">Unanswered questions count as incorrect. Tap a number to go to a question.</p>' : '<p style="margin-top:12px">Tap a number to review a question before scoring.</p>')
       + navGrid(s) + navLegend(s), [
-      { label: 'Terminar y calificar', kind: 'primary', run: () => finishSession('done') },
-      { label: 'Volver a las preguntas' },
+      { label: 'Submit and score', kind: 'primary', run: () => finishSession('done') },
+      { label: 'Back to questions' },
     ], bindGrid);
   }
   function openExitSheet() {
     const s = session;
-    openSheet('¿Salir de la sesión?', '<p>Tu sesión queda guardada en este dispositivo y puedes continuarla desde el inicio.' + (s.endsAt ? ' Ojo: el reloj sigue corriendo, como en el examen real.' : '') + '</p>', [
-      { label: 'Seguir aquí', kind: 'primary' },
-      { label: 'Salir al inicio', run: () => { stopTimer(); keepAwake(false); renderHome(); } },
-      { label: ICON.x + 'Abandonar sin guardar', kind: 'danger', run: () => { discardSession(); renderHome(); toast('Sesión descartada.'); } },
+    openSheet('Leave this session?', '<p>Your session stays saved on this device and you can resume it from the home screen.' + (s.endsAt ? ' Heads up: the clock keeps running, as in the real exam.' : '') + '</p>', [
+      { label: 'Stay here', kind: 'primary' },
+      { label: 'Back to home', run: () => { stopTimer(); keepAwake(false); renderHome(); } },
+      { label: ICON.x + 'Discard without saving', kind: 'danger', run: () => { discardSession(); renderHome(); toast('Session discarded.'); } },
     ]);
   }
 
@@ -1231,7 +1231,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     LS.del(KEYS.session);
     reviewFilter = 'all';
     showResults();
-    if (reason === 'time') toast('Se acabó el tiempo. Calificamos lo que alcanzaste a responder.');
+    if (reason === 'time') toast('Time’s up. Everything you answered has been scored.');
   }
 
   /* ---------- reloj ---------- */
@@ -1251,13 +1251,13 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
       const left = Math.max(0, Math.round((session.endsAt - now) / 1000));
       timerEl.innerHTML = ICON.clock + '<span>' + clock(left) + '</span>';
       timerEl.classList.toggle('low', left <= 300);
-      timerEl.setAttribute('aria-label', 'Tiempo restante ' + clock(left));
-      if (left <= 300 && !warned && left > 0) { warned = true; toast('Quedan 5 minutos.'); }
+      timerEl.setAttribute('aria-label', 'Time remaining ' + clock(left));
+      if (left <= 300 && !warned && left > 0) { warned = true; toast('5 minutes left.'); }
       if (left <= 0) finishSession('time');
     } else {
       timerEl.classList.remove('low');
       timerEl.innerHTML = ICON.clock + '<span>' + clock((now - session.startedAt) / 1000) + '</span>';
-      timerEl.setAttribute('aria-label', 'Tiempo transcurrido');
+      timerEl.setAttribute('aria-label', 'Time elapsed');
     }
   }
 
@@ -1294,31 +1294,31 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
     const e = r.entry;
     const ex = EXAMS[e.exam];
     document.body.dataset.exam = e.exam;
-    $('rEyebrow').textContent = ex.code + ' · ' + MODE_NAME[e.mode] + (e.timed ? ' · con tiempo' : ' · sin tiempo');
+    $('rEyebrow').textContent = ex.code + ' · ' + MODE_NAME[e.mode] + (e.timed ? ' · timed' : ' · untimed');
     if (!e.counted) {
       $('rScore').textContent = '—';
       $('rUnit').hidden = true;
-      $('rStatus').innerHTML = '<p class="note" style="margin-top:8px">No comprobaste ninguna pregunta, así que no hay nota para esta práctica.</p>';
+      $('rStatus').innerHTML = '<p class="note" style="margin-top:8px">You didn’t check any questions, so this practice has no score.</p>';
       $('rSub').textContent = '';
     } else {
       $('rScore').textContent = String(e.score);
       $('rUnit').hidden = false;
       const pass = e.score >= ex.pass;
       $('rStatus').innerHTML = e.mode === 'exam'
-        ? statusHTML(pass ? 'good' : 'bad', pass ? 'Aprobado · el mínimo es ' + ex.pass + ' %' : 'No aprobado · necesitas ' + ex.pass + ' %')
-        : statusHTML(pass ? 'good' : 'warn', pass ? 'Por encima del ' + ex.pass + ' % que pide el examen' : 'Por debajo del ' + ex.pass + ' % que pide el examen');
-      let sub = e.correct + ' de ' + e.counted + ' correctas · ' + durLabel(e.dur);
-      if (e.mode === 'exam' && e.answered < e.n) sub += ' · ' + (e.n - e.answered) + ' sin responder';
-      if (e.mode === 'practice' && e.counted < e.n) sub += ' · ' + (e.n - e.counted) + ' sin comprobar';
-      if (e.reason === 'time') sub += ' · se acabó el tiempo';
+        ? statusHTML(pass ? 'good' : 'bad', pass ? 'Passed · the minimum is ' + ex.pass + '%' : 'Not passed · you need ' + ex.pass + '%')
+        : statusHTML(pass ? 'good' : 'warn', pass ? 'Above the ' + ex.pass + '% the exam requires' : 'Below the ' + ex.pass + '% the exam requires');
+      let sub = e.correct + ' of ' + e.counted + ' correct · ' + durLabel(e.dur);
+      if (e.mode === 'exam' && e.answered < e.n) sub += ' · ' + (e.n - e.answered) + ' unanswered';
+      if (e.mode === 'practice' && e.counted < e.n) sub += ' · ' + (e.n - e.counted) + ' not checked';
+      if (e.reason === 'time') sub += ' · time ran out';
       $('rSub').textContent = sub;
     }
     $('rDomains').innerHTML = domainBars(ex, e.dom.map((d) => ({ right: d[0], seen: d[1] })), 'result');
     const wrong = resultItems(r).filter((it) => it.graded && !it.ok).length;
     const retry = $('retryWrongBtn');
     retry.disabled = !wrong;
-    retry.textContent = wrong ? 'Repasar (' + wrong + ')' : 'Sin falladas';
-    retry.setAttribute('aria-label', wrong ? 'Repasar las ' + plural(wrong, 'pregunta fallada', 'preguntas falladas') : 'No hay preguntas falladas');
+    retry.textContent = wrong ? 'Retry (' + wrong + ')' : 'No misses';
+    retry.setAttribute('aria-label', wrong ? 'Retry ' + plural(wrong, 'missed question', 'missed questions') : 'No missed questions');
     renderReview();
     show('results');
   }
@@ -1330,25 +1330,25 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
       flagged: items.filter((it) => it.flagged).length,
     };
     if (!counts[reviewFilter]) reviewFilter = 'all';
-    $('rFilter').innerHTML = [['all', 'Todas'], ['wrong', 'Incorrectas'], ['flagged', 'Marcadas']]
+    $('rFilter').innerHTML = [['all', 'All'], ['wrong', 'Incorrect'], ['flagged', 'Flagged']]
       .map(([v, label]) => '<button type="button" class="chip" role="radio" data-filter="' + v + '" aria-checked="' + (reviewFilter === v) + '"' + (counts[v] ? '' : ' disabled') + '>' + label + ' <span class="num">(' + counts[v] + ')</span></button>').join('');
     const list = items.filter((it) => reviewFilter === 'all' || (reviewFilter === 'wrong' ? it.graded && !it.ok : it.flagged));
     const perm = result.session.perm;
     $('rList').innerHTML = list.map((it) => {
       const q = it.q;
       const state = !it.graded ? 'skip' : it.ok ? 'ok' : 'bad';
-      const mark = '<span class="mark ' + state + '" role="img" aria-label="' + (state === 'ok' ? 'Correcta' : state === 'bad' ? 'Incorrecta' : 'Sin comprobar') + '">' + (state === 'ok' ? ICON.check : state === 'bad' ? ICON.x : ICON.dash) + '</span>';
+      const mark = '<span class="mark ' + state + '" role="img" aria-label="' + (state === 'ok' ? 'Correct' : state === 'bad' ? 'Incorrect' : 'Not checked') + '">' + (state === 'ok' ? ICON.check : state === 'bad' ? ICON.x : ICON.dash) + '</span>';
       const order = perm[q.i] || q.o.map((_, k) => k);
       const options = order.map((k, pos) => {
         const isAns = q.a.includes(k);
         const picked = it.sel.includes(k);
         const cls = isAns ? 'correct' : picked ? 'picked-wrong' : '';
-        const tags = (isAns ? '<span class="tag tag-ok">' + ICON.check + 'Correcta</span>' : '') + (picked ? '<span class="tag' + (isAns ? '' : ' tag-bad') + '">' + (isAns ? '' : ICON.x) + 'Tu respuesta</span>' : '');
+        const tags = (isAns ? '<span class="tag tag-ok">' + ICON.check + 'Correct</span>' : '') + (picked ? '<span class="tag' + (isAns ? '' : ' tag-bad') + '">' + (isAns ? '' : ICON.x) + 'Your answer</span>' : '');
         return '<li class="' + cls + '"><span class="l">' + LETTERS[pos] + '</span><span>' + inline(q.o[k]) + (tags ? '<span class="rtags">' + tags + '</span>' : '') + '</span></li>';
       }).join('');
       return '<li><details class="ritem"' + (reviewFilter === 'wrong' ? ' open' : '') + '><summary><span class="rn num">' + (it.idx + 1) + '</span>' + mark + '<span class="rsum">' + esc(trunc(plain(q.q), 120)) + '</span></summary>'
-        + '<div class="rbody"><p class="qdom">' + esc(EXAMS[q.x].domains[q.d].name) + ' · ' + esc(q.t) + (it.flagged ? ' · marcada' : '') + '</p>'
-        + '<div class="qtext small">' + rich(q.q) + '</div><ol class="ropts">' + options + '</ol><div class="explain">' + rich(q.e) + '</div></div></details></li>';
+        + '<div class="rbody"><p class="qdom">' + esc(EXAMS[q.x].domains[q.d].name) + ' · ' + esc(q.t) + (it.flagged ? ' · flagged' : '') + '</p>'
+        + '<div class="qtext small">' + rich(q.q) + '</div><ol class="ropts">' + options + '</ol><div class="explain" lang="es">' + rich(q.e) + '</div></div></details></li>';
     }).join('');
   }
 
@@ -1356,7 +1356,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
   const cloud = { ref: null, busy: false, again: false, timer: 0, retried: false };
   function setSync(state) {
     const badge = $('syncBadge');
-    const text = { local: 'Guardado en este dispositivo', syncing: 'Sincronizando…', cloud: 'Sincronizado con tu cuenta', error: 'Sin sincronizar · guardado aquí' }[state];
+    const text = { local: 'Saved on this device', syncing: 'Syncing…', cloud: 'Synced to your account', error: 'Not synced · saved here' }[state];
     badge.textContent = text;
     badge.classList.toggle('on', state === 'cloud');
   }
@@ -1459,9 +1459,9 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
   });
   $('resumeBtn').addEventListener('click', openSession);
   $('discardBtn').addEventListener('click', () => {
-    openSheet('¿Descartar la sesión?', '<p>Se borra la sesión en curso. Las preguntas que ya comprobaste en modo Simulador siguen contando en tu progreso.</p>', [
-      { label: 'Descartar', kind: 'primary', run: () => { discardSession(); refreshHome(); } },
-      { label: 'Cancelar' },
+    openSheet('Discard this session?', '<p>The current session will be deleted. Questions you already checked in Practice mode still count toward your progress.</p>', [
+      { label: 'Discard', kind: 'primary', run: () => { discardSession(); refreshHome(); } },
+      { label: 'Cancel' },
     ]);
   });
   $('statsBody').addEventListener('click', (e) => {
@@ -1479,24 +1479,24 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
         const score = d.seen ? d.right / d.seen : -1 + i * 0.001;
         if (score < bestScore) { bestScore = score; best = i; }
       });
-      toast('Practicando: ' + ex.domains[best].name);
+      toast('Practicing: ' + ex.domains[best].name);
       launch({ exam: settings.exam, mode: 'practice', timed: settings.timed, count: 20, domain: best, source: 'all' });
     } else if (t.dataset.practiceDomain != null) {
       const d = Number(t.dataset.practiceDomain);
       launch({ exam: settings.exam, mode: 'practice', timed: settings.timed, count: 20, domain: d, source: 'all' });
     } else if (t.id === 'resetBtn') {
       const ex = EXAMS[settings.exam];
-      openSheet('¿Borrar tu progreso de ' + ex.code + '?', '<p>Se eliminan tus aciertos, fallos e intentos de ' + esc(ex.code) + ' en este dispositivo' + (cloud.ref ? ' y en tu cuenta' : '') + '. No se puede deshacer.</p>', [
-        { label: 'Borrar progreso', kind: 'primary', run: () => {
+      openSheet('Reset your ' + ex.code + ' progress?', '<p>This deletes your ' + esc(ex.code) + ' answers, misses and attempts on this device' + (cloud.ref ? ' and in your account' : '') + '. It can’t be undone.</p>', [
+        { label: 'Reset progress', kind: 'primary', run: () => {
           const prefix = settings.exam + '-';
           for (const id of Object.keys(progress.stats)) if (id.startsWith(prefix)) delete progress.stats[id];
           progress.history = progress.history.filter((h) => h.exam !== settings.exam);
           progress.updated = Date.now();
           saveProgress(true);
           refreshHome();
-          toast('Progreso de ' + ex.code + ' borrado.');
+          toast(ex.code + ' progress reset.');
         } },
-        { label: 'Cancelar' },
+        { label: 'Cancel' },
       ]);
     }
   });
@@ -1568,6 +1568,7 @@ select{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:1
 
   /* ---------- arranque ---------- */
   function start(hotData) {
+    document.documentElement.lang = 'en';
     drawHelm();
     const wanted = hotData && hotData.view;
     if (session && session.endsAt && Date.now() >= session.endsAt) {

@@ -3,10 +3,10 @@
 Simulador de práctica para los exámenes **KCNA** (Kubernetes and Cloud Native Associate) y **KCSA** (Kubernetes and Cloud Native Security Associate) de la CNCF / Linux Foundation.
 
 - **618 preguntas originales**: 310 de KCNA y 308 de KCSA, repartidas según el peso oficial de cada dominio.
-- Preguntas y opciones **en inglés**, como en el examen real; explicaciones **en español** que dicen por qué la respuesta es correcta y por qué fallan las otras.
-- **Modo Simulador**: compruebas cada respuesta y ves la explicación al instante.
-- **Modo Examen**: 60 preguntas con el reparto oficial por dominio, sin pistas, con opción de marcar y revisar, y nota al final (aprobado ≥ 75 %).
-- **Con o sin tiempo**: 90 minutos para 60 preguntas (unos 90 s por pregunta, también en las prácticas cortas).
+- Interfaz, preguntas y opciones **en inglés**, como en la plataforma del examen real (Previous, Flag, Next, Review & submit…); explicaciones **en español** que dicen por qué la respuesta es correcta y por qué fallan las otras.
+- Modo **Practice**: compruebas cada respuesta (Check) y ves la explicación al instante.
+- Modo **Exam**: 60 preguntas con el reparto oficial por dominio, sin pistas, con opción de marcar (Flag) y revisar, y nota al final (aprobado ≥ 75 %).
+- **Timed / untimed**: con tiempo son 90 minutos para 60 preguntas (unos 90 s por pregunta, también en las prácticas cortas).
 - Progreso por dominio, historial de intentos, repaso de falladas y reanudación de sesiones. Todo se guarda en el navegador; en el enlace publicado en claude.ai también se sincroniza con tu cuenta.
 
 ## Abrirlo
